@@ -327,7 +327,7 @@ function App() {
           </div>
 
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
-            <p>&copy; 2024 Hall IA. Tous droits réservés.</p>
+            <p>&copy; {new Date().getFullYear()} Hall IA. Tous droits réservés.</p>
           </div>
         </div>
       </footer>

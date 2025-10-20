@@ -137,7 +137,7 @@ export function Dashboard() {
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center">
+                <div className="text-center bg-blue-50 rounded-xl p-6">
                   <div className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                     1
                   </div>
@@ -147,7 +147,7 @@ export function Dashboard() {
                   </p>
                 </div>
 
-                <div className="text-center">
+                <div className="text-center bg-green-50 rounded-xl p-6">
                   <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                     2
                   </div>
@@ -157,7 +157,7 @@ export function Dashboard() {
                   </p>
                 </div>
 
-                <div className="text-center">
+                <div className="text-center bg-purple-50 rounded-xl p-6">
                   <div className="w-14 h-14 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                     3
                   </div>
@@ -167,7 +167,7 @@ export function Dashboard() {
                   </p>
                 </div>
 
-                <div className="text-center">
+                <div className="text-center bg-orange-50 rounded-xl p-6">
                   <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
                     4
                   </div>

@@ -23,6 +23,13 @@ export function SettingsNew() {
   const [autoReply, setAutoReply] = useState(true);
   const [adFilter, setAdFilter] = useState(true);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showCompanyInfoModal, setShowCompanyInfoModal] = useState(false);
+  const [companyInfoStep, setCompanyInfoStep] = useState(1);
+  const [companyFormData, setCompanyFormData] = useState({
+    company_name: '',
+    activity_description: '',
+    services_offered: '',
+  });
 
   useEffect(() => {
     loadAccounts();
@@ -73,6 +80,55 @@ export function SettingsNew() {
     setDocuments(documents.filter(doc => doc.id !== docId));
   };
 
+  const handleCompanyInfoNext = () => {
+    if (companyInfoStep === 1 && !companyFormData.company_name) {
+      alert('Veuillez entrer le nom de votre entreprise');
+      return;
+    }
+    if (companyInfoStep === 2 && !companyFormData.activity_description) {
+      alert('Veuillez décrire votre activité');
+      return;
+    }
+    if (companyInfoStep < 3) {
+      setCompanyInfoStep(companyInfoStep + 1);
+    } else {
+      handleCompanyInfoSubmit();
+    }
+  };
+
+  const handleCompanyInfoBack = () => {
+    if (companyInfoStep > 1) {
+      setCompanyInfoStep(companyInfoStep - 1);
+    }
+  };
+
+  const handleCompanyInfoSubmit = async () => {
+    try {
+      const { error } = await supabase
+        .from('email_configurations')
+        .update({
+          company_name: companyFormData.company_name,
+          activity_description: companyFormData.activity_description,
+          services_offered: companyFormData.services_offered,
+        })
+        .eq('user_id', user?.id);
+
+      if (error) throw error;
+
+      setShowCompanyInfoModal(false);
+      setCompanyInfoStep(1);
+      setCompanyFormData({
+        company_name: '',
+        activity_description: '',
+        services_offered: '',
+      });
+      alert('Informations de l\'entreprise enregistrées avec succès!');
+    } catch (err) {
+      console.error('Erreur lors de l\'enregistrement:', err);
+      alert('Erreur lors de l\'enregistrement des informations');
+    }
+  };
+
   const connectGmail = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -113,6 +169,8 @@ export function SettingsNew() {
           }
           await loadEmailAccounts();
           setShowAddAccountModal(false);
+          setShowCompanyInfoModal(true);
+          setCompanyInfoStep(1);
           window.removeEventListener('message', handleMessage);
         }
       };
@@ -353,6 +411,110 @@ export function SettingsNew() {
         </div>
       </div>
     </div>
+
+    {showCompanyInfoModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+          <div className="flex items-center gap-3 mb-6">
+            {companyInfoStep > 1 && (
+              <button
+                onClick={handleCompanyInfoBack}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ChevronRight className="w-5 h-5 rotate-180 text-gray-600" />
+              </button>
+            )}
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-[#3D2817]">Connexion</h2>
+            </div>
+          </div>
+
+          <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-800">
+              <span className="font-semibold">Étape {companyInfoStep}/3</span> - {
+                companyInfoStep === 1 ? 'Authentification' :
+                companyInfoStep === 2 ? 'Description de l\'entreprise' :
+                'Signature'
+              }
+            </p>
+          </div>
+
+          {companyInfoStep === 1 && (
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Nom de l'entreprise
+                </label>
+                <input
+                  type="text"
+                  value={companyFormData.company_name}
+                  onChange={(e) => setCompanyFormData({ ...companyFormData, company_name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="Ex: Hall IA"
+                />
+              </div>
+            </div>
+          )}
+
+          {companyInfoStep === 2 && (
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Description de l'activité
+                </label>
+                <textarea
+                  value={companyFormData.activity_description}
+                  onChange={(e) => setCompanyFormData({ ...companyFormData, activity_description: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="Décrivez ce que fait votre entreprise..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          )}
+
+          {companyInfoStep === 3 && (
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Signature email
+                </label>
+                <textarea
+                  value={companyFormData.services_offered}
+                  onChange={(e) => setCompanyFormData({ ...companyFormData, services_offered: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="Votre signature d'email..."
+                  rows={4}
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleCompanyInfoNext}
+              className="flex-1 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all"
+            >
+              {companyInfoStep === 3 ? 'Terminer' : 'Continuer'}
+            </button>
+            <button
+              onClick={() => {
+                setShowCompanyInfoModal(false);
+                setCompanyInfoStep(1);
+                setCompanyFormData({
+                  company_name: '',
+                  activity_description: '',
+                  services_offered: '',
+                });
+              }}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Retour
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 }

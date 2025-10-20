@@ -144,6 +144,10 @@ export function SettingsNew() {
   const connectGmail = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
+
+      console.log('Starting Gmail OAuth...');
+      console.log('Session:', session ? 'exists' : 'missing');
+
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gmail-oauth-init`,
         {
@@ -156,18 +160,25 @@ export function SettingsNew() {
           body: JSON.stringify({ redirectUrl: window.location.origin }),
         }
       );
+
+      console.log('Response status:', response.status);
+
       if (!response.ok) {
         const error = await response.json();
+        console.error('Error response:', error);
         throw new Error(error.error || 'Échec de l\'initialisation Gmail');
       }
+
       const { authUrl } = await response.json();
+      console.log('Auth URL received:', authUrl);
 
       localStorage.setItem('gmail-oauth-pending', 'true');
 
+      console.log('Redirecting to Google...');
       window.location.href = authUrl;
     } catch (err) {
       console.error('Erreur connexion Gmail:', err);
-      alert('Erreur lors de la connexion Gmail');
+      alert('Erreur lors de la connexion Gmail: ' + (err as Error).message);
     }
   };
 

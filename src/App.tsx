@@ -29,7 +29,7 @@ function App() {
         {/* Header */}
         <header className="px-6 py-6 flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-2">
-            <img src="/logo.png" alt="Hall IA" className="h-12" />
+            <img src="/logo copy copy.png" alt="Hall IA" className="h-12" />
           </div>
           <button
             onClick={() => setShowAuthModal(true)}

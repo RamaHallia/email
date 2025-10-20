@@ -255,24 +255,6 @@ export function SettingsNew() {
                 </button>
               </div>
 
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="font-semibold text-gray-900">Filtrage publicités</div>
-                  <div className="text-sm text-gray-600">Isolation des emails commerciaux</div>
-                </div>
-                <button
-                  onClick={() => setAdFilter(!adFilter)}
-                  className={`relative w-14 h-8 rounded-full transition-colors ${
-                    adFilter ? 'bg-green-500' : 'bg-gray-300'
-                  }`}
-                >
-                  <div
-                    className={`absolute top-1 left-1 w-6 h-6 bg-white rounded-full transition-transform ${
-                      adFilter ? 'translate-x-6' : 'translate-x-0'
-                    }`}
-                  />
-                </button>
-              </div>
             </div>
           </div>
 

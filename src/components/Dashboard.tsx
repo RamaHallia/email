@@ -35,6 +35,17 @@ export function Dashboard() {
               Tableau de bord
             </button>
             <button
+              onClick={() => setActiveView('email-configs')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'email-configs'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <Mail className="w-5 h-5" />
+              Configuration
+            </button>
+            <button
               onClick={() => setActiveView('settings')}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
                 activeView === 'settings'

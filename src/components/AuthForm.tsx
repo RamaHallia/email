@@ -13,11 +13,13 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
   const [fullName, setFullName] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
     setLoading(true);
 
     try {
@@ -38,7 +40,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
         if (error) {
           setError(error.message);
         } else {
-          onSuccess?.();
+          setSuccessMessage('Un email de confirmation a été envoyé à votre adresse. Veuillez vérifier votre boîte mail.');
         }
       }
     } catch (err) {
@@ -65,6 +67,13 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
           <p className="text-sm text-red-800">{error}</p>
+        </div>
+      )}
+
+      {successMessage && (
+        <div className="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
+          <p className="text-sm text-green-800">{successMessage}</p>
         </div>
       )}
 
@@ -153,6 +162,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           onClick={() => {
             setIsLogin(!isLogin);
             setError(null);
+            setSuccessMessage(null);
           }}
           className="text-gray-600 hover:text-[#EF6855] transition-colors"
         >

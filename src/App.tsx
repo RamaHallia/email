@@ -97,6 +97,96 @@ function App() {
           </div>
         </div>
 
+        {/* Bottom Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
+          {/* Left Card */}
+          <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-2xl p-10 text-white">
+            <h2 className="text-3xl font-bold mb-8">
+              Gagnez du temps précieux
+            </h2>
+
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
+                  <Clock className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">
+                    Jusqu'à 3h par jour économisées
+                  </h3>
+                  <p className="text-white/90">
+                    Ne perdez plus de temps à trier et répondre manuellement à vos emails
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
+                  <Zap className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">
+                    Réactivité instantanée
+                  </h3>
+                  <p className="text-white/90">
+                    Vos contacts reçoivent des réponses rapides et pertinentes
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
+                  <TrendingUp className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-lg mb-1">
+                    Performance améliorée
+                  </h3>
+                  <p className="text-white/90">
+                    Augmentez votre productivité et celle de votre équipe
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Card */}
+          <div className="bg-white rounded-2xl p-10 shadow-sm">
+            <h2 className="text-3xl font-bold text-[#3D2817] mb-8">
+              Comment ça fonctionne ?
+            </h2>
+
+            <div className="space-y-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                  1
+                </div>
+                <p className="text-gray-600 pt-1">
+                  Configurez vos paramètres email (SMTP/IMAP) et informations entreprise
+                </p>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                  2
+                </div>
+                <p className="text-gray-600 pt-1">
+                  L'IA analyse et classifie automatiquement vos emails entrants
+                </p>
+              </div>
+
+              <div className="flex items-start gap-4">
+                <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold">
+                  3
+                </div>
+                <p className="text-gray-600 pt-1">
+                  Des réponses personnalisées sont générées et prêtes à être envoyées
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Pricing Section */}
         <div className="mb-16">
           <div className="text-center mb-12">
@@ -189,97 +279,58 @@ function App() {
             </div>
           </div>
         </div>
+      </main>
 
-        {/* Bottom Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Card */}
-          <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-2xl p-10 text-white">
-            <h2 className="text-3xl font-bold mb-8">
-              Gagnez du temps précieux
-            </h2>
+      {/* Footer */}
+      <footer className="bg-[#3D2817] text-white">
+        <div className="max-w-7xl mx-auto px-6 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            {/* Logo & Description */}
+            <div className="md:col-span-2">
+              <img src="/logo copy copy.png" alt="Hall IA" className="h-10 mb-4 brightness-0 invert" />
+              <p className="text-white/70 mb-4">
+                La solution d'automatisation intelligente pour gérer vos emails professionnels avec efficacité.
+              </p>
+            </div>
 
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
-                  <Clock className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-1">
-                    Jusqu'à 3h par jour économisées
-                  </h3>
-                  <p className="text-white/90">
-                    Ne perdez plus de temps à trier et répondre manuellement à vos emails
-                  </p>
-                </div>
-              </div>
+            {/* Product */}
+            <div>
+              <h4 className="font-bold mb-4">Produit</h4>
+              <ul className="space-y-2 text-white/70">
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">Fonctionnalités</a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">Tarifs</a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">Documentation</a>
+                </li>
+              </ul>
+            </div>
 
-              <div className="flex items-start gap-4">
-                <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
-                  <Zap className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-1">
-                    Réactivité instantanée
-                  </h3>
-                  <p className="text-white/90">
-                    Vos contacts reçoivent des réponses rapides et pertinentes
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="bg-white/20 rounded-lg p-3 flex-shrink-0">
-                  <TrendingUp className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-lg mb-1">
-                    Performance améliorée
-                  </h3>
-                  <p className="text-white/90">
-                    Augmentez votre productivité et celle de votre équipe
-                  </p>
-                </div>
-              </div>
+            {/* Company */}
+            <div>
+              <h4 className="font-bold mb-4">Entreprise</h4>
+              <ul className="space-y-2 text-white/70">
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">À propos</a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">Contact</a>
+                </li>
+                <li>
+                  <a href="#" className="hover:text-white transition-colors">Mentions légales</a>
+                </li>
+              </ul>
             </div>
           </div>
 
-          {/* Right Card */}
-          <div className="bg-white rounded-2xl p-10 shadow-sm">
-            <h2 className="text-3xl font-bold text-[#3D2817] mb-8">
-              Comment ça fonctionne ?
-            </h2>
-
-            <div className="space-y-6">
-              <div className="flex items-start gap-4">
-                <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold">
-                  1
-                </div>
-                <p className="text-gray-600 pt-1">
-                  Configurez vos paramètres email (SMTP/IMAP) et informations entreprise
-                </p>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold">
-                  2
-                </div>
-                <p className="text-gray-600 pt-1">
-                  L'IA analyse et classifie automatiquement vos emails entrants
-                </p>
-              </div>
-
-              <div className="flex items-start gap-4">
-                <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 text-white font-bold">
-                  3
-                </div>
-                <p className="text-gray-600 pt-1">
-                  Des réponses personnalisées sont générées et prêtes à être envoyées
-                </p>
-              </div>
-            </div>
+          <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
+            <p>&copy; 2024 Hall IA. Tous droits réservés.</p>
           </div>
         </div>
-      </main>
+      </footer>
     </div>
 
     {/* Auth Modal */}

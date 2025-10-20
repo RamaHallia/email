@@ -1,9 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { X, CheckCircle } from 'lucide-react';
-
-type ConfigStep = 'connection' | 'company-info' | 'success';
+import { X } from 'lucide-react';
 
 interface ConfigurationModalProps {
   isOpen: boolean;
@@ -13,17 +11,7 @@ interface ConfigurationModalProps {
 
 export function ConfigurationModal({ isOpen, onClose, onComplete }: ConfigurationModalProps) {
   const { user } = useAuth();
-  const [step, setStep] = useState<ConfigStep>('connection');
   const [connecting, setConnecting] = useState(false);
-  const [saving, setSaving] = useState(false);
-  const [connectedEmail, setConnectedEmail] = useState('');
-  const [provider, setProvider] = useState<'gmail' | 'outlook' | 'imap'>('gmail');
-
-  const [companyForm, setCompanyForm] = useState({
-    company_name: '',
-    activity_description: '',
-    services_offered: '',
-  });
 
   const [imapForm, setImapForm] = useState({
     email: '',
@@ -70,9 +58,9 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
               is_connected: true,
             }, { onConflict: 'user_id' });
 
-            setConnectedEmail(event.data.email);
-            setProvider('gmail');
-            setStep('company-info');
+            setImapForm({ email: '', password: '', imap_host: '', imap_port: '993' });
+            await onComplete();
+            onClose();
           } catch (e) {
             console.error('Error saving Gmail config:', e);
             alert('Erreur lors de la sauvegarde');
@@ -108,47 +96,15 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
 
       if (error) throw error;
 
-      setConnectedEmail(imapForm.email);
-      setProvider('imap');
-      setStep('company-info');
+      setImapForm({ email: '', password: '', imap_host: '', imap_port: '993' });
+      await onComplete();
+      onClose();
     } catch (err) {
       console.error('Error saving IMAP config:', err);
       alert('Erreur lors de la configuration IMAP');
     } finally {
       setConnecting(false);
     }
-  };
-
-  const handleCompanySubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const { error } = await supabase
-        .from('email_configurations')
-        .update({
-          company_name: companyForm.company_name,
-          activity_description: companyForm.activity_description,
-          services_offered: companyForm.services_offered,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      setStep('success');
-    } catch (err) {
-      console.error('Error saving company info:', err);
-      alert('Erreur lors de la sauvegarde');
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const handleComplete = () => {
-    onComplete();
-    onClose();
-    setStep('connection');
-    setCompanyForm({ company_name: '', activity_description: '', services_offered: '' });
-    setImapForm({ email: '', password: '', imap_host: '', imap_port: '993' });
   };
 
   if (!isOpen) return null;
@@ -158,44 +114,20 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
       <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
           <div className="flex-1">
-            {step === 'connection' && (
-              <>
-                <div className="text-sm font-medium text-gray-500 mb-1">Etape 1/3 - Connexion email</div>
-                <h2 className="text-2xl font-bold text-[#3D2817]">Connectez votre compte email</h2>
-              </>
-            )}
-            {step === 'company-info' && (
-              <>
-                <div className="text-sm font-medium text-gray-500 mb-1">Etape 2/3 - Informations entreprise</div>
-                <h2 className="text-2xl font-bold text-[#3D2817]">Décrivez votre activité</h2>
-              </>
-            )}
-            {step === 'success' && (
-              <>
-                <div className="inline-block px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-medium mb-2">
-                  Etape 3/3 - Configuration terminée
-                </div>
-              </>
-            )}
+            <h2 className="text-2xl font-bold text-[#3D2817]">Ajouter un compte email</h2>
+            <p className="text-sm text-gray-500 mt-1">Sélectionnez votre fournisseur d'email</p>
           </div>
-          {step !== 'success' && (
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors"
-            >
-              <X className="w-6 h-6" />
-            </button>
-          )}
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600 transition-colors"
+          >
+            <X className="w-6 h-6" />
+          </button>
         </div>
 
         <div className="p-8">
-          {step === 'connection' && (
-            <div className="space-y-6">
-              <p className="text-gray-600 text-center mb-8">
-                Choisissez votre méthode de connexion pour commencer
-              </p>
-
-              <div className="space-y-4">
+          <div className="space-y-6">
+            <div className="space-y-4">
                 <button
                   type="button"
                   onClick={connectGmail}
@@ -287,128 +219,16 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
                     </button>
                   </form>
                 </details>
-              </div>
             </div>
-          )}
 
-          {step === 'company-info' && (
-            <form onSubmit={handleCompanySubmit} className="space-y-6">
-              <div className="text-center mb-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-green-50 text-green-700 border border-green-200 text-sm font-medium mb-4">
-                  <CheckCircle className="w-5 h-5" />
-                  Email connecté: {connectedEmail}
-                </div>
-                <p className="text-gray-600">
-                  Ces informations permettront à l'IA de personnaliser les réponses automatiques
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Nom de l'entreprise
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={companyForm.company_name}
-                  onChange={(e) => setCompanyForm({ ...companyForm, company_name: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                  placeholder="Nom de votre entreprise"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Description de l'activité
-                </label>
-                <textarea
-                  required
-                  value={companyForm.activity_description}
-                  onChange={(e) => setCompanyForm({ ...companyForm, activity_description: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                  placeholder="Décrivez votre activité principale, vos produits ou services..."
-                  rows={4}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Signature email
-                </label>
-                <textarea
-                  value={companyForm.services_offered}
-                  onChange={(e) => setCompanyForm({ ...companyForm, services_offered: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                  placeholder="Signature qui apparaîtra dans les emails automatiques"
-                  rows={3}
-                />
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className="flex-1 bg-[#EF6855] text-white py-3 rounded-lg font-medium hover:bg-[#d55a47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {saving ? 'Enregistrement...' : 'Continuer'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setStep('connection')}
-                  className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  Retour
-                </button>
-              </div>
-            </form>
-          )}
-
-          {step === 'success' && (
-            <div className="text-center py-8">
-              <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-12 h-12 text-white" />
-              </div>
-
-              <h3 className="text-3xl font-bold text-[#3D2817] mb-3">
-                Compte ajouté !
-              </h3>
-
-              <p className="text-gray-600 mb-8">
-                Votre compte email est maintenant configuré et prêt à être utilisé.
-              </p>
-
-              <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left">
-                <h4 className="font-semibold text-[#3D2817] mb-4">Prochaines étapes :</h4>
-                <div className="space-y-3">
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-gray-700">
-                      Vos emails commencent à être triés automatiquement
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-gray-700">
-                      Des brouillons de réponse sont générés
-                    </div>
-                  </div>
-                  <div className="flex items-start gap-3">
-                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                    <div className="text-sm text-gray-700">
-                      Les publicités sont automatiquement filtrées
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                onClick={handleComplete}
-                className="w-full bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-4 rounded-xl font-semibold text-lg hover:shadow-lg transition-all"
-              >
-                Retourner aux paramètres
-              </button>
-            </div>
-          )}
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
         </div>
       </div>
     </div>

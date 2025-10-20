@@ -120,9 +120,6 @@ function App() {
             <div className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-xl p-4 animate-bounce">
               <div className="text-2xl font-bold text-[#EF6855]">🚀</div>
             </div>
-            <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4">
-              <div className="text-sm font-semibold text-[#3D2817]">IA Avancée</div>
-            </div>
           </div>
         </div>
 

@@ -52,7 +52,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-[#3D2817] mb-2">
-          {isLogin ? 'Connexion' : 'Créer un compte'}
+          {isLogin ? 'Se connecter' : "S'inscrire"}
         </h2>
         <p className="text-gray-600">
           {isLogin

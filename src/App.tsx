@@ -3,6 +3,7 @@ import { Mail, Zap, TrendingUp, Clock, ArrowRight, Check, Users } from 'lucide-r
 import { useAuth } from './contexts/AuthContext';
 import { AuthForm } from './components/AuthForm';
 import { Dashboard } from './components/Dashboard';
+import { supabase } from './lib/supabase';
 
 function App() {
   const { user, loading } = useAuth();
@@ -20,6 +21,32 @@ function App() {
   }
 
   if (user) {
+    if (!user.email_confirmed_at) {
+      return (
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50 flex items-center justify-center p-6">
+          <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="w-16 h-16 bg-gradient-to-r from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-[#3D2817] mb-4">
+              Confirmez votre email
+            </h2>
+            <p className="text-gray-600 mb-6">
+              Un email de confirmation a été envoyé à <strong>{user.email}</strong>.
+              Veuillez vérifier votre boîte mail et cliquer sur le lien de confirmation pour accéder au tableau de bord.
+            </p>
+            <button
+              onClick={() => {
+                supabase.auth.signOut();
+              }}
+              className="text-[#EF6855] hover:underline font-medium"
+            >
+              Se déconnecter
+            </button>
+          </div>
+        </div>
+      );
+    }
     return <Dashboard />;
   }
 

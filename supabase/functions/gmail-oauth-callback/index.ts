@@ -107,9 +107,17 @@ Deno.serve(async (req)=>{
           <script>
             if (window.opener) {
               window.opener.postMessage({ type: 'gmail-connected', email: '${userInfo.email}' }, '*');
-              setTimeout(() => window.close(), 500);
+              setTimeout(() => {
+                try {
+                  window.close();
+                } catch (e) {
+                  console.log('Could not close window:', e);
+                }
+              }, 1500);
             } else {
-              window.location.href = '${redirectUrl || supabaseUrl}';
+              setTimeout(() => {
+                window.location.href = '${redirectUrl || '/'}';
+              }, 2000);
             }
           </script>
         </body>

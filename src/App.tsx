@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Zap, TrendingUp, Clock, ArrowRight } from 'lucide-react';
+import { Mail, Zap, TrendingUp, Clock, ArrowRight, Check, Users } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { AuthForm } from './components/AuthForm';
 import { Dashboard } from './components/Dashboard';
@@ -94,6 +94,99 @@ function App() {
             <p className="text-gray-600">
               Concentrez-vous sur l'essentiel pendant que l'IA gère votre boîte de réception.
             </p>
+          </div>
+        </div>
+
+        {/* Pricing Section */}
+        <div className="mb-16">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-[#3D2817] mb-4">
+              Tarifs simples et transparents
+            </h2>
+            <p className="text-lg text-gray-600">
+              Commencez dès aujourd'hui avec notre offre flexible
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Plan Premier */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg border-2 border-[#EF6855] relative">
+              <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-4 py-1 rounded-full text-sm font-semibold">
+                Populaire
+              </div>
+              <h3 className="text-2xl font-bold text-[#3D2817] mb-2">
+                Premier
+              </h3>
+              <div className="mb-6">
+                <span className="text-5xl font-bold text-[#3D2817]">29€</span>
+                <span className="text-gray-600 ml-2">/mois</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                L'essentiel pour démarrer avec l'automatisation email
+              </p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">1 utilisateur inclus</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Classification intelligente des emails</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Réponses automatiques personnalisées</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Support par email</span>
+                </li>
+              </ul>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="w-full bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-shadow"
+              >
+                Commencer
+              </button>
+            </div>
+
+            {/* Plan + Utilisateurs */}
+            <div className="bg-white rounded-2xl p-8 shadow-lg">
+              <h3 className="text-2xl font-bold text-[#3D2817] mb-2">
+                Utilisateurs additionnels
+              </h3>
+              <div className="mb-6">
+                <span className="text-5xl font-bold text-[#3D2817]">+19€</span>
+                <span className="text-gray-600 ml-2">/utilisateur/mois</span>
+              </div>
+              <p className="text-gray-600 mb-6">
+                Ajoutez des membres à votre équipe
+              </p>
+              <ul className="space-y-4 mb-8">
+                <li className="flex items-start gap-3">
+                  <Users className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Utilisateur supplémentaire</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Toutes les fonctionnalités incluses</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Boîte email dédiée par utilisateur</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <Check className="w-5 h-5 text-[#EF6855] flex-shrink-0 mt-0.5" />
+                  <span className="text-gray-700">Gestion centralisée de l'équipe</span>
+                </li>
+              </ul>
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="w-full bg-white border-2 border-[#EF6855] text-[#EF6855] py-3 rounded-lg font-medium hover:bg-orange-50 transition-colors"
+              >
+                Ajouter des utilisateurs
+              </button>
+            </div>
           </div>
         </div>
 

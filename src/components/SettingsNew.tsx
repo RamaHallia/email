@@ -73,9 +73,59 @@ export function SettingsNew() {
     setDocuments(documents.filter(doc => doc.id !== docId));
   };
 
+  const connectGmail = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gmail-oauth-init`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session?.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ redirectUrl: window.location.origin }),
+        }
+      );
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Échec de l\'initialisation Gmail');
+      }
+      const { authUrl } = await response.json();
+      const width = 600; const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.data.type === 'gmail-connected') {
+          try {
+            await supabase.from('email_configurations').upsert({
+              user_id: user?.id as string,
+              name: event.data.email || 'Gmail',
+              email: event.data.email || '',
+              provider: 'gmail',
+              is_connected: true,
+            }, { onConflict: 'user_id' });
+          } catch (e) {
+            console.error('Upsert config Gmail après OAuth:', e);
+          }
+          await loadEmailAccounts();
+          setShowAddAccountModal(false);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      window.addEventListener('message', handleMessage);
+    } catch (err) {
+      console.error('Erreur connexion Gmail:', err);
+      alert('Erreur lors de la connexion Gmail');
+    }
+  };
+
   const handleProviderSelect = async (provider: 'gmail' | 'outlook' | 'imap') => {
     if (provider === 'gmail') {
-      window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gmail-oauth-init?user_id=${user?.id}`;
+      await connectGmail();
     } else if (provider === 'outlook') {
       window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/outlook-oauth-init?user_id=${user?.id}`;
     } else {

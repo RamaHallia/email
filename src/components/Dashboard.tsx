@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut } from 'lucide-react';
-import { Settings } from './Settings';
+import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
 type ActiveView = 'home' | 'settings' | 'email-configs';
@@ -223,10 +223,10 @@ export function Dashboard() {
                 Paramètres
               </h1>
               <p className="text-gray-600">
-                Configurez vos comptes email et webhooks
+                Gérez vos comptes email et configuration
               </p>
             </div>
-            <Settings />
+            <SettingsNew />
           </>
         )}
 

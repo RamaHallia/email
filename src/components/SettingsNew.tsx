@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, FileText, Youtube, Globe, Zap, X, Check, Lock, ChevronRight } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight } from 'lucide-react';
 
 interface EmailAccount {
   id: string;
@@ -289,18 +289,14 @@ export function SettingsNew() {
                 v2
               </span>
             </div>
-            <div className="grid grid-cols-3 gap-4">
-              <button className="flex flex-col items-center gap-3 p-6 border-2 border-gray-200 rounded-xl hover:border-[#EF6855] hover:bg-orange-50 transition-colors opacity-50 cursor-not-allowed">
-                <Youtube className="w-8 h-8 text-gray-400" />
-                <span className="text-sm text-gray-600">Vidéos YouTube</span>
-              </button>
+            <div className="grid grid-cols-2 gap-4">
               <button className="flex flex-col items-center gap-3 p-6 border-2 border-gray-200 rounded-xl hover:border-[#EF6855] hover:bg-orange-50 transition-colors opacity-50 cursor-not-allowed">
                 <Globe className="w-8 h-8 text-gray-400" />
                 <span className="text-sm text-gray-600">Liens web</span>
               </button>
               <button className="flex flex-col items-center gap-3 p-6 border-2 border-gray-200 rounded-xl hover:border-[#EF6855] hover:bg-orange-50 transition-colors opacity-50 cursor-not-allowed">
-                <Zap className="w-8 h-8 text-gray-400" />
-                <span className="text-sm text-gray-600">Templates</span>
+                <Share2 className="w-8 h-8 text-gray-400" />
+                <span className="text-sm text-gray-600">Réseaux Sociaux</span>
               </button>
             </div>
           </div>

@@ -8,6 +8,7 @@ interface AuthFormProps {
 
 export function AuthForm({ onSuccess }: AuthFormProps) {
   const [isLogin, setIsLogin] = useState(true);
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
@@ -23,7 +24,17 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     setLoading(true);
 
     try {
-      if (isLogin) {
+      if (isForgotPassword) {
+        const { supabase } = await import('../lib/supabase');
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/reset-password`,
+        });
+        if (error) {
+          setError(error.message);
+        } else {
+          setSuccessMessage('Un email de réinitialisation a été envoyé à votre adresse.');
+        }
+      } else if (isLogin) {
         const { error } = await signIn(email, password);
         if (error) {
           setError(error.message);
@@ -54,10 +65,12 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
     <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-[#3D2817] mb-2">
-          {isLogin ? 'Se connecter' : "S'inscrire"}
+          {isForgotPassword ? 'Mot de passe oublié' : isLogin ? 'Se connecter' : "S'inscrire"}
         </h2>
         <p className="text-gray-600">
-          {isLogin
+          {isForgotPassword
+            ? 'Entrez votre email pour réinitialiser votre mot de passe'
+            : isLogin
             ? 'Connectez-vous pour gérer vos emails'
             : 'Commencez à automatiser vos emails'}
         </p>
@@ -78,7 +91,7 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!isLogin && (
+        {!isLogin && !isForgotPassword && (
           <div>
             <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
               Nom complet
@@ -116,29 +129,47 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
           </div>
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-            Mot de passe
-          </label>
-          <div className="relative">
-            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent outline-none transition"
-              placeholder="••••••••"
-              required
-              minLength={6}
-            />
+        {!isForgotPassword && (
+          <div>
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              Mot de passe
+            </label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent outline-none transition"
+                placeholder="••••••••"
+                required
+                minLength={6}
+              />
+            </div>
+            {!isLogin && (
+              <p className="mt-1 text-xs text-gray-500">
+                Minimum 6 caractères
+              </p>
+            )}
           </div>
-          {!isLogin && (
-            <p className="mt-1 text-xs text-gray-500">
-              Minimum 6 caractères
-            </p>
-          )}
-        </div>
+        )}
+
+        {isLogin && !isForgotPassword && (
+          <div className="text-right">
+            <button
+              type="button"
+              onClick={() => {
+                setIsForgotPassword(true);
+                setError(null);
+                setSuccessMessage(null);
+              }}
+              className="text-sm text-[#EF6855] hover:underline"
+            >
+              Mot de passe oublié ?
+            </button>
+          </div>
+        )}
 
         <button
           type="submit"
@@ -149,35 +180,49 @@ export function AuthForm({ onSuccess }: AuthFormProps) {
             <span>Chargement...</span>
           ) : (
             <>
-              {isLogin ? 'Se connecter' : 'Créer mon compte'}
+              {isForgotPassword ? 'Envoyer le lien' : isLogin ? 'Se connecter' : 'Créer mon compte'}
               <ArrowRight className="w-5 h-5" />
             </>
           )}
         </button>
       </form>
 
-      <div className="mt-6 text-center">
-        <button
-          type="button"
-          onClick={() => {
-            setIsLogin(!isLogin);
-            setError(null);
-            setSuccessMessage(null);
-          }}
-          className="text-gray-600 hover:text-[#EF6855] transition-colors"
-        >
-          {isLogin ? (
-            <>
-              Pas encore de compte ?{' '}
-              <span className="font-semibold">Créer un compte</span>
-            </>
-          ) : (
-            <>
-              Déjà inscrit ?{' '}
-              <span className="font-semibold">Se connecter</span>
-            </>
-          )}
-        </button>
+      <div className="mt-6 text-center space-y-2">
+        {isForgotPassword ? (
+          <button
+            type="button"
+            onClick={() => {
+              setIsForgotPassword(false);
+              setError(null);
+              setSuccessMessage(null);
+            }}
+            className="text-gray-600 hover:text-[#EF6855] transition-colors"
+          >
+            <span className="font-semibold">Retour à la connexion</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError(null);
+              setSuccessMessage(null);
+            }}
+            className="text-gray-600 hover:text-[#EF6855] transition-colors"
+          >
+            {isLogin ? (
+              <>
+                Pas encore de compte ?{' '}
+                <span className="font-semibold">Créer un compte</span>
+              </>
+            ) : (
+              <>
+                Déjà inscrit ?{' '}
+                <span className="font-semibold">Se connecter</span>
+              </>
+            )}
+          </button>
+        )}
       </div>
     </div>
   );

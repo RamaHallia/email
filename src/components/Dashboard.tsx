@@ -136,7 +136,7 @@ export function Dashboard() {
       <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <img src="/logo.png" alt="Hall IA" className="h-10" />
+            <img src="/logo copy copy.png" alt="Hall IA" className="h-12" />
             <nav className="flex gap-4">
               <button
                 onClick={() => setActiveView('home')}

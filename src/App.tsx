@@ -54,20 +54,13 @@ function App() {
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Hall IA classifie automatiquement vos emails dans différentes boîtes et prépare des réponses intelligentes pour vos destinataires.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-8 py-4 rounded-lg font-medium text-lg flex items-center justify-center gap-2 hover:shadow-xl transition-all hover:scale-105"
-              >
-                Commencer maintenant
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button
-                className="bg-white text-[#3D2817] px-8 py-4 rounded-lg font-medium text-lg border-2 border-gray-200 hover:border-[#EF6855] transition-colors"
-              >
-                Voir la démo
-              </button>
-            </div>
+            <button
+              onClick={() => setShowAuthModal(true)}
+              className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-8 py-4 rounded-lg font-medium text-lg flex items-center justify-center gap-2 hover:shadow-xl transition-all hover:scale-105 w-fit"
+            >
+              Commencer maintenant
+              <ArrowRight className="w-5 h-5" />
+            </button>
 
             {/* Stats */}
             <div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-gray-200">

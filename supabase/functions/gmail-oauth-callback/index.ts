@@ -85,11 +85,39 @@ Deno.serve(async (req)=>{
     if (configError) {
       console.error('Error creating email configuration:', configError);
     }
-    return new Response(null, {
-      status: 302,
+    return new Response(`
+    <html>
+        <head>
+          <meta charset="utf-8" />
+          <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <style>
+            body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#f6fff8; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+            .card { background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); }
+            .icon { width:56px; height:56px; border-radius:9999px; background:#ecfdf5; color:#059669; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; }
+            .title { font-weight:700; color:#065f46; margin-bottom:4px; }
+            .subtitle { color:#475569; font-size:14px; }
+          </style>
+        </head>
+        <body>
+          <div class="card">
+            <div class="icon">✓</div>
+            <div class="title">Connexion Gmail réussie</div>
+            <div class="subtitle">Vous pouvez fermer cette fenêtre.</div>
+          </div>
+          <script>
+            if (window.opener) {
+              window.opener.postMessage({ type: 'gmail-connected', email: '${userInfo.email}' }, '*');
+              setTimeout(() => window.close(), 500);
+            } else {
+              window.location.href = '${redirectUrl || supabaseUrl}';
+            }
+          </script>
+        </body>
+    </html>`, {
+      status: 200,
       headers: {
         ...corsHeaders,
-        'Location': redirectUrl || supabaseUrl
+        'Content-Type': 'text/html'
       }
     });
   } catch (error) {

@@ -36,18 +36,6 @@ export function SettingsNew() {
     loadDocuments();
   }, [user]);
 
-  useEffect(() => {
-    const checkGmailOAuthReturn = async () => {
-      if (localStorage.getItem('gmail-oauth-pending') === 'true') {
-        localStorage.removeItem('gmail-oauth-pending');
-        await loadAccounts();
-        setShowCompanyInfoModal(true);
-        setCompanyInfoStep(1);
-      }
-    };
-    checkGmailOAuthReturn();
-  }, []);
-
   const loadAccounts = async () => {
     if (!user) return;
 
@@ -144,10 +132,6 @@ export function SettingsNew() {
   const connectGmail = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-
-      console.log('Starting Gmail OAuth...');
-      console.log('Session:', session ? 'exists' : 'missing');
-
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gmail-oauth-init`,
         {
@@ -160,25 +144,40 @@ export function SettingsNew() {
           body: JSON.stringify({ redirectUrl: window.location.origin }),
         }
       );
-
-      console.log('Response status:', response.status);
-
       if (!response.ok) {
         const error = await response.json();
-        console.error('Error response:', error);
         throw new Error(error.error || 'Échec de l\'initialisation Gmail');
       }
-
       const { authUrl } = await response.json();
-      console.log('Auth URL received:', authUrl);
+      const width = 600; const height = 700;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
 
-      localStorage.setItem('gmail-oauth-pending', 'true');
-
-      console.log('Redirecting to Google...');
-      window.location.href = authUrl;
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.data.type === 'gmail-connected') {
+          try {
+            await supabase.from('email_configurations').upsert({
+              user_id: user?.id as string,
+              name: event.data.email || 'Gmail',
+              email: event.data.email || '',
+              provider: 'gmail',
+              is_connected: true,
+            }, { onConflict: 'user_id' });
+          } catch (e) {
+            console.error('Upsert config Gmail après OAuth:', e);
+          }
+          await loadEmailAccounts();
+          setShowAddAccountModal(false);
+          setShowCompanyInfoModal(true);
+          setCompanyInfoStep(1);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      window.addEventListener('message', handleMessage);
     } catch (err) {
       console.error('Erreur connexion Gmail:', err);
-      alert('Erreur lors de la connexion Gmail: ' + (err as Error).message);
+      alert('Erreur lors de la connexion Gmail');
     }
   };
 

@@ -41,21 +41,99 @@ function App() {
         </header>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 py-16">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-bold text-[#3D2817] mb-6">
-            Automatisez la gestion de vos emails
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-            Hall IA classifie automatiquement vos emails dans différentes boîtes et prépare des réponses intelligentes pour vos destinataires.
-          </p>
-          <button
-            onClick={() => setShowAuthModal(true)}
-            className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-8 py-4 rounded-lg font-medium text-lg flex items-center gap-2 mx-auto hover:shadow-lg transition-shadow"
-          >
-            Commencer maintenant
-            <ArrowRight className="w-5 h-5" />
-          </button>
+      <main className="max-w-7xl mx-auto px-6 py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
+          {/* Left content */}
+          <div>
+            <div className="inline-block bg-gradient-to-r from-[#EF6855]/10 to-[#F9A459]/10 px-4 py-2 rounded-full mb-6">
+              <span className="text-[#EF6855] font-semibold text-sm">Intelligence Artificielle</span>
+            </div>
+            <h1 className="text-6xl font-bold text-[#3D2817] mb-6 leading-tight">
+              Automatisez la gestion de vos emails
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 leading-relaxed">
+              Hall IA classifie automatiquement vos emails dans différentes boîtes et prépare des réponses intelligentes pour vos destinataires.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-8 py-4 rounded-lg font-medium text-lg flex items-center justify-center gap-2 hover:shadow-xl transition-all hover:scale-105"
+              >
+                Commencer maintenant
+                <ArrowRight className="w-5 h-5" />
+              </button>
+              <button
+                className="bg-white text-[#3D2817] px-8 py-4 rounded-lg font-medium text-lg border-2 border-gray-200 hover:border-[#EF6855] transition-colors"
+              >
+                Voir la démo
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-gray-200">
+              <div>
+                <div className="text-4xl font-bold text-[#EF6855] mb-1">3h</div>
+                <div className="text-sm text-gray-600">économisées par jour</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-[#EF6855] mb-1">98%</div>
+                <div className="text-sm text-gray-600">de précision IA</div>
+              </div>
+              <div>
+                <div className="text-4xl font-bold text-[#EF6855] mb-1">24/7</div>
+                <div className="text-sm text-gray-600">disponibilité</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right visual */}
+          <div className="relative">
+            <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-3xl p-8 shadow-2xl transform rotate-1 hover:rotate-0 transition-transform">
+              <div className="bg-white rounded-2xl p-6 space-y-4">
+                {/* Mock email items */}
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-white rounded-xl border-l-4 border-[#EF6855]">
+                  <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Mail className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-[#3D2817] text-sm mb-1">Demande commerciale</div>
+                    <div className="text-xs text-gray-500">Classifié automatiquement</div>
+                  </div>
+                  <Check className="w-5 h-5 text-green-500" />
+                </div>
+
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-white rounded-xl border-l-4 border-[#F9A459]">
+                  <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                    <Zap className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-[#3D2817] text-sm mb-1">Réponse générée</div>
+                    <div className="text-xs text-gray-500">Prête à envoyer</div>
+                  </div>
+                  <Check className="w-5 h-5 text-green-500" />
+                </div>
+
+                <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-orange-50 to-white rounded-xl border-l-4 border-[#EF6855]">
+                  <div className="bg-gradient-to-br from-[#EF6855] to-[#F9A459] w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0">
+                    <TrendingUp className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-[#3D2817] text-sm mb-1">Support technique</div>
+                    <div className="text-xs text-gray-500">En traitement</div>
+                  </div>
+                  <div className="w-5 h-5 border-2 border-gray-300 rounded-full animate-spin border-t-[#EF6855]"></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Floating elements */}
+            <div className="absolute -top-6 -right-6 bg-white rounded-2xl shadow-xl p-4 animate-bounce">
+              <div className="text-2xl font-bold text-[#EF6855]">🚀</div>
+            </div>
+            <div className="absolute -bottom-6 -left-6 bg-white rounded-2xl shadow-xl p-4">
+              <div className="text-sm font-semibold text-[#3D2817]">IA Avancée</div>
+            </div>
+          </div>
         </div>
 
         {/* Feature Cards */}

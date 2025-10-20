@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, FileText, Youtube, Globe, Zap } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Youtube, Globe, Zap, X, Check, Lock, ChevronRight } from 'lucide-react';
 
 interface EmailAccount {
   id: string;
@@ -22,6 +22,7 @@ export function SettingsNew() {
   const [autoSort, setAutoSort] = useState(true);
   const [autoReply, setAutoReply] = useState(true);
   const [adFilter, setAdFilter] = useState(true);
+  const [showAddAccountModal, setShowAddAccountModal] = useState(false);
 
   useEffect(() => {
     loadAccounts();
@@ -72,8 +73,90 @@ export function SettingsNew() {
     setDocuments(documents.filter(doc => doc.id !== docId));
   };
 
+  const handleProviderSelect = async (provider: 'gmail' | 'outlook' | 'imap') => {
+    if (provider === 'gmail') {
+      window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/gmail-oauth-init?user_id=${user?.id}`;
+    } else if (provider === 'outlook') {
+      window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/outlook-oauth-init?user_id=${user?.id}`;
+    } else {
+      alert('IMAP/SMTP configuration coming soon');
+      setShowAddAccountModal(false);
+    }
+  };
+
   return (
-    <div className="max-w-7xl">
+    <>
+      {showAddAccountModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-[#3D2817] mb-2">Ajouter un compte email</h2>
+              <p className="text-gray-600 text-sm">Sélectionnez votre fournisseur d'email</p>
+            </div>
+
+            <div className="space-y-3 mb-6">
+              <button
+                onClick={() => handleProviderSelect('gmail')}
+                className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-[#EF6855] hover:bg-orange-50 transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-xl">
+                    G
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900">Gmail</div>
+                    <div className="text-sm text-gray-500">Google Workspace</div>
+                  </div>
+                </div>
+                <Check className="w-5 h-5 text-green-500" />
+              </button>
+
+              <button
+                onClick={() => handleProviderSelect('outlook')}
+                className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-[#EF6855] hover:bg-orange-50 transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M7 18h11v-2H7v2zm0-4h11v-2H7v2zm0-4h11V8H7v2zm14 8V6c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2z"/>
+                    </svg>
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900">Outlook</div>
+                    <div className="text-sm text-gray-500">Microsoft 365</div>
+                  </div>
+                </div>
+                <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">Bientôt</span>
+              </button>
+
+              <button
+                onClick={() => handleProviderSelect('imap')}
+                className="w-full flex items-center justify-between p-4 border-2 border-gray-200 rounded-xl hover:border-[#EF6855] hover:bg-orange-50 transition-all group"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <Lock className="w-6 h-6 text-gray-600" />
+                  </div>
+                  <div className="text-left">
+                    <div className="font-semibold text-gray-900">Autres emails</div>
+                    <div className="text-sm text-gray-500">SMTP / IMAP</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-[#EF6855]" />
+              </button>
+            </div>
+
+            <button
+              onClick={() => setShowAddAccountModal(false)}
+              className="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -97,7 +180,10 @@ export function SettingsNew() {
                   </div>
                 </button>
               ))}
-              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => setShowAddAccountModal(true)}
+                className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Ajouter un compte
               </button>
@@ -239,5 +325,6 @@ export function SettingsNew() {
         </div>
       </div>
     </div>
+    </>
   );
 }

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
@@ -24,8 +24,23 @@ export function Dashboard() {
           </div>
           <div className="flex items-center gap-4">
             <button
+              onClick={() => setActiveView('home')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'home'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              Tableau de bord
+            </button>
+            <button
               onClick={() => setActiveView('settings')}
-              className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-[#EF6855] transition-colors"
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'settings'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
             >
               <SettingsIcon className="w-5 h-5" />
               Paramètres

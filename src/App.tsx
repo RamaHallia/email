@@ -45,9 +45,6 @@ function App() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
           {/* Left content */}
           <div>
-            <div className="inline-block bg-gradient-to-r from-[#EF6855]/10 to-[#F9A459]/10 px-4 py-2 rounded-full mb-6">
-              <span className="text-[#EF6855] font-semibold text-sm">Intelligence Artificielle</span>
-            </div>
             <h1 className="text-6xl font-bold text-[#3D2817] mb-6 leading-tight">
               Automatisez la gestion de vos emails
             </h1>

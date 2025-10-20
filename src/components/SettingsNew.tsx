@@ -36,6 +36,18 @@ export function SettingsNew() {
     loadDocuments();
   }, [user]);
 
+  useEffect(() => {
+    const checkGmailOAuthReturn = async () => {
+      if (localStorage.getItem('gmail-oauth-pending') === 'true') {
+        localStorage.removeItem('gmail-oauth-pending');
+        await loadAccounts();
+        setShowCompanyInfoModal(true);
+        setCompanyInfoStep(1);
+      }
+    };
+    checkGmailOAuthReturn();
+  }, []);
+
   const loadAccounts = async () => {
     if (!user) return;
 
@@ -149,42 +161,10 @@ export function SettingsNew() {
         throw new Error(error.error || 'Échec de l\'initialisation Gmail');
       }
       const { authUrl } = await response.json();
-      const width = 600;
-      const height = 700;
-      const left = (window.screen.width / 2) - (width / 2);
-      const top = (window.screen.height / 2) - (height / 2);
-      const popup = window.open(
-        authUrl,
-        'GmailOAuth',
-        `popup=yes,width=${width},height=${height},left=${left},top=${top},toolbar=no,location=no,status=no,menubar=no,scrollbars=yes,resizable=yes`
-      );
 
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        alert('La popup a été bloquée. Veuillez autoriser les popups pour ce site.');
-        return;
-      }
+      localStorage.setItem('gmail-oauth-pending', 'true');
 
-      const handleMessage = async (event: MessageEvent) => {
-        if (event.data.type === 'gmail-connected') {
-          try {
-            await supabase.from('email_configurations').upsert({
-              user_id: user?.id as string,
-              name: event.data.email || 'Gmail',
-              email: event.data.email || '',
-              provider: 'gmail',
-              is_connected: true,
-            }, { onConflict: 'user_id' });
-          } catch (e) {
-            console.error('Upsert config Gmail après OAuth:', e);
-          }
-          await loadEmailAccounts();
-          setShowAddAccountModal(false);
-          setShowCompanyInfoModal(true);
-          setCompanyInfoStep(1);
-          window.removeEventListener('message', handleMessage);
-        }
-      };
-      window.addEventListener('message', handleMessage);
+      window.location.href = authUrl;
     } catch (err) {
       console.error('Erreur connexion Gmail:', err);
       alert('Erreur lors de la connexion Gmail');

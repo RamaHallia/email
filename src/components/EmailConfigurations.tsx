@@ -719,7 +719,7 @@ export function EmailConfigurations() {
               ) : (
                 <button
                   type="button"
-                  onClick={handleDelete}
+                  onClick={handleDeleteClick}
                   className="px-6 py-3 border border-red-200 text-red-700 rounded-lg hover:bg-red-50 transition-colors"
                 >
                   Supprimer

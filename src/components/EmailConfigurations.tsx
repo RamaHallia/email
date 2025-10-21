@@ -19,6 +19,8 @@ type SimpleConfigRow = {
   company_name: string | null;
   activity_description: string | null;
   services_offered: string | null;
+  gmail_token_id: string | null;
+  outlook_token_id: string | null;
   created_at: string;
 };
 
@@ -334,11 +336,30 @@ export function EmailConfigurations() {
   const handleDelete = async () => {
     if (!user?.id) return;
     try {
+      const cfg = items[0];
+
+      if (cfg?.provider === 'gmail' && cfg?.gmail_token_id) {
+        const { error: tokenError } = await supabase
+          .from('gmail_tokens')
+          .delete()
+          .eq('id', cfg.gmail_token_id);
+        if (tokenError) console.error('Erreur suppression token Gmail:', tokenError);
+      }
+
+      if (cfg?.provider === 'outlook' && cfg?.outlook_token_id) {
+        const { error: tokenError } = await supabase
+          .from('outlook_tokens')
+          .delete()
+          .eq('id', cfg.outlook_token_id);
+        if (tokenError) console.error('Erreur suppression token Outlook:', tokenError);
+      }
+
       const { error } = await supabase
         .from('email_configurations')
         .delete()
         .eq('user_id', user.id);
       if (error) throw error;
+
       await loadLatestConfig();
       setFormData({
         email: '',

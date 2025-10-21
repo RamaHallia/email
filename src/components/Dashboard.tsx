@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { supabase } from '../lib/supabase';
 import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
@@ -7,10 +8,148 @@ import { EmailConfigurations } from './EmailConfigurations';
 type ActiveView = 'home' | 'settings' | 'email-configs';
 type TimePeriod = 'today' | 'week' | 'month';
 
+interface EmailStats {
+  emailsRepondus: number;
+  emailsTries: number;
+  publicitiesFiltrees: number;
+  emailsRepondusHier: number;
+  emailsTriesHier: number;
+  publicitiesHier: number;
+}
+
 export function Dashboard() {
   const { user, signOut } = useAuth();
   const [activeView, setActiveView] = useState<ActiveView>('home');
   const [timePeriod, setTimePeriod] = useState<TimePeriod>('today');
+  const [stats, setStats] = useState<EmailStats>({
+    emailsRepondus: 0,
+    emailsTries: 0,
+    publicitiesFiltrees: 0,
+    emailsRepondusHier: 0,
+    emailsTriesHier: 0,
+    publicitiesHier: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id && activeView === 'home') {
+      loadStats();
+    }
+  }, [user?.id, timePeriod, activeView]);
+
+  const getDateRange = () => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    switch (timePeriod) {
+      case 'today':
+        return {
+          start: today.toISOString(),
+          end: new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+          previousStart: yesterday.toISOString(),
+          previousEnd: today.toISOString(),
+        };
+      case 'week':
+        const weekStart = new Date(today);
+        weekStart.setDate(today.getDate() - today.getDay());
+        const previousWeekStart = new Date(weekStart);
+        previousWeekStart.setDate(weekStart.getDate() - 7);
+        return {
+          start: weekStart.toISOString(),
+          end: now.toISOString(),
+          previousStart: previousWeekStart.toISOString(),
+          previousEnd: weekStart.toISOString(),
+        };
+      case 'month':
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const previousMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return {
+          start: monthStart.toISOString(),
+          end: now.toISOString(),
+          previousStart: previousMonthStart.toISOString(),
+          previousEnd: monthStart.toISOString(),
+        };
+    }
+  };
+
+  const loadStats = async () => {
+    setLoading(true);
+    try {
+      const { start, end, previousStart, previousEnd } = getDateRange();
+
+      const { count: emailsRepondus } = await supabase
+        .from('email_traite')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .gte('processed_at', start)
+        .lt('processed_at', end);
+
+      const { count: emailsRepondusHier } = await supabase
+        .from('email_traite')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .gte('processed_at', previousStart)
+        .lt('processed_at', previousEnd);
+
+      const { count: emailsTries } = await supabase
+        .from('email_info')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .gte('created_at', start)
+        .lt('created_at', end);
+
+      const { count: emailsTriesHier } = await supabase
+        .from('email_info')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .gte('created_at', previousStart)
+        .lt('created_at', previousEnd);
+
+      const { count: publicitiesFiltrees } = await supabase
+        .from('email_pub')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .gte('created_at', start)
+        .lt('created_at', end);
+
+      const { count: publicitiesHier } = await supabase
+        .from('email_pub')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id)
+        .gte('created_at', previousStart)
+        .lt('created_at', previousEnd);
+
+      setStats({
+        emailsRepondus: emailsRepondus || 0,
+        emailsTries: emailsTries || 0,
+        publicitiesFiltrees: publicitiesFiltrees || 0,
+        emailsRepondusHier: emailsRepondusHier || 0,
+        emailsTriesHier: emailsTriesHier || 0,
+        publicitiesHier: publicitiesHier || 0,
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const calculateTimeSaved = () => {
+    const minutes = stats.emailsRepondus * 2 + stats.emailsTries * 0.5;
+    const hours = Math.floor(minutes / 60);
+    const mins = Math.round(minutes % 60);
+    return `${hours}h ${mins}m`;
+  };
+
+  const getDiffText = (current: number, previous: number) => {
+    const diff = current - previous;
+    if (diff === 0) return 'Aucun changement';
+    const sign = diff > 0 ? '+' : '';
+    const period = timePeriod === 'today' ? 'depuis hier' : 'vs période précédente';
+    return `${sign}${diff} ${period}`;
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
@@ -122,8 +261,16 @@ export function Dashboard() {
                     <span className="text-sm text-gray-600">Emails répondus</span>
                     <Mail className="w-5 h-5 text-blue-500" />
                   </div>
-                  <div className="text-3xl font-bold text-[#3D2817] mb-1">42</div>
-                  <div className="text-xs text-green-600">+5 depuis hier</div>
+                  {loading ? (
+                    <div className="text-3xl font-bold text-[#3D2817] mb-1">...</div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-[#3D2817] mb-1">{stats.emailsRepondus}</div>
+                      <div className={`text-xs ${stats.emailsRepondus > stats.emailsRepondusHier ? 'text-green-600' : 'text-gray-600'}`}>
+                        {getDiffText(stats.emailsRepondus, stats.emailsRepondusHier)}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="bg-white border-2 border-green-200 rounded-xl p-6">
@@ -131,8 +278,16 @@ export function Dashboard() {
                     <span className="text-sm text-gray-600">Emails triés</span>
                     <TrendingUp className="w-5 h-5 text-green-500" />
                   </div>
-                  <div className="text-3xl font-bold text-[#3D2817] mb-1">128</div>
-                  <div className="text-xs text-green-600">+12 depuis hier</div>
+                  {loading ? (
+                    <div className="text-3xl font-bold text-[#3D2817] mb-1">...</div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-[#3D2817] mb-1">{stats.emailsTries}</div>
+                      <div className={`text-xs ${stats.emailsTries > stats.emailsTriesHier ? 'text-green-600' : 'text-gray-600'}`}>
+                        {getDiffText(stats.emailsTries, stats.emailsTriesHier)}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="bg-white border-2 border-purple-200 rounded-xl p-6">
@@ -140,8 +295,16 @@ export function Dashboard() {
                     <span className="text-sm text-gray-600">Publicités filtrées</span>
                     <Filter className="w-5 h-5 text-purple-500" />
                   </div>
-                  <div className="text-3xl font-bold text-[#3D2817] mb-1">89</div>
-                  <div className="text-xs text-green-600">+8 depuis hier</div>
+                  {loading ? (
+                    <div className="text-3xl font-bold text-[#3D2817] mb-1">...</div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-[#3D2817] mb-1">{stats.publicitiesFiltrees}</div>
+                      <div className={`text-xs ${stats.publicitiesFiltrees > stats.publicitiesHier ? 'text-green-600' : 'text-gray-600'}`}>
+                        {getDiffText(stats.publicitiesFiltrees, stats.publicitiesHier)}
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="bg-white border-2 border-orange-200 rounded-xl p-6">
@@ -149,10 +312,16 @@ export function Dashboard() {
                     <span className="text-sm text-gray-600">Temps économisé</span>
                     <Clock className="w-5 h-5 text-orange-500" />
                   </div>
-                  <div className="text-3xl font-bold text-[#3D2817] mb-1">2h 28m</div>
-                  <div className="text-xs text-gray-600">
-                    Basé sur 2 min/email répondu + 30s/email trié
-                  </div>
+                  {loading ? (
+                    <div className="text-3xl font-bold text-[#3D2817] mb-1">...</div>
+                  ) : (
+                    <>
+                      <div className="text-3xl font-bold text-[#3D2817] mb-1">{calculateTimeSaved()}</div>
+                      <div className="text-xs text-gray-600">
+                        Basé sur 2 min/email répondu + 30s/email trié
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>

@@ -134,7 +134,7 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .or(`email_account_id.eq.${selectedAccountId},email_account_id.is.null`)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -144,7 +144,7 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .or(`email_account_id.eq.${selectedAccountId},email_account_id.is.null`)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -154,7 +154,7 @@ export function Dashboard() {
         .from('email_info')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .or(`email_account_id.eq.${selectedAccountId},email_account_id.is.null`)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -164,7 +164,7 @@ export function Dashboard() {
         .from('email_info')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .or(`email_account_id.eq.${selectedAccountId},email_account_id.is.null`)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -174,7 +174,7 @@ export function Dashboard() {
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .or(`email_account_id.eq.${selectedAccountId},email_account_id.is.null`)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -184,7 +184,7 @@ export function Dashboard() {
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .or(`email_account_id.eq.${selectedAccountId},email_account_id.is.null`)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 

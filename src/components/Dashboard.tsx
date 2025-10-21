@@ -15,6 +15,8 @@ interface EmailStats {
   emailsRepondusHier: number;
   emailsTriesHier: number;
   publicitiesHier: number;
+  emailsInfo: number;
+  emailsInfoHier: number;
 }
 
 export function Dashboard() {
@@ -28,6 +30,8 @@ export function Dashboard() {
     emailsRepondusHier: 0,
     emailsTriesHier: 0,
     publicitiesHier: 0,
+    emailsInfo: 0,
+    emailsInfoHier: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -139,13 +143,18 @@ export function Dashboard() {
 
       if (error6) console.error('Error fetching publicitiesHier:', error6);
 
+      const totalEmailsTries = (emailsRepondus || 0) + (emailsTries || 0) + (publicitiesFiltrees || 0);
+      const totalEmailsTriesHier = (emailsRepondusHier || 0) + (emailsTriesHier || 0) + (publicitiesHier || 0);
+
       setStats({
         emailsRepondus: emailsRepondus || 0,
-        emailsTries: emailsTries || 0,
+        emailsTries: totalEmailsTries,
         publicitiesFiltrees: publicitiesFiltrees || 0,
         emailsRepondusHier: emailsRepondusHier || 0,
-        emailsTriesHier: emailsTriesHier || 0,
+        emailsTriesHier: totalEmailsTriesHier,
         publicitiesHier: publicitiesHier || 0,
+        emailsInfo: emailsTries || 0,
+        emailsInfoHier: emailsTriesHier || 0,
       });
     } catch (error) {
       console.error('Error loading stats:', error);
@@ -157,7 +166,7 @@ export function Dashboard() {
   const calculateTimeSaved = () => {
     const totalMinutes =
       stats.emailsRepondus * 2 +
-      stats.emailsTries * 0.5 +
+      stats.emailsInfo * 0.5 +
       stats.publicitiesFiltrees * (10 / 60);
 
     const hours = Math.floor(totalMinutes / 60);

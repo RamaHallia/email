@@ -155,9 +155,16 @@ export function Dashboard() {
   };
 
   const calculateTimeSaved = () => {
-    const minutes = stats.emailsRepondus * 2 + stats.emailsTries * 0.5;
-    const hours = Math.floor(minutes / 60);
-    const mins = Math.round(minutes % 60);
+    const totalMinutes =
+      stats.emailsRepondus * 2 +
+      stats.emailsTries * 0.5 +
+      stats.publicitiesFiltrees * (10 / 60);
+
+    const hours = Math.floor(totalMinutes / 60);
+    const mins = Math.round(totalMinutes % 60);
+
+    if (hours === 0 && mins === 0) return '0m';
+    if (hours === 0) return `${mins}m`;
     return `${hours}h ${mins}m`;
   };
 
@@ -336,7 +343,7 @@ export function Dashboard() {
                     <>
                       <div className="text-3xl font-bold text-[#3D2817] mb-1">{calculateTimeSaved()}</div>
                       <div className="text-xs text-gray-600">
-                        Basé sur 2 min/email répondu + 30s/email trié
+                        2 min/réponse + 30s/tri + 10s/pub filtrée
                       </div>
                     </>
                   )}

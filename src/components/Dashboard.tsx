@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
@@ -19,6 +19,12 @@ interface EmailStats {
   emailsInfoHier: number;
 }
 
+interface EmailAccount {
+  id: string;
+  email: string;
+  provider: 'gmail' | 'outlook';
+}
+
 export function Dashboard() {
   const { user, signOut } = useAuth();
   const [activeView, setActiveView] = useState<ActiveView>('home');
@@ -34,12 +40,45 @@ export function Dashboard() {
     emailsInfoHier: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<EmailAccount[]>([]);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
   useEffect(() => {
-    if (user?.id && activeView === 'home') {
+    if (user?.id) {
+      loadAccounts();
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    if (user?.id && activeView === 'home' && selectedAccountId) {
       loadStats();
     }
-  }, [user?.id, timePeriod, activeView]);
+  }, [user?.id, timePeriod, activeView, selectedAccountId]);
+
+  const loadAccounts = async () => {
+    if (!user?.id) return;
+
+    const { data: gmailData } = await supabase
+      .from('gmail_oauth_tokens')
+      .select('id, email')
+      .eq('user_id', user.id);
+
+    const { data: outlookData } = await supabase
+      .from('outlook_tokens')
+      .select('id, email')
+      .eq('user_id', user.id);
+
+    const allAccounts: EmailAccount[] = [
+      ...(gmailData || []).map(acc => ({ id: acc.id, email: acc.email, provider: 'gmail' as const })),
+      ...(outlookData || []).map(acc => ({ id: acc.id, email: acc.email, provider: 'outlook' as const }))
+    ];
+
+    setAccounts(allAccounts);
+    if (allAccounts.length > 0 && !selectedAccountId) {
+      setSelectedAccountId(allAccounts[0].id);
+    }
+  };
 
   const getDateRange = () => {
     const now = new Date();
@@ -79,8 +118,8 @@ export function Dashboard() {
   };
 
   const loadStats = async () => {
-    if (!user?.id) {
-      console.error('User ID not available');
+    if (!user?.id || !selectedAccountId) {
+      console.error('User ID or Account ID not available');
       setLoading(false);
       return;
     }
@@ -93,6 +132,7 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -102,6 +142,7 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -111,6 +152,7 @@ export function Dashboard() {
         .from('email_info')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -120,6 +162,7 @@ export function Dashboard() {
         .from('email_info')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -129,6 +172,7 @@ export function Dashboard() {
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -138,6 +182,7 @@ export function Dashboard() {
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
+        .eq('email_account_id', selectedAccountId)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -253,6 +298,42 @@ export function Dashboard() {
             </div>
 
             <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="mb-6">
+                <h2 className="text-sm font-semibold text-gray-700 mb-3">Compte email</h2>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+                    className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-[#EF6855] transition-colors flex items-center justify-between"
+                  >
+                    <span className="font-medium text-gray-900">
+                      {accounts.find(acc => acc.id === selectedAccountId)?.email || 'Sélectionner un compte'}
+                    </span>
+                    <ChevronDown className="w-5 h-5 text-gray-500" />
+                  </button>
+                  {showAccountDropdown && (
+                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-10">
+                      {accounts.map(account => (
+                        <button
+                          key={account.id}
+                          onClick={() => {
+                            setSelectedAccountId(account.id);
+                            setShowAccountDropdown(false);
+                          }}
+                          className={`w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                            selectedAccountId === account.id ? 'bg-orange-50' : ''
+                          }`}
+                        >
+                          <div className="font-medium text-gray-900">{account.email}</div>
+                          <div className="text-xs text-gray-500">
+                            {account.provider === 'gmail' ? 'Gmail' : 'Outlook'}
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+
               <div className="mb-6">
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">Période</h2>
                 <div className="flex gap-3">

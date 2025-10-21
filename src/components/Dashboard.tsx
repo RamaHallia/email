@@ -22,7 +22,7 @@ interface EmailStats {
 interface EmailAccount {
   id: string;
   email: string;
-  provider: 'gmail' | 'outlook';
+  provider: 'gmail' | 'outlook' | 'smtp_imap';
 }
 
 export function Dashboard() {
@@ -73,7 +73,7 @@ export function Dashboard() {
     const allAccounts: EmailAccount[] = (data || []).map(acc => ({
       id: acc.id,
       email: acc.email,
-      provider: acc.provider as 'gmail' | 'outlook'
+      provider: acc.provider as 'gmail' | 'outlook' | 'smtp_imap'
     }));
 
     setAccounts(allAccounts);

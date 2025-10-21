@@ -66,24 +66,24 @@ Deno.serve(async (req)=>{
       email: userInfo.email,
       updated_at: new Date().toISOString()
     }, {
-      onConflict: 'user_id,email'
+      onConflict: 'user_id'
     }).select().single();
     if (dbError) {
       throw new Error(`Database error: ${dbError.message}`);
     }
-    const { error: accountError } = await supabase.from('email_accounts').upsert({
+    const { error: configError } = await supabase.from('email_configurations').upsert({
       user_id: userId,
       name: `Gmail - ${userInfo.email}`,
       email: userInfo.email,
       provider: 'gmail',
-      is_active: true,
+      is_connected: true,
       gmail_token_id: tokenData.id,
-      updated_at: new Date().toISOString()
+      last_sync_at: new Date().toISOString()
     }, {
-      onConflict: 'user_id,email'
+      onConflict: 'user_id'
     });
-    if (accountError) {
-      console.error('Error creating email account:', accountError);
+    if (configError) {
+      console.error('Error creating email configuration:', configError);
     }
     return new Response(`
     <html>

@@ -70,6 +70,7 @@ Deno.serve(async (req)=>{
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const anon = Deno.env.get('SUPABASE_ANON_KEY');
     const redirectUri = `${supabaseUrl}/functions/v1/outlook-oauth-callback?apikey=${anon}`;
+    // Échange code -> tokens
     const tokenResponse = await fetch(`https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`, {
       method: 'POST',
       headers: {
@@ -87,12 +88,14 @@ Deno.serve(async (req)=>{
     if (!tokenResponse.ok) {
       throw new Error(`Token exchange failed: ${JSON.stringify(tokens)}`);
     }
+    // Infos user Graph
     const userInfoResponse = await fetch('https://graph.microsoft.com/v1.0/me', {
       headers: {
         Authorization: `Bearer ${tokens.access_token}`
       }
     });
     const userInfo = await userInfoResponse.json();
+    // Écriture en base
     const supabase = createClient(supabaseUrl, serviceKey);
     const expiryDate = new Date();
     expiryDate.setSeconds(expiryDate.getSeconds() + (tokens.expires_in || 3600));
@@ -104,21 +107,22 @@ Deno.serve(async (req)=>{
       email: userInfo.mail || userInfo.userPrincipalName,
       updated_at: new Date().toISOString()
     }, {
-      onConflict: 'user_id,email'
+      onConflict: 'user_id'
     }).select().single();
     if (dbError) throw new Error(`Database error: ${dbError.message}`);
-    const { error: accountError } = await supabase.from('email_accounts').upsert({
+    const { error: configError } = await supabase.from('email_configurations').upsert({
       user_id: userId,
       name: `Outlook - ${userInfo.mail || userInfo.userPrincipalName}`,
       email: userInfo.mail || userInfo.userPrincipalName,
       provider: 'outlook',
-      is_active: true,
+      is_connected: true,
       outlook_token_id: tokenData.id,
-      updated_at: new Date().toISOString()
+      last_sync_at: new Date().toISOString()
     }, {
-      onConflict: 'user_id,email'
+      onConflict: 'user_id'
     });
-    if (accountError) console.error('Error creating email account:', accountError);
+    if (configError) console.error('Error creating email configuration:', configError);
+    // Succès + postMessage
     return new Response(`<!doctype html>
       <html>
         <head>

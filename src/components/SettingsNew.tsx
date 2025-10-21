@@ -201,13 +201,22 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       const handleMessage = async (event: MessageEvent) => {
         if (event.data.type === 'gmail-connected') {
           try {
-            await supabase.from('email_configurations').upsert({
-              user_id: user?.id as string,
-              name: event.data.email || 'Gmail',
-              email: event.data.email || '',
-              provider: 'gmail',
-              is_connected: true,
-            }, { onConflict: 'user_id' });
+            const { data: existing } = await supabase
+              .from('email_configurations')
+              .select('id')
+              .eq('user_id', user?.id as string)
+              .eq('email', event.data.email || '')
+              .maybeSingle();
+
+            if (!existing) {
+              await supabase.from('email_configurations').insert({
+                user_id: user?.id as string,
+                name: event.data.email || 'Gmail',
+                email: event.data.email || '',
+                provider: 'gmail',
+                is_connected: true,
+              });
+            }
           } catch (e) {
             console.error('Upsert config Gmail après OAuth:', e);
           }

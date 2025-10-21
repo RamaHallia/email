@@ -27,7 +27,8 @@ export function EmailConfigurations() {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState<SimpleConfigRow[]>([]);
   const [saving, setSaving] = useState(false);
-  const [mode, setMode] = useState<'choices' | 'imap_form' | 'account'>('choices');
+  const [mode, setMode] = useState<'choices' | 'imap_form' | 'account' | 'list'>('choices');
+  const [selectedConfigId, setSelectedConfigId] = useState<string | null>(null);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -55,13 +56,22 @@ export function EmailConfigurations() {
       if (event?.data?.type === 'gmail-connected' || event?.data?.type === 'outlook-connected') {
         try {
           const provider = event.data.type === 'gmail-connected' ? 'gmail' : 'outlook';
-          await supabase.from('email_configurations').upsert({
-            user_id: user?.id as string,
-            name: event.data.email || provider,
-            email: event.data.email || '',
-            provider,
-            is_connected: true,
-          }, { onConflict: 'user_id' });
+          const { data: existing } = await supabase
+            .from('email_configurations')
+            .select('id')
+            .eq('user_id', user?.id as string)
+            .eq('email', event.data.email || '')
+            .maybeSingle();
+
+          if (!existing) {
+            await supabase.from('email_configurations').insert({
+              user_id: user?.id as string,
+              name: event.data.email || provider,
+              email: event.data.email || '',
+              provider,
+              is_connected: true,
+            });
+          }
         } catch (e) {
           console.error('Upsert config après OAuth (global handler):', e);
         }
@@ -97,13 +107,22 @@ export function EmailConfigurations() {
           .eq('user_id', user?.id)
           .maybeSingle();
         if (gmail?.email) {
-          await supabase.from('email_configurations').upsert({
-            user_id: user?.id as string,
-            name: gmail.email,
-            email: gmail.email,
-            provider: 'gmail',
-            is_connected: true,
-          }, { onConflict: 'user_id' });
+          const { data: existing } = await supabase
+            .from('email_configurations')
+            .select('id')
+            .eq('user_id', user?.id as string)
+            .eq('email', gmail.email)
+            .maybeSingle();
+
+          if (!existing) {
+            await supabase.from('email_configurations').insert({
+              user_id: user?.id as string,
+              name: gmail.email,
+              email: gmail.email,
+              provider: 'gmail',
+              is_connected: true,
+            });
+          }
           const { data: after } = await supabase
             .from('email_configurations')
             .select('*')
@@ -165,16 +184,25 @@ export function EmailConfigurations() {
         if (event.data.type === 'gmail-connected') {
           try {
             // Créer/mettre à jour une ligne de configuration pour cet utilisateur
-            await supabase.from('email_configurations').upsert({
-              user_id: user?.id as string,
-              name: event.data.email || 'Gmail',
-              email: event.data.email || '',
-              provider: 'gmail',
-              is_connected: true,
-              company_name: null,
-              activity_description: null,
-              services_offered: null,
-            }, { onConflict: 'user_id' });
+            const { data: existing } = await supabase
+              .from('email_configurations')
+              .select('id')
+              .eq('user_id', user?.id as string)
+              .eq('email', event.data.email || '')
+              .maybeSingle();
+
+            if (!existing) {
+              await supabase.from('email_configurations').insert({
+                user_id: user?.id as string,
+                name: event.data.email || 'Gmail',
+                email: event.data.email || '',
+                provider: 'gmail',
+                is_connected: true,
+                company_name: null,
+                activity_description: null,
+                services_offered: null,
+              });
+            }
           } catch (e) {
             console.error('Upsert config Gmail après OAuth:', e);
           }
@@ -240,22 +268,41 @@ export function EmailConfigurations() {
         if (error) throw error;
       } else {
         // Pour IMAP/SMTP, upsert complet
-        const upsertRes = await supabase.from('email_configurations').upsert({
-          user_id: user.id,
-          name: formData.company_name || formData.email,
-          email: formData.email,
-          provider: 'smtp_imap',
-          is_connected: true,
-          password: formData.password,
-          imap_host: formData.imap_host,
-          imap_port: parseInt(formData.imap_port),
-          imap_username: formData.email,
-          imap_password: formData.password,
-          company_name: formData.company_name,
-          activity_description: formData.activity_description,
-          services_offered: formData.services_offered,
-        }, { onConflict: 'user_id' });
-        if (upsertRes.error) throw upsertRes.error;
+        const cfg = items.find(c => c.id === selectedConfigId);
+        if (cfg?.id) {
+          const updateRes = await supabase
+            .from('email_configurations')
+            .update({
+              email: formData.email,
+              password: formData.password,
+              imap_host: formData.imap_host,
+              imap_port: parseInt(formData.imap_port),
+              imap_username: formData.email,
+              imap_password: formData.password,
+              company_name: formData.company_name,
+              activity_description: formData.activity_description,
+              services_offered: formData.services_offered,
+            })
+            .eq('id', cfg.id);
+          if (updateRes.error) throw updateRes.error;
+        } else {
+          const insertRes = await supabase.from('email_configurations').insert({
+            user_id: user.id,
+            name: formData.company_name || formData.email,
+            email: formData.email,
+            provider: 'smtp_imap',
+            is_connected: true,
+            password: formData.password,
+            imap_host: formData.imap_host,
+            imap_port: parseInt(formData.imap_port),
+            imap_username: formData.email,
+            imap_password: formData.password,
+            company_name: formData.company_name,
+            activity_description: formData.activity_description,
+            services_offered: formData.services_offered,
+          });
+          if (insertRes.error) throw insertRes.error;
+        }
       }
 
       await loadLatestConfig();

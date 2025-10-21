@@ -89,8 +89,8 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .gte('processed_at', start)
-        .lt('processed_at', end);
+        .gte('created_at', start)
+        .lt('created_at', end);
 
       if (error1) console.error('Error fetching emailsRepondus:', error1);
 
@@ -98,8 +98,8 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .gte('processed_at', previousStart)
-        .lt('processed_at', previousEnd);
+        .gte('created_at', previousStart)
+        .lt('created_at', previousEnd);
 
       if (error2) console.error('Error fetching emailsRepondusHier:', error2);
 

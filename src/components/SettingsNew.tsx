@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight } from 'lucide-react';
+import { ConfirmationModal } from './ConfirmationModal';
 
 interface EmailAccount {
   id: string;
@@ -31,6 +32,10 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [showCompanyInfoModal, setShowCompanyInfoModal] = useState(false);
   const [companyInfoStep, setCompanyInfoStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [accountToDelete, setAccountToDelete] = useState<{ id: string; email: string; provider: string } | null>(null);
+  const [showDeleteDocModal, setShowDeleteDocModal] = useState(false);
+  const [docToDelete, setDocToDelete] = useState<string | null>(null);
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -129,17 +134,29 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     ]);
   };
 
-  const handleDeleteAccount = async (accountId: string, provider: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce compte ?')) return;
+  const handleDeleteAccountClick = (accountId: string, email: string, provider: string) => {
+    setAccountToDelete({ id: accountId, email, provider });
+    setShowDeleteModal(true);
+  };
 
-    const tableName = provider === 'gmail' ? 'gmail_tokens' : 'outlook_tokens';
-    await supabase.from(tableName).delete().eq('id', accountId);
+  const handleDeleteAccount = async () => {
+    if (!accountToDelete) return;
+
+    const tableName = accountToDelete.provider === 'gmail' ? 'gmail_tokens' : 'outlook_tokens';
+    await supabase.from(tableName).delete().eq('id', accountToDelete.id);
+    setAccountToDelete(null);
     loadAccounts();
   };
 
-  const handleDeleteDocument = (docId: string) => {
-    if (!confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) return;
-    setDocuments(documents.filter(doc => doc.id !== docId));
+  const handleDeleteDocumentClick = (docId: string) => {
+    setDocToDelete(docId);
+    setShowDeleteDocModal(true);
+  };
+
+  const handleDeleteDocument = () => {
+    if (!docToDelete) return;
+    setDocuments(documents.filter(doc => doc.id !== docToDelete));
+    setDocToDelete(null);
   };
 
   const handleCompanyInfoNext = () => {
@@ -425,7 +442,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                     <Edit className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => handleDeleteAccount(selectedAccount.id, selectedAccount.provider)}
+                    onClick={() => handleDeleteAccountClick(selectedAccount.id, selectedAccount.email, selectedAccount.provider)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                   >
                     <Trash2 className="w-5 h-5" />
@@ -521,7 +538,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                     <span className="text-gray-700">{doc.name}</span>
                   </div>
                   <button
-                    onClick={() => handleDeleteDocument(doc.id)}
+                    onClick={() => handleDeleteDocumentClick(doc.id)}
                     className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -801,6 +818,34 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         </div>
       </div>
     )}
+
+    <ConfirmationModal
+      isOpen={showDeleteModal}
+      onClose={() => {
+        setShowDeleteModal(false);
+        setAccountToDelete(null);
+      }}
+      onConfirm={handleDeleteAccount}
+      title="Supprimer le compte"
+      message={`Êtes-vous sûr de vouloir supprimer définitivement le compte ${accountToDelete?.email} ? Cette action est irréversible.`}
+      confirmText="Supprimer"
+      cancelText="Annuler"
+      variant="danger"
+    />
+
+    <ConfirmationModal
+      isOpen={showDeleteDocModal}
+      onClose={() => {
+        setShowDeleteDocModal(false);
+        setDocToDelete(null);
+      }}
+      onConfirm={handleDeleteDocument}
+      title="Supprimer le document"
+      message="Êtes-vous sûr de vouloir supprimer définitivement ce document ? Cette action est irréversible."
+      confirmText="Supprimer"
+      cancelText="Annuler"
+      variant="danger"
+    />
     </>
   );
 }

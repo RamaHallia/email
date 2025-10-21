@@ -59,20 +59,22 @@ export function Dashboard() {
   const loadAccounts = async () => {
     if (!user?.id) return;
 
-    const { data: gmailData } = await supabase
-      .from('gmail_oauth_tokens')
-      .select('id, email')
-      .eq('user_id', user.id);
+    const { data, error } = await supabase
+      .from('email_configurations')
+      .select('id, email, provider')
+      .eq('user_id', user.id)
+      .eq('is_connected', true);
 
-    const { data: outlookData } = await supabase
-      .from('outlook_tokens')
-      .select('id, email')
-      .eq('user_id', user.id);
+    if (error) {
+      console.error('Error loading accounts:', error);
+      return;
+    }
 
-    const allAccounts: EmailAccount[] = [
-      ...(gmailData || []).map(acc => ({ id: acc.id, email: acc.email, provider: 'gmail' as const })),
-      ...(outlookData || []).map(acc => ({ id: acc.id, email: acc.email, provider: 'outlook' as const }))
-    ];
+    const allAccounts: EmailAccount[] = (data || []).map(acc => ({
+      id: acc.id,
+      email: acc.email,
+      provider: acc.provider as 'gmail' | 'outlook'
+    }));
 
     setAccounts(allAccounts);
     if (allAccounts.length > 0 && !selectedAccountId) {

@@ -25,6 +25,7 @@ export function SettingsNew() {
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
   const [showCompanyInfoModal, setShowCompanyInfoModal] = useState(false);
   const [companyInfoStep, setCompanyInfoStep] = useState(1);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -135,13 +136,13 @@ export function SettingsNew() {
       if (error) throw error;
 
       setShowCompanyInfoModal(false);
+      setShowSuccessModal(true);
       setCompanyInfoStep(1);
       setCompanyFormData({
         company_name: '',
         activity_description: '',
         services_offered: '',
       });
-      alert('Informations de l\'entreprise enregistrées avec succès!');
     } catch (err) {
       console.error('Erreur lors de l\'enregistrement:', err);
       alert('Erreur lors de l\'enregistrement des informations');
@@ -531,6 +532,57 @@ export function SettingsNew() {
               Retour
             </button>
           </div>
+        </div>
+      </div>
+    )}
+
+    {showSuccessModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+          <div className="mb-6 p-4 bg-green-50 rounded-lg border border-green-200">
+            <p className="text-sm text-green-800 text-center font-medium">
+              Étape 3/3 - Configuration terminée
+            </p>
+          </div>
+
+          <div className="flex justify-center mb-6">
+            <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center">
+              <Check className="w-10 h-10 text-white stroke-[3]" />
+            </div>
+          </div>
+
+          <h2 className="text-3xl font-bold text-[#3D2817] text-center mb-3">
+            Compte ajouté !
+          </h2>
+
+          <p className="text-gray-600 text-center mb-8">
+            Votre compte email est maintenant configuré et prêt à être utilisé.
+          </p>
+
+          <div className="bg-blue-50 rounded-lg p-6 mb-6">
+            <h3 className="font-semibold text-[#3D2817] mb-4">Prochaines étapes :</h3>
+            <div className="space-y-3">
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-gray-700">Vos emails commencent à être triés automatiquement</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-gray-700">Des brouillons de réponse sont générés</span>
+              </div>
+              <div className="flex items-start gap-3">
+                <Check className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                <span className="text-gray-700">Les publicités sont automatiquement filtrées</span>
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={() => setShowSuccessModal(false)}
+            className="w-full bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-4 rounded-lg font-medium hover:shadow-lg transition-all text-lg"
+          >
+            Retourner aux paramètres
+          </button>
         </div>
       </div>
     )}

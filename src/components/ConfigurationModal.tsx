@@ -50,13 +50,13 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
       const handleMessage = async (event: MessageEvent) => {
         if (event.data.type === 'gmail-connected') {
           try {
-            await supabase.from('email_configurations').upsert({
+            await supabase.from('email_configurations').insert({
               user_id: user?.id as string,
               name: event.data.email || 'Gmail',
               email: event.data.email || '',
               provider: 'gmail',
               is_connected: true,
-            }, { onConflict: 'user_id' });
+            });
 
             setImapForm({ email: '', password: '', imap_host: '', imap_port: '993' });
             await onComplete();
@@ -81,18 +81,18 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
     e.preventDefault();
     setConnecting(true);
     try {
-      const { error } = await supabase.from('email_configurations').upsert({
+      const { error } = await supabase.from('email_configurations').insert({
         user_id: user?.id as string,
         name: imapForm.email,
         email: imapForm.email,
-        provider: 'smtp_imap',
+        provider: 'other',
         is_connected: true,
         password: imapForm.password,
         imap_host: imapForm.imap_host,
         imap_port: parseInt(imapForm.imap_port),
         imap_username: imapForm.email,
         imap_password: imapForm.password,
-      }, { onConflict: 'user_id' });
+      });
 
       if (error) throw error;
 
@@ -161,7 +161,7 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
                         <rect x="3" y="4" width="18" height="16" rx="2"/>
                         <path d="M3 8l9 6 9-6"/>
                       </svg>
-                      <span className="text-lg font-semibold text-gray-700">Configurer IMAP/SMTP</span>
+                      <span className="text-lg font-semibold text-gray-700">Autres emails (IMAP)</span>
                     </div>
                   </summary>
 

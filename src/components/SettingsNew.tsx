@@ -41,8 +41,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     password: '',
     imap_host: '',
     imap_port: '993',
-    smtp_host: '',
-    smtp_port: '587',
   });
 
   useEffect(() => {
@@ -255,7 +253,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   };
 
   const handleImapSubmit = async () => {
-    if (!imapFormData.email || !imapFormData.password || !imapFormData.imap_host || !imapFormData.smtp_host) {
+    if (!imapFormData.email || !imapFormData.password || !imapFormData.imap_host) {
       alert('Veuillez remplir tous les champs obligatoires');
       return;
     }
@@ -284,9 +282,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         imap_port: parseInt(imapFormData.imap_port),
         imap_username: imapFormData.email,
         imap_password: imapFormData.password,
-        smtp_host: imapFormData.smtp_host,
-        smtp_port: parseInt(imapFormData.smtp_port),
-        smtp_username: imapFormData.email,
       });
 
       if (error) throw error;
@@ -297,8 +292,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         password: '',
         imap_host: '',
         imap_port: '993',
-        smtp_host: '',
-        smtp_port: '587',
       });
       await loadAccounts();
       alert('Compte ajouté avec succès !');
@@ -716,7 +709,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
           <div className="mb-6">
-            <h2 className="text-2xl font-bold text-[#3D2817] mb-2">Ajouter un compte IMAP/SMTP</h2>
+            <h2 className="text-2xl font-bold text-[#3D2817] mb-2">Ajouter un compte IMAP</h2>
             <p className="text-gray-600 text-sm">Configurez votre compte email personnalisé</p>
           </div>
 
@@ -774,32 +767,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-[#3D2817] mb-2">
-                  Serveur SMTP
-                </label>
-                <input
-                  type="text"
-                  value={imapFormData.smtp_host}
-                  onChange={(e) => setImapFormData({ ...imapFormData, smtp_host: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                  placeholder="smtp.example.com"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-[#3D2817] mb-2">
-                  Port SMTP
-                </label>
-                <input
-                  type="text"
-                  value={imapFormData.smtp_port}
-                  onChange={(e) => setImapFormData({ ...imapFormData, smtp_port: e.target.value })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                  placeholder="587"
-                />
-              </div>
-            </div>
           </div>
 
           <div className="flex gap-3">
@@ -817,8 +784,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   password: '',
                   imap_host: '',
                   imap_port: '993',
-                  smtp_host: '',
-                  smtp_port: '587',
                 });
               }}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"

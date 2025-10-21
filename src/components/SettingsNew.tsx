@@ -63,9 +63,16 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       .select('id, email')
       .eq('user_id', user.id);
 
+    const { data: imapAccounts } = await supabase
+      .from('email_configurations')
+      .select('id, email')
+      .eq('user_id', user.id)
+      .eq('provider', 'smtp_imap');
+
     const allAccounts: EmailAccount[] = [
       ...(gmailAccounts || []).map(acc => ({ ...acc, provider: 'gmail' })),
       ...(outlookAccounts || []).map(acc => ({ ...acc, provider: 'outlook' })),
+      ...(imapAccounts || []).map(acc => ({ ...acc, provider: 'imap' })),
     ];
 
     setAccounts(allAccounts);
@@ -393,7 +400,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   <div className={`text-xs ${
                     selectedAccount?.id === account.id ? 'text-white/80' : 'text-gray-500'
                   }`}>
-                    {account.provider === 'gmail' ? 'Gmail' : 'Outlook'}
+                    {account.provider === 'gmail' ? 'Gmail' : account.provider === 'outlook' ? 'Outlook' : 'IMAP'}
                   </div>
                 </button>
               ))}

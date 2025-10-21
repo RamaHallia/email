@@ -372,6 +372,7 @@ export function EmailConfigurations() {
           isOpen={showConfigModal}
           onClose={() => setShowConfigModal(false)}
           onComplete={loadLatestConfig}
+          onNavigateToOther={() => setMode('imap_form')}
         />
       </>
     );

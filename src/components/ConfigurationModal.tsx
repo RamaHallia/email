@@ -7,18 +7,13 @@ interface ConfigurationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: () => void;
+  onNavigateToOther?: () => void;
 }
 
-export function ConfigurationModal({ isOpen, onClose, onComplete }: ConfigurationModalProps) {
+export function ConfigurationModal({ isOpen, onClose, onComplete, onNavigateToOther }: ConfigurationModalProps) {
   const { user } = useAuth();
   const [connecting, setConnecting] = useState(false);
 
-  const [imapForm, setImapForm] = useState({
-    email: '',
-    password: '',
-    imap_host: '',
-    imap_port: '993',
-  });
 
   const connectGmail = async () => {
     setConnecting(true);
@@ -58,7 +53,6 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
               is_connected: true,
             });
 
-            setImapForm({ email: '', password: '', imap_host: '', imap_port: '993' });
             await onComplete();
             onClose();
           } catch (e) {
@@ -77,35 +71,6 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
     }
   };
 
-  const handleImapSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setConnecting(true);
-    try {
-      const { error } = await supabase.from('email_configurations').insert({
-        user_id: user?.id as string,
-        name: imapForm.email,
-        email: imapForm.email,
-        provider: 'other',
-        is_connected: true,
-        password: imapForm.password,
-        imap_host: imapForm.imap_host,
-        imap_port: parseInt(imapForm.imap_port),
-        imap_username: imapForm.email,
-        imap_password: imapForm.password,
-      });
-
-      if (error) throw error;
-
-      setImapForm({ email: '', password: '', imap_host: '', imap_port: '993' });
-      await onComplete();
-      onClose();
-    } catch (err) {
-      console.error('Error saving IMAP config:', err);
-      alert('Erreur lors de la configuration IMAP');
-    } finally {
-      setConnecting(false);
-    }
-  };
 
   if (!isOpen) return null;
 
@@ -154,71 +119,23 @@ export function ConfigurationModal({ isOpen, onClose, onComplete }: Configuratio
                   </div>
                 </div>
 
-                <details className="group">
-                  <summary className="cursor-pointer list-none">
-                    <div className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white border-2 border-gray-200 hover:border-[#EF6855] transition-all">
-                      <svg className="w-8 h-8 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="3" y="4" width="18" height="16" rx="2"/>
-                        <path d="M3 8l9 6 9-6"/>
-                      </svg>
-                      <span className="text-lg font-semibold text-gray-700">Autres emails (IMAP)</span>
-                    </div>
-                  </summary>
-
-                  <form onSubmit={handleImapSubmit} className="mt-6 space-y-4 border-2 border-gray-200 rounded-xl p-6">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Adresse email</label>
-                      <input
-                        type="email"
-                        required
-                        value={imapForm.email}
-                        onChange={(e) => setImapForm({ ...imapForm, email: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                        placeholder="exemple@entreprise.com"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
-                      <input
-                        type="password"
-                        required
-                        value={imapForm.password}
-                        onChange={(e) => setImapForm({ ...imapForm, password: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Serveur IMAP</label>
-                        <input
-                          type="text"
-                          required
-                          value={imapForm.imap_host}
-                          onChange={(e) => setImapForm({ ...imapForm, imap_host: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                          placeholder="imap.exemple.com"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Port</label>
-                        <input
-                          type="number"
-                          required
-                          value={imapForm.imap_port}
-                          onChange={(e) => setImapForm({ ...imapForm, imap_port: e.target.value })}
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                        />
-                      </div>
-                    </div>
-                    <button
-                      type="submit"
-                      disabled={connecting}
-                      className="w-full bg-[#EF6855] text-white py-3 rounded-lg font-medium hover:bg-[#d55a47] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {connecting ? 'Connexion...' : 'Connecter'}
-                    </button>
-                  </form>
-                </details>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onNavigateToOther) {
+                      onNavigateToOther();
+                      onClose();
+                    }
+                  }}
+                  disabled={!onNavigateToOther}
+                  className="w-full flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-white border-2 border-gray-200 hover:border-[#EF6855] hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <svg className="w-8 h-8 text-gray-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="4" width="18" height="16" rx="2"/>
+                    <path d="M3 8l9 6 9-6"/>
+                  </svg>
+                  <span className="text-lg font-semibold text-gray-700">Autres emails (IMAP)</span>
+                </button>
             </div>
 
             <button

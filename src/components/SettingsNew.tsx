@@ -27,6 +27,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [autoReply, setAutoReply] = useState(true);
   const [adFilter, setAdFilter] = useState(true);
   const [showAddAccountModal, setShowAddAccountModal] = useState(false);
+  const [showImapModal, setShowImapModal] = useState(false);
   const [showCompanyInfoModal, setShowCompanyInfoModal] = useState(false);
   const [companyInfoStep, setCompanyInfoStep] = useState(1);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
@@ -34,6 +35,14 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     company_name: '',
     activity_description: '',
     services_offered: '',
+  });
+  const [imapFormData, setImapFormData] = useState({
+    email: '',
+    password: '',
+    imap_host: '',
+    imap_port: '993',
+    smtp_host: '',
+    smtp_port: '587',
   });
 
   useEffect(() => {
@@ -241,9 +250,61 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/outlook-oauth-init?user_id=${user?.id}`;
     } else {
       setShowAddAccountModal(false);
-      if (onNavigateToEmailConfig) {
-        onNavigateToEmailConfig();
+      setShowImapModal(true);
+    }
+  };
+
+  const handleImapSubmit = async () => {
+    if (!imapFormData.email || !imapFormData.password || !imapFormData.imap_host || !imapFormData.smtp_host) {
+      alert('Veuillez remplir tous les champs obligatoires');
+      return;
+    }
+
+    try {
+      const { data: existing } = await supabase
+        .from('email_configurations')
+        .select('id')
+        .eq('user_id', user?.id as string)
+        .eq('email', imapFormData.email)
+        .maybeSingle();
+
+      if (existing) {
+        alert('Ce compte email existe déjà');
+        return;
       }
+
+      const { error } = await supabase.from('email_configurations').insert({
+        user_id: user?.id as string,
+        name: imapFormData.email,
+        email: imapFormData.email,
+        provider: 'smtp_imap',
+        is_connected: true,
+        password: imapFormData.password,
+        imap_host: imapFormData.imap_host,
+        imap_port: parseInt(imapFormData.imap_port),
+        imap_username: imapFormData.email,
+        imap_password: imapFormData.password,
+        smtp_host: imapFormData.smtp_host,
+        smtp_port: parseInt(imapFormData.smtp_port),
+        smtp_username: imapFormData.email,
+      });
+
+      if (error) throw error;
+
+      setShowImapModal(false);
+      setImapFormData({
+        email: '',
+        password: '',
+        imap_host: '',
+        imap_port: '993',
+        smtp_host: '',
+        smtp_port: '587',
+      });
+      await loadAccounts();
+      alert('Compte ajouté avec succès !');
+    } catch (err) {
+      console.error('Erreur ajout compte IMAP:', err);
+      alert('Erreur lors de l\'ajout du compte');
     }
   };
 
@@ -647,6 +708,124 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
           >
             Retourner aux paramètres
           </button>
+        </div>
+      </div>
+    )}
+
+    {showImapModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-lg w-full mx-4 shadow-2xl">
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold text-[#3D2817] mb-2">Ajouter un compte IMAP/SMTP</h2>
+            <p className="text-gray-600 text-sm">Configurez votre compte email personnalisé</p>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                Adresse email
+              </label>
+              <input
+                type="email"
+                value={imapFormData.email}
+                onChange={(e) => setImapFormData({ ...imapFormData, email: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                placeholder="votre@email.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                Mot de passe
+              </label>
+              <input
+                type="password"
+                value={imapFormData.password}
+                onChange={(e) => setImapFormData({ ...imapFormData, password: e.target.value })}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                placeholder="••••••••"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Serveur IMAP
+                </label>
+                <input
+                  type="text"
+                  value={imapFormData.imap_host}
+                  onChange={(e) => setImapFormData({ ...imapFormData, imap_host: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="imap.example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Port IMAP
+                </label>
+                <input
+                  type="text"
+                  value={imapFormData.imap_port}
+                  onChange={(e) => setImapFormData({ ...imapFormData, imap_port: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="993"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Serveur SMTP
+                </label>
+                <input
+                  type="text"
+                  value={imapFormData.smtp_host}
+                  onChange={(e) => setImapFormData({ ...imapFormData, smtp_host: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="smtp.example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-[#3D2817] mb-2">
+                  Port SMTP
+                </label>
+                <input
+                  type="text"
+                  value={imapFormData.smtp_port}
+                  onChange={(e) => setImapFormData({ ...imapFormData, smtp_port: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
+                  placeholder="587"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <button
+              onClick={handleImapSubmit}
+              className="flex-1 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all"
+            >
+              Ajouter le compte
+            </button>
+            <button
+              onClick={() => {
+                setShowImapModal(false);
+                setImapFormData({
+                  email: '',
+                  password: '',
+                  imap_host: '',
+                  imap_port: '993',
+                  smtp_host: '',
+                  smtp_port: '587',
+                });
+              }}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Annuler
+            </button>
+          </div>
         </div>
       </div>
     )}

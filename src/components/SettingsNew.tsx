@@ -36,6 +36,7 @@ export function SettingsNew() {
     loadAccounts();
     loadDocuments();
     checkCompanyInfo();
+    loadCompanyData();
   }, [user]);
 
   const loadAccounts = async () => {
@@ -78,6 +79,29 @@ export function SettingsNew() {
         setCompanyFormData(prev => ({ ...prev, company_name: config.company_name || '' }));
       }
     }
+  };
+
+  const loadCompanyData = async () => {
+    if (!user) return;
+
+    const { data: config } = await supabase
+      .from('email_configurations')
+      .select('company_name, activity_description, services_offered')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (config) {
+      setCompanyFormData({
+        company_name: config.company_name || '',
+        activity_description: config.activity_description || '',
+        services_offered: config.services_offered || '',
+      });
+    }
+  };
+
+  const handleEditCompanyInfo = () => {
+    setShowCompanyInfoModal(true);
+    setCompanyInfoStep(1);
   };
 
   const loadDocuments = async () => {
@@ -138,11 +162,7 @@ export function SettingsNew() {
       setShowCompanyInfoModal(false);
       setShowSuccessModal(true);
       setCompanyInfoStep(1);
-      setCompanyFormData({
-        company_name: '',
-        activity_description: '',
-        services_offered: '',
-      });
+      await loadCompanyData();
     } catch (err) {
       console.error('Erreur lors de l\'enregistrement:', err);
       alert('Erreur lors de l\'enregistrement des informations');
@@ -339,6 +359,35 @@ export function SettingsNew() {
               <p className="text-sm text-gray-500">
                 {selectedAccount.provider === 'gmail' ? 'Gmail' : 'Outlook'}
               </p>
+            </div>
+          )}
+
+          {selectedAccount?.provider === 'gmail' && (
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="font-bold text-[#3D2817]">Informations de l'entreprise</h3>
+                <button
+                  onClick={handleEditCompanyInfo}
+                  className="px-4 py-2 text-[#EF6855] border-2 border-[#EF6855] rounded-lg hover:bg-orange-50 transition-colors flex items-center gap-2 font-medium"
+                >
+                  <Edit className="w-4 h-4" />
+                  Modifier
+                </button>
+              </div>
+              <div className="space-y-3 text-sm">
+                <div>
+                  <span className="text-gray-500">Nom de l'entreprise:</span>
+                  <p className="font-medium text-gray-900">{companyFormData.company_name || 'Non renseigné'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Description de l'activité:</span>
+                  <p className="font-medium text-gray-900">{companyFormData.activity_description || 'Non renseignée'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Signature email:</span>
+                  <p className="font-medium text-gray-900">{companyFormData.services_offered || 'Non renseignée'}</p>
+                </div>
+              </div>
             </div>
           )}
 

@@ -14,7 +14,11 @@ interface Document {
   name: string;
 }
 
-export function SettingsNew() {
+interface SettingsNewProps {
+  onNavigateToEmailConfig?: () => void;
+}
+
+export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) {
   const { user } = useAuth();
   const [accounts, setAccounts] = useState<EmailAccount[]>([]);
   const [documents, setDocuments] = useState<Document[]>([]);
@@ -227,8 +231,10 @@ export function SettingsNew() {
     } else if (provider === 'outlook') {
       window.location.href = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/outlook-oauth-init?user_id=${user?.id}`;
     } else {
-      alert('IMAP/SMTP configuration coming soon');
       setShowAddAccountModal(false);
+      if (onNavigateToEmailConfig) {
+        onNavigateToEmailConfig();
+      }
     }
   };
 

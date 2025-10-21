@@ -538,7 +538,7 @@ export function Dashboard() {
                 Gérez vos comptes email et configuration
               </p>
             </div>
-            <SettingsNew />
+            <SettingsNew onNavigateToEmailConfig={() => setActiveView('email-configs')} />
           </>
         )}
 

@@ -157,8 +157,14 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const handleDeleteAccount = async () => {
     if (!accountToDelete) return;
 
-    const tableName = accountToDelete.provider === 'gmail' ? 'gmail_tokens' : 'outlook_tokens';
-    await supabase.from(tableName).delete().eq('id', accountToDelete.id);
+    if (accountToDelete.provider === 'imap') {
+      await supabase.from('email_configurations').delete().eq('id', accountToDelete.id);
+    } else {
+      const tableName = accountToDelete.provider === 'gmail' ? 'gmail_tokens' : 'outlook_tokens';
+      await supabase.from(tableName).delete().eq('id', accountToDelete.id);
+    }
+
+    setShowDeleteModal(false);
     setAccountToDelete(null);
     loadAccounts();
   };

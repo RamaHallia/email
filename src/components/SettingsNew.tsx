@@ -34,6 +34,7 @@ export function SettingsNew() {
   useEffect(() => {
     loadAccounts();
     loadDocuments();
+    checkCompanyInfo();
   }, [user]);
 
   const loadAccounts = async () => {
@@ -57,6 +58,24 @@ export function SettingsNew() {
     setAccounts(allAccounts);
     if (allAccounts.length > 0) {
       setSelectedAccount(allAccounts[0]);
+    }
+  };
+
+  const checkCompanyInfo = async () => {
+    if (!user) return;
+
+    const { data: config } = await supabase
+      .from('email_configurations')
+      .select('provider, company_name, activity_description')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    if (config && config.provider === 'gmail' && !config.activity_description) {
+      setShowCompanyInfoModal(true);
+      setCompanyInfoStep(2);
+      if (config.company_name) {
+        setCompanyFormData(prev => ({ ...prev, company_name: config.company_name || '' }));
+      }
     }
   };
 
@@ -167,7 +186,7 @@ export function SettingsNew() {
           } catch (e) {
             console.error('Upsert config Gmail après OAuth:', e);
           }
-          await loadEmailAccounts();
+          await loadAccounts();
           setShowAddAccountModal(false);
           setShowCompanyInfoModal(true);
           setCompanyInfoStep(1);

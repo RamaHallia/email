@@ -89,17 +89,31 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const checkCompanyInfo = async () => {
     if (!user) return;
 
-    const { data: config } = await supabase
-      .from('email_configurations')
-      .select('provider, company_name, activity_description')
-      .eq('user_id', user.id)
-      .maybeSingle();
+    const { data: gmailAccounts } = await supabase
+      .from('gmail_tokens')
+      .select('id, email')
+      .eq('user_id', user.id);
 
-    if (config && config.provider === 'gmail' && !config.activity_description) {
-      setShowCompanyInfoModal(true);
-      setCompanyInfoStep(2);
-      if (config.company_name) {
-        setCompanyFormData(prev => ({ ...prev, company_name: config.company_name || '' }));
+    if (gmailAccounts && gmailAccounts.length > 0) {
+      const { data: config } = await supabase
+        .from('email_configurations')
+        .select('company_name, activity_description, services_offered')
+        .eq('user_id', user.id)
+        .eq('provider', 'gmail')
+        .maybeSingle();
+
+      if (!config || !config.activity_description) {
+        setShowCompanyInfoModal(true);
+        if (config?.company_name) {
+          setCompanyInfoStep(2);
+          setCompanyFormData({
+            company_name: config.company_name,
+            activity_description: config.activity_description || '',
+            services_offered: config.services_offered || '',
+          });
+        } else {
+          setCompanyInfoStep(1);
+        }
       }
     }
   };
@@ -111,6 +125,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       .from('email_configurations')
       .select('company_name, activity_description, services_offered')
       .eq('user_id', user.id)
+      .eq('provider', 'gmail')
       .maybeSingle();
 
     if (config) {
@@ -183,16 +198,52 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
   const handleCompanyInfoSubmit = async () => {
     try {
-      const { error } = await supabase
-        .from('email_configurations')
-        .update({
-          company_name: companyFormData.company_name,
-          activity_description: companyFormData.activity_description,
-          services_offered: companyFormData.services_offered,
-        })
-        .eq('user_id', user?.id);
+      const { data: gmailToken } = await supabase
+        .from('gmail_tokens')
+        .select('id, email')
+        .eq('user_id', user?.id)
+        .maybeSingle();
 
-      if (error) throw error;
+      if (!gmailToken) {
+        alert('Aucun compte Gmail trouvé');
+        return;
+      }
+
+      const { data: existingConfig } = await supabase
+        .from('email_configurations')
+        .select('id')
+        .eq('user_id', user?.id)
+        .eq('provider', 'gmail')
+        .maybeSingle();
+
+      if (existingConfig) {
+        const { error } = await supabase
+          .from('email_configurations')
+          .update({
+            company_name: companyFormData.company_name,
+            activity_description: companyFormData.activity_description,
+            services_offered: companyFormData.services_offered,
+          })
+          .eq('id', existingConfig.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('email_configurations')
+          .insert({
+            user_id: user?.id,
+            name: gmailToken.email,
+            email: gmailToken.email,
+            provider: 'gmail',
+            is_connected: true,
+            gmail_token_id: gmailToken.id,
+            company_name: companyFormData.company_name,
+            activity_description: companyFormData.activity_description,
+            services_offered: companyFormData.services_offered,
+          });
+
+        if (error) throw error;
+      }
 
       setShowCompanyInfoModal(false);
       setShowSuccessModal(true);

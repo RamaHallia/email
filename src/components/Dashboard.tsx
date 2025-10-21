@@ -75,51 +75,69 @@ export function Dashboard() {
   };
 
   const loadStats = async () => {
+    if (!user?.id) {
+      console.error('User ID not available');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const { start, end, previousStart, previousEnd } = getDateRange();
 
-      const { count: emailsRepondus } = await supabase
+      const { count: emailsRepondus, error: error1 } = await supabase
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('processed_at', start)
         .lt('processed_at', end);
 
-      const { count: emailsRepondusHier } = await supabase
+      if (error1) console.error('Error fetching emailsRepondus:', error1);
+
+      const { count: emailsRepondusHier, error: error2 } = await supabase
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('processed_at', previousStart)
         .lt('processed_at', previousEnd);
 
-      const { count: emailsTries } = await supabase
+      if (error2) console.error('Error fetching emailsRepondusHier:', error2);
+
+      const { count: emailsTries, error: error3 } = await supabase
         .from('email_info')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('created_at', start)
         .lt('created_at', end);
 
-      const { count: emailsTriesHier } = await supabase
+      if (error3) console.error('Error fetching emailsTries:', error3);
+
+      const { count: emailsTriesHier, error: error4 } = await supabase
         .from('email_info')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
-      const { count: publicitiesFiltrees } = await supabase
+      if (error4) console.error('Error fetching emailsTriesHier:', error4);
+
+      const { count: publicitiesFiltrees, error: error5 } = await supabase
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('created_at', start)
         .lt('created_at', end);
 
-      const { count: publicitiesHier } = await supabase
+      if (error5) console.error('Error fetching publicitiesFiltrees:', error5);
+
+      const { count: publicitiesHier, error: error6 } = await supabase
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user?.id)
+        .eq('user_id', user.id)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
+
+      if (error6) console.error('Error fetching publicitiesHier:', error6);
 
       setStats({
         emailsRepondus: emailsRepondus || 0,

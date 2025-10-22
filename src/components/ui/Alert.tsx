@@ -13,21 +13,21 @@ export function Alert({ type = 'info', title, children, onClose }: AlertProps) {
     success: CheckCircle,
     error: AlertCircle,
     info: Info,
-    warning: AlertCircle
+    warning: AlertCircle,
   }
 
   const colors = {
     success: 'bg-green-50 border-green-200 text-green-800',
     error: 'bg-red-50 border-red-200 text-red-800',
     info: 'bg-blue-50 border-blue-200 text-blue-800',
-    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800'
+    warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
   }
 
   const iconColors = {
     success: 'text-green-400',
     error: 'text-red-400',
     info: 'text-blue-400',
-    warning: 'text-yellow-400'
+    warning: 'text-yellow-400',
   }
 
   const Icon = icons[type]
@@ -40,13 +40,9 @@ export function Alert({ type = 'info', title, children, onClose }: AlertProps) {
         </div>
         <div className="ml-3 flex-1">
           {title && (
-            <h3 className="text-sm font-medium mb-1">
-              {title}
-            </h3>
+            <h3 className="text-sm font-medium mb-1">{title}</h3>
           )}
-          <div className="text-sm">
-            {children}
-          </div>
+          <div className="text-sm">{children}</div>
         </div>
         {onClose && (
           <div className="ml-auto pl-3">
@@ -61,7 +57,7 @@ export function Alert({ type = 'info', title, children, onClose }: AlertProps) {
                   'text-blue-500 hover:bg-blue-100 focus:ring-blue-600'
                 }`}
               >
-                <X className="h-4 w-4" />
+                <X className="h-5 w-5" />
               </button>
             </div>
           </div>

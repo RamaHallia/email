@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { SubscriptionModal } from './SubscriptionModal';
 
 interface SubscriptionBlockerProps {
   hasActiveSubscription: boolean;
@@ -25,17 +24,5 @@ export function SubscriptionBlocker({
     );
   }
 
-  return (
-    <>
-      {children}
-      {!hasActiveSubscription && (
-        <SubscriptionModal
-          isOpen={true}
-          onClose={() => {}}
-          emailAccountsCount={Math.max(emailAccountsCount, 1)}
-          isUpgrade={false}
-        />
-      )}
-    </>
-  );
+  return <>{children}</>;
 }

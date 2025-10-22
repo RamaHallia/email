@@ -365,11 +365,8 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveView('subscription')}
-              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                !hasActiveSubscription
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : activeView === 'subscription'
+                activeView === 'subscription'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}

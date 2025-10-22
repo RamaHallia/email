@@ -323,8 +323,11 @@ export function Dashboard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setActiveView('home')}
+              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'home'
+                !hasActiveSubscription
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : activeView === 'home'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
@@ -334,8 +337,11 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveView('email-configs')}
+              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'email-configs'
+                !hasActiveSubscription
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : activeView === 'email-configs'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
@@ -345,8 +351,11 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveView('settings')}
+              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'settings'
+                !hasActiveSubscription
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : activeView === 'settings'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
@@ -356,8 +365,11 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveView('subscription')}
+              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'subscription'
+                !hasActiveSubscription
+                  ? 'text-gray-400 cursor-not-allowed'
+                  : activeView === 'subscription'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}

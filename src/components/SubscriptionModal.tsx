@@ -136,7 +136,7 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
       <div className="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] p-6 text-white relative">
-          {onClose && !isUpgrade && (
+          {onClose && (
             <button
               onClick={onClose}
               className="absolute top-4 right-4 p-2 hover:bg-white/20 rounded-lg transition-colors"
@@ -295,7 +295,7 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
                 </>
               )}
             </button>
-            {onClose && !isUpgrade && (
+            {onClose && (
               <button
                 onClick={onClose}
                 disabled={loading}

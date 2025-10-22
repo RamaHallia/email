@@ -28,11 +28,14 @@ export function SubscriptionBlocker({
   return (
     <>
       {children}
-      <SubscriptionModal
-        isOpen={!hasActiveSubscription}
-        emailAccountsCount={Math.max(emailAccountsCount, 1)}
-        isUpgrade={false}
-      />
+      {!hasActiveSubscription && (
+        <SubscriptionModal
+          isOpen={true}
+          onClose={() => {}}
+          emailAccountsCount={Math.max(emailAccountsCount, 1)}
+          isUpgrade={false}
+        />
+      )}
     </>
   );
 }

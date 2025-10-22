@@ -4,8 +4,37 @@ import { useAuth } from './contexts/AuthContext';
 import { AuthForm } from './components/AuthForm';
 import { Dashboard } from './components/Dashboard';
 import { supabase } from './lib/supabase';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useAuth } from './hooks/useAuth';
+import { Login } from './pages/Login';
+import { Signup } from './pages/Signup';
+import { Pricing } from './pages/Pricing';
+import { Success } from './pages/Success';
+import { Dashboard } from './pages/Dashboard';
+import { SubscriptionStatus } from './components/subscription/SubscriptionStatus';
+import { Button } from './components/ui/Button';
+import { signOut } from './lib/auth';
+import { Link } from 'react-router-dom';
 
 function App() {
+  const { user, loading } = useAuth();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
   const { user, loading } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
 
@@ -52,28 +81,86 @@ function App() {
 
   return (
     <>
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-        {/* Header */}
-        <header className="px-6 py-6 flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-2">
-            <img src="/logo copy copy.png" alt="Hall IA" className="h-12" />
-          </div>
+    <Router>
+      <div className="min-h-screen bg-gray-50">
+        {user && (
+          <nav className="bg-white shadow">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex justify-between h-16">
+                <div className="flex items-center">
+                  <Link to="/" className="text-xl font-bold text-gray-900">
+                    Hall IA
+                  </Link>
+                  <div className="ml-10 flex items-baseline space-x-4">
+                    <Link
+                      to="/dashboard"
+                      className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Dashboard
+                    </Link>
+                    <Link
+                      to="/pricing"
+                      className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                    >
+                      Pricing
+                    </Link>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-4">
+                  <div className="text-sm">
+                    <SubscriptionStatus />
+                  </div>
+                  <Button variant="outline" size="sm" onClick={handleSignOut}>
+                    Sign Out
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </nav>
+        )}
+
+        <Routes>
+          <Route
+            path="/"
+            element={
+              user ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/pricing" element={<Pricing />} />
+          <Route path="/success" element={<Success />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+        </Routes>
+      </div>
+    </Router>
+
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+      {/* Header */}
+      <header className="px-6 py-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <img src="/logo copy copy.png" alt="Hall IA" className="h-10" />
           <button
             onClick={() => setShowAuthModal(true)}
-            className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 hover:shadow-lg transition-shadow"
+            className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white px-6 py-2 rounded-lg font-medium hover:shadow-lg transition-shadow"
           >
-            <ArrowRight className="w-4 h-4" />
-            Connexion
+            Se connecter
           </button>
-        </header>
+        </div>
+      </header>
 
-      {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 py-20">
+      {/* Main Content */}
+      <main className="max-w-7xl mx-auto px-6 py-12">
+        {/* Hero Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-20">
           {/* Left content */}
           <div>
-            <h1 className="text-6xl font-bold text-[#3D2817] mb-6 leading-tight">
-              Automatisez la gestion de vos emails
+            <h1 className="text-5xl lg:text-6xl font-bold text-[#3D2817] mb-6 leading-tight">
+              Automatisez votre{' '}
+              <span className="bg-gradient-to-r from-[#EF6855] to-[#F9A459] bg-clip-text text-transparent">
+                gestion email
+              </span>{' '}
+              avec l'IA
             </h1>
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Hall IA classifie automatiquement vos emails dans différentes boîtes et prépare des réponses intelligentes pour vos destinataires.

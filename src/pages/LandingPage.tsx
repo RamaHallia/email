@@ -1,9 +1,17 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Mail, Zap, TrendingUp, Clock, ArrowRight, Check, Users } from 'lucide-react';
 import { AuthForm } from '../components/AuthForm';
 
 export function LandingPage() {
   const [showAuthModal, setShowAuthModal] = useState(false);
+  const [selectedPriceId, setSelectedPriceId] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  const handleSubscribe = (priceId: string) => {
+    setSelectedPriceId(priceId);
+    setShowAuthModal(true);
+  };
 
   return (
     <>
@@ -267,7 +275,7 @@ export function LandingPage() {
                   </li>
                 </ul>
                 <button
-                  onClick={() => setShowAuthModal(true)}
+                  onClick={() => handleSubscribe('price_1SKznU14zZqoQtSCqzsGj6PI')}
                   className="w-full bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-shadow"
                 >
                   Commencer
@@ -304,7 +312,7 @@ export function LandingPage() {
                   </li>
                 </ul>
                 <button
-                  onClick={() => setShowAuthModal(true)}
+                  onClick={() => handleSubscribe('price_1SKzor14zZqoQtSCYomr78di')}
                   className="w-full bg-white border-2 border-[#EF6855] text-[#EF6855] py-3 rounded-lg font-medium hover:bg-orange-50 transition-colors"
                 >
                   Ajouter des utilisateurs
@@ -371,7 +379,14 @@ export function LandingPage() {
             >
               ✕
             </button>
-            <AuthForm onSuccess={() => setShowAuthModal(false)} />
+            <AuthForm
+              onSuccess={() => {
+                setShowAuthModal(false);
+                if (selectedPriceId) {
+                  navigate(`/checkout?price_id=${selectedPriceId}`);
+                }
+              }}
+            />
           </div>
         </div>
       )}

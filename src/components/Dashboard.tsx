@@ -148,7 +148,7 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    if (accounts.length === 1 && !hasActiveSubscription && !subscriptionLoading && !showSuccessMessage) {
+    if (accounts.length >= 1 && !hasActiveSubscription && !subscriptionLoading && !showSuccessMessage && !showSubscriptionModal) {
       setShowSubscriptionModal(true);
     } else if (hasActiveSubscription) {
       setShowSubscriptionModal(false);

@@ -384,6 +384,8 @@ export function LandingPage() {
                 setShowAuthModal(false);
                 if (selectedPriceId) {
                   navigate(`/checkout?price_id=${selectedPriceId}`);
+                } else {
+                  navigate('/dashboard');
                 }
               }}
             />

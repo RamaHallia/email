@@ -1,11 +1,12 @@
 import React from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { SignupForm } from '../components/auth/SignupForm';
 import { useAuth } from '../hooks/useAuth';
 import { Mail } from 'lucide-react';
 
 export function SignupPage() {
   const { user, loading } = useAuth();
+  const navigate = useNavigate();
 
   if (loading) {
     return (
@@ -16,7 +17,7 @@ export function SignupPage() {
   }
 
   if (user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
@@ -43,7 +44,7 @@ export function SignupPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <SignupForm />
+          <SignupForm onSuccess={() => navigate('/dashboard')} />
         </div>
       </div>
     </div>

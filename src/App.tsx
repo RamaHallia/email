@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Mail, Zap, TrendingUp, Clock, ArrowRight, Check, Users } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { AuthForm } from './components/AuthForm';
-import { Dashboard } from './components/Dashboard';
 import { supabase } from './lib/supabase';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/layout/Header';

@@ -15,9 +15,7 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
 
   if (!isOpen) return null;
 
-  const basePrice = 29;
-  const additionalUserPrice = 19;
-  const totalPrice = basePrice + (emailAccountsCount > 1 ? (emailAccountsCount - 1) * additionalUserPrice : 0);
+  const totalPrice = 29;
 
   const handleSubscribe = async () => {
     setLoading(true);
@@ -111,13 +109,10 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="text-lg font-bold text-[#3D2817] mb-0.5">
-                  {emailAccountsCount === 1 ? 'Plan Premier' : `Plan ${emailAccountsCount} compte${emailAccountsCount > 1 ? 's' : ''}`}
+                  Plan Hall IA
                 </h3>
                 <p className="text-sm text-gray-600">
-                  {emailAccountsCount === 1
-                    ? '1 compte email inclus'
-                    : `1 compte de base + ${emailAccountsCount - 1} additionnel${emailAccountsCount > 2 ? 's' : ''}`
-                  }
+                  {emailAccountsCount} compte{emailAccountsCount > 1 ? 's' : ''} email
                 </p>
               </div>
               <div className="text-right">
@@ -125,25 +120,6 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
                 <div className="text-sm text-gray-600">/mois</div>
               </div>
             </div>
-
-            {emailAccountsCount > 1 && (
-              <div className="mb-4 p-2.5 bg-white rounded-lg border border-orange-200">
-                <div className="text-xs text-gray-700 space-y-1">
-                  <div className="flex justify-between">
-                    <span>Plan de base (1 compte)</span>
-                    <span className="font-medium">{basePrice}€</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Comptes additionnels ({emailAccountsCount - 1} × {additionalUserPrice}€)</span>
-                    <span className="font-medium">{(emailAccountsCount - 1) * additionalUserPrice}€</span>
-                  </div>
-                  <div className="pt-2 border-t border-orange-200 flex justify-between font-bold text-[#3D2817]">
-                    <span>Total</span>
-                    <span>{totalPrice}€/mois</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="space-y-2">
               <h4 className="text-sm font-semibold text-[#3D2817] mb-2">Inclus :</h4>

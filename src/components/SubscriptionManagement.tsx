@@ -99,11 +99,7 @@ export function SubscriptionManagement() {
     }
   };
 
-  const basePrice = 29;
-  const additionalUserPrice = 19;
-  const totalPrice = subscription
-    ? basePrice + (subscription.email_accounts_count > 1 ? (subscription.email_accounts_count - 1) * additionalUserPrice : 0)
-    : 0;
+  const totalPrice = 29;
 
   const statusConfig = {
     active: {
@@ -227,15 +223,7 @@ export function SubscriptionManagement() {
         </div>
 
         {/* Détails du plan */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <Users className="w-4 h-4 text-gray-600" />
-              <span className="text-sm text-gray-600">Comptes email</span>
-            </div>
-            <div className="text-2xl font-bold text-[#3D2817]">{subscription.email_accounts_count}</div>
-          </div>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           {subscription.current_period_end && (
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="flex items-center gap-2 mb-2">
@@ -254,11 +242,11 @@ export function SubscriptionManagement() {
 
           <div className="p-4 bg-gray-50 rounded-lg">
             <div className="flex items-center gap-2 mb-2">
-              <CreditCard className="w-4 h-4 text-gray-600" />
-              <span className="text-sm text-gray-600">Plan</span>
+              <Users className="w-4 h-4 text-gray-600" />
+              <span className="text-sm text-gray-600">Comptes email</span>
             </div>
             <div className="font-semibold text-[#3D2817]">
-              {subscription.email_accounts_count === 1 ? 'Base' : `Base + ${subscription.email_accounts_count - 1} additionnel${subscription.email_accounts_count > 2 ? 's' : ''}`}
+              {subscription.email_accounts_count} compte{subscription.email_accounts_count > 1 ? 's' : ''}
             </div>
           </div>
         </div>

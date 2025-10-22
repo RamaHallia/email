@@ -41,9 +41,6 @@ serve(async (req) => {
       apiVersion: '2023-10-16',
     })
 
-    const basePrice = 2900
-    const additionalUserPrice = 1900
-
     let customer
     const { data: existingSubscription } = await supabaseClient
       .from('subscriptions')
@@ -67,34 +64,17 @@ serve(async (req) => {
         price_data: {
           currency: 'eur',
           product_data: {
-            name: 'Hall IA - Plan de base',
-            description: '1 compte email inclus',
+            name: 'Hall IA',
+            description: `${emailAccountsCount} compte${emailAccountsCount > 1 ? 's' : ''} email`,
           },
           recurring: {
             interval: 'month',
           },
-          unit_amount: basePrice,
+          unit_amount: 2900,
         },
         quantity: 1,
       },
     ]
-
-    if (emailAccountsCount > 1) {
-      lineItems.push({
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: 'Hall IA - Comptes additionnels',
-            description: 'Compte email supplémentaire',
-          },
-          recurring: {
-            interval: 'month',
-          },
-          unit_amount: additionalUserPrice,
-        },
-        quantity: emailAccountsCount - 1,
-      })
-    }
 
     const session = await stripe.checkout.sessions.create({
       customer: customer.id,

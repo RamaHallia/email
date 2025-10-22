@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Mail, Zap, TrendingUp, Clock, ArrowRight, Check, Users } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { AuthForm } from './components/AuthForm';
+import { Dashboard } from './components/Dashboard';
 import { supabase } from './lib/supabase';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/layout/Header';
@@ -94,7 +95,9 @@ function App() {
             </button>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-6 mt-12 pt-12 border-t border-gray-200">
+            <div className="grid grid-cols-3 gap-6 mt-12 pt-12 
+  )
+}border-t border-gray-200">
               <div>
                 <div className="text-4xl font-bold text-[#EF6855] mb-1">3h</div>
                 <div className="text-sm text-gray-600">économisées par jour</div>
@@ -428,9 +431,6 @@ function App() {
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
             <p>&copy; {new Date().getFullYear()} Hall IA. Tous droits réservés.</p>
           </div>
-        </div>
-      </footer>
-      </div>
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Header />

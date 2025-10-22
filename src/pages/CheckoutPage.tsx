@@ -43,7 +43,7 @@ export function CheckoutPage() {
             body: JSON.stringify({
               price_id: priceId,
               mode: 'subscription',
-              success_url: `${window.location.origin}/success`,
+              success_url: `${window.location.origin}/dashboard`,
               cancel_url: `${window.location.origin}/`,
             }),
           }

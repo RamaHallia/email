@@ -42,6 +42,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [accounts, setAccounts] = useState<EmailAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+  const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
   useEffect(() => {
@@ -51,10 +52,10 @@ export function Dashboard() {
   }, [user?.id]);
 
   useEffect(() => {
-    if (user?.id && activeView === 'home' && selectedAccountId) {
+    if (user?.id && activeView === 'home' && selectedEmail) {
       loadStats();
     }
-  }, [user?.id, timePeriod, activeView, selectedAccountId]);
+  }, [user?.id, timePeriod, activeView, selectedEmail]);
 
   const loadAccounts = async () => {
     if (!user?.id) return;
@@ -79,6 +80,7 @@ export function Dashboard() {
     setAccounts(allAccounts);
     if (allAccounts.length > 0 && !selectedAccountId) {
       setSelectedAccountId(allAccounts[0].id);
+      setSelectedEmail(allAccounts[0].email);
     }
   };
 
@@ -120,8 +122,8 @@ export function Dashboard() {
   };
 
   const loadStats = async () => {
-    if (!user?.id || !selectedAccountId) {
-      console.error('User ID or Account ID not available');
+    if (!user?.id || !selectedEmail) {
+      console.error('User ID or Email not available');
       setLoading(false);
       return;
     }
@@ -134,7 +136,7 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('email_account_id', selectedAccountId)
+        .eq('email', selectedEmail)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -144,7 +146,7 @@ export function Dashboard() {
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('email_account_id', selectedAccountId)
+        .eq('email', selectedEmail)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -154,7 +156,7 @@ export function Dashboard() {
         .from('email_info')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('email_account_id', selectedAccountId)
+        .eq('email', selectedEmail)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -164,7 +166,7 @@ export function Dashboard() {
         .from('email_info')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('email_account_id', selectedAccountId)
+        .eq('email', selectedEmail)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -174,7 +176,7 @@ export function Dashboard() {
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('email_account_id', selectedAccountId)
+        .eq('email', selectedEmail)
         .gte('created_at', start)
         .lt('created_at', end);
 
@@ -184,7 +186,7 @@ export function Dashboard() {
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
         .eq('user_id', user.id)
-        .eq('email_account_id', selectedAccountId)
+        .eq('email', selectedEmail)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
 
@@ -319,6 +321,7 @@ export function Dashboard() {
                           key={account.id}
                           onClick={() => {
                             setSelectedAccountId(account.id);
+                            setSelectedEmail(account.email);
                             setShowAccountDropdown(false);
                           }}
                           className={`w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${

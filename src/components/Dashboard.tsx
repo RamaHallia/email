@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, ChevronDown, CreditCard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
+import { SubscriptionManagement } from './SubscriptionManagement';
+import { SubscriptionModal } from './SubscriptionModal';
+import { SubscriptionBlocker } from './SubscriptionBlocker';
 
-type ActiveView = 'home' | 'settings' | 'email-configs';
+type ActiveView = 'home' | 'settings' | 'email-configs' | 'subscription';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -44,12 +47,25 @@ export function Dashboard() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
+  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
+  const [shouldShowSubscriptionModal, setShouldShowSubscriptionModal] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
       loadAccounts();
+      checkSubscription();
     }
   }, [user?.id]);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const tab = urlParams.get('tab');
+    if (tab === 'subscription') {
+      setActiveView('subscription');
+    }
+  }, []);
 
   useEffect(() => {
     if (user?.id && activeView === 'home' && selectedEmail) {
@@ -82,7 +98,42 @@ export function Dashboard() {
       setSelectedAccountId(allAccounts[0].id);
       setSelectedEmail(allAccounts[0].email);
     }
+
+    if (allAccounts.length === 1 && !hasActiveSubscription && subscriptionLoading === false) {
+      setShouldShowSubscriptionModal(true);
+    }
   };
+
+  const checkSubscription = async () => {
+    if (!user?.id) return;
+
+    setSubscriptionLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('subscriptions')
+        .select('status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error checking subscription:', error);
+        setHasActiveSubscription(false);
+      } else {
+        setHasActiveSubscription(data?.status === 'active');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setHasActiveSubscription(false);
+    } finally {
+      setSubscriptionLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (accounts.length === 1 && !hasActiveSubscription && !subscriptionLoading) {
+      setShowSubscriptionModal(true);
+    }
+  }, [accounts.length, hasActiveSubscription, subscriptionLoading]);
 
   const getDateRange = () => {
     const now = new Date();
@@ -235,8 +286,13 @@ export function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
-      <header className="bg-white border-b border-gray-200">
+    <SubscriptionBlocker
+      hasActiveSubscription={hasActiveSubscription}
+      loading={subscriptionLoading}
+      emailAccountsCount={Math.max(accounts.length, 1)}
+    >
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+        <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-r from-[#EF6855] to-[#F9A459] rounded-lg flex items-center justify-center">
@@ -277,6 +333,17 @@ export function Dashboard() {
             >
               <SettingsIcon className="w-5 h-5" />
               Paramètres
+            </button>
+            <button
+              onClick={() => setActiveView('subscription')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'subscription'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <CreditCard className="w-5 h-5" />
+              Abonnement
             </button>
             <span className="text-sm text-gray-600">{user?.email}</span>
             <button
@@ -558,7 +625,19 @@ export function Dashboard() {
             <EmailConfigurations />
           </>
         )}
+
+        {activeView === 'subscription' && <SubscriptionManagement />}
       </main>
-    </div>
+
+      {!hasActiveSubscription && showSubscriptionModal && (
+        <SubscriptionModal
+          isOpen={true}
+          onClose={() => setShowSubscriptionModal(false)}
+          emailAccountsCount={Math.max(accounts.length, 1)}
+          isUpgrade={false}
+        />
+      )}
+      </div>
+    </SubscriptionBlocker>
   );
 }

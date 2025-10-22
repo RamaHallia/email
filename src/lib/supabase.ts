@@ -1,73 +1,99 @@
-import { createClient } from '@supabase/supabase-js'
+import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true
-  }
-})
+if (!supabaseUrl || !supabaseAnonKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 export type Database = {
   public: {
     Tables: {
       profiles: {
         Row: {
-          id: string
-          company_name: string | null
-          activity_description: string | null
-          services_offered: string | null
-          created_at: string
-          updated_at: string
-        }
+          id: string;
+          email: string;
+          full_name: string | null;
+          company_name: string | null;
+          smtp_host: string | null;
+          smtp_port: number | null;
+          imap_host: string | null;
+          imap_port: number | null;
+          created_at: string;
+          updated_at: string;
+        };
         Insert: {
-          id: string
-          company_name?: string | null
-          activity_description?: string | null
-          services_offered?: string | null
-          created_at?: string
-          updated_at?: string
-        }
+          id: string;
+          email: string;
+          full_name?: string | null;
+          company_name?: string | null;
+          smtp_host?: string | null;
+          smtp_port?: number | null;
+          imap_host?: string | null;
+          imap_port?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
         Update: {
-          id?: string
-          company_name?: string | null
-          activity_description?: string | null
-          services_offered?: string | null
-          created_at?: string
-          updated_at?: string
-        }
-      }
-      stripe_user_subscriptions: {
+          id?: string;
+          email?: string;
+          full_name?: string | null;
+          company_name?: string | null;
+          smtp_host?: string | null;
+          smtp_port?: number | null;
+          imap_host?: string | null;
+          imap_port?: number | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      emails: {
         Row: {
-          customer_id: string | null
-          subscription_id: string | null
-          subscription_status: string | null
-          price_id: string | null
-          current_period_start: number | null
-          current_period_end: number | null
-          cancel_at_period_end: boolean | null
-          payment_method_brand: string | null
-          payment_method_last4: string | null
-        }
-      }
-    }
-    Views: {
-      stripe_user_subscriptions: {
-        Row: {
-          customer_id: string | null
-          subscription_id: string | null
-          subscription_status: string | null
-          price_id: string | null
-          current_period_start: number | null
-          current_period_end: number | null
-          cancel_at_period_end: boolean | null
-          payment_method_brand: string | null
-          payment_method_last4: string | null
-        }
-      }
-    }
-  }
-}
+          id: string;
+          user_id: string;
+          category_id: string | null;
+          sender_email: string;
+          sender_name: string | null;
+          subject: string;
+          body: string;
+          received_at: string;
+          is_read: boolean;
+          ai_suggested_reply: string | null;
+          reply_sent: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          category_id?: string | null;
+          sender_email: string;
+          sender_name?: string | null;
+          subject: string;
+          body: string;
+          received_at?: string;
+          is_read?: boolean;
+          ai_suggested_reply?: string | null;
+          reply_sent?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          category_id?: string | null;
+          sender_email?: string;
+          sender_name?: string | null;
+          subject?: string;
+          body?: string;
+          received_at?: string;
+          is_read?: boolean;
+          ai_suggested_reply?: string | null;
+          reply_sent?: boolean;
+          created_at?: string;
+        };
+      };
+    };
+  };
+};

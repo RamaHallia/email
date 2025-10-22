@@ -7,6 +7,7 @@ import { EmailConfigurations } from './EmailConfigurations';
 import { SubscriptionManagement } from './SubscriptionManagement';
 import { SubscriptionModal } from './SubscriptionModal';
 import { SubscriptionBlocker } from './SubscriptionBlocker';
+import { PaymentSuccessModal } from './PaymentSuccessModal';
 
 type ActiveView = 'home' | 'settings' | 'email-configs' | 'subscription';
 type TimePeriod = 'today' | 'week' | 'month';
@@ -377,24 +378,6 @@ export function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {showSuccessMessage && (
-          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4 animate-fade-in">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-green-900 mb-1">Abonnement activé avec succès !</h3>
-                <p className="text-sm text-green-700">
-                  Bienvenue sur Hall IA ! Vous pouvez maintenant profiter de toutes les fonctionnalités pour automatiser vos emails.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {activeView === 'home' && (
           <div className="space-y-8">
             <div>
@@ -675,6 +658,11 @@ export function Dashboard() {
           isUpgrade={false}
         />
       )}
+
+      <PaymentSuccessModal
+        isOpen={showSuccessMessage}
+        onClose={() => setShowSuccessMessage(false)}
+      />
       </div>
     </SubscriptionBlocker>
   );

@@ -429,6 +429,9 @@ function App() {
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
             <p>&copy; {new Date().getFullYear()} Hall IA. Tous droits réservés.</p>
           </div>
+        </div>
+      </footer>
+      </div>
     <Router>
       <div className="min-h-screen bg-gray-50">
         <Header />

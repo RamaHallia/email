@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
+import { SubscriptionModal } from './SubscriptionModal';
 
 interface EmailAccount {
   id: string;
@@ -36,6 +37,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [accountToDelete, setAccountToDelete] = useState<{ id: string; email: string; provider: string } | null>(null);
   const [showDeleteDocModal, setShowDeleteDocModal] = useState(false);
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
+  const [subscription, setSubscription] = useState<any>(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -53,7 +56,30 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     loadDocuments();
     checkCompanyInfo();
     loadCompanyData();
+    loadSubscription();
   }, [user]);
+
+  const loadSubscription = async () => {
+    if (!user) return;
+
+    const { data } = await supabase
+      .from('subscriptions')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    setSubscription(data);
+  };
+
+  const handleAddAccountClick = () => {
+    const allowedAccounts = subscription?.email_accounts_count || 1;
+
+    if (accounts.length >= allowedAccounts) {
+      setShowUpgradeModal(true);
+    } else {
+      setShowAddAccountModal(true);
+    }
+  };
 
   const loadAccounts = async () => {
     if (!user) return;
@@ -479,7 +505,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                 </button>
               ))}
               <button
-                onClick={() => setShowAddAccountModal(true)}
+                onClick={handleAddAccountClick}
                 className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
@@ -902,6 +928,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       confirmText="Supprimer"
       cancelText="Annuler"
       variant="danger"
+    />
+
+    <SubscriptionModal
+      isOpen={showUpgradeModal}
+      onClose={() => setShowUpgradeModal(false)}
+      emailAccountsCount={accounts.length + 1}
+      isUpgrade={true}
     />
     </>
   );

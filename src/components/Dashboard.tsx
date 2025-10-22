@@ -68,8 +68,17 @@ export function Dashboard() {
     if (success === 'true') {
       setActiveView('home');
       setShowSuccessMessage(true);
+      setShowSubscriptionModal(false);
       window.history.replaceState({}, '', '/dashboard');
-      checkSubscription();
+
+      const recheckSubscription = async () => {
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await checkSubscription();
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        await checkSubscription();
+      };
+
+      recheckSubscription();
       setTimeout(() => setShowSuccessMessage(false), 5000);
     } else if (tab === 'subscription') {
       setActiveView('subscription');
@@ -139,10 +148,12 @@ export function Dashboard() {
   };
 
   useEffect(() => {
-    if (accounts.length === 1 && !hasActiveSubscription && !subscriptionLoading) {
+    if (accounts.length === 1 && !hasActiveSubscription && !subscriptionLoading && !showSuccessMessage) {
       setShowSubscriptionModal(true);
+    } else if (hasActiveSubscription) {
+      setShowSubscriptionModal(false);
     }
-  }, [accounts.length, hasActiveSubscription, subscriptionLoading]);
+  }, [accounts.length, hasActiveSubscription, subscriptionLoading, showSuccessMessage]);
 
   const getDateRange = () => {
     const now = new Date();

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { Mail, Zap, TrendingUp, Clock, ArrowRight, Check, Users } from 'lucide-react';
 import { useAuth } from './contexts/AuthContext';
 import { AuthForm } from './components/AuthForm';
-import { Dashboard } from './components/Dashboard';
 import { supabase } from './lib/supabase';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Header } from './components/layout/Header';
@@ -431,40 +430,24 @@ function App() {
           <div className="border-t border-white/10 mt-8 pt-8 text-center text-white/60">
             <p>&copy; {new Date().getFullYear()} Hall IA. Tous droits réservés.</p>
           </div>
-    <Router>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/signup" element={<SignupPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/success" element={<SuccessPage />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </div>
-    </Router>
-
-    {/* Auth Modal */}
-    {showAuthModal && (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="relative">
-          <button
-            onClick={() => setShowAuthModal(false)}
-            className="absolute -top-4 -right-4 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-10"
-          >
-            ✕
-          </button>
-          <AuthForm onSuccess={() => setShowAuthModal(false)} />
         </div>
+      </footer>
       </div>
-    )}
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="relative">
+            <button
+              onClick={() => setShowAuthModal(false)}
+              className="absolute -top-4 -right-4 bg-white rounded-full w-8 h-8 flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors z-10"
+            >
+              ✕
+            </button>
+            <AuthForm onSuccess={() => setShowAuthModal(false)} />
+          </div>
+        </div>
+      )}
     </>
   );
 }

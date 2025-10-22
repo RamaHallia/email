@@ -51,6 +51,7 @@ export function Dashboard() {
   const [subscriptionLoading, setSubscriptionLoading] = useState(true);
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [shouldShowSubscriptionModal, setShouldShowSubscriptionModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -62,7 +63,15 @@ export function Dashboard() {
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
     const tab = urlParams.get('tab');
-    if (tab === 'subscription') {
+    const success = urlParams.get('success');
+
+    if (success === 'true') {
+      setActiveView('home');
+      setShowSuccessMessage(true);
+      window.history.replaceState({}, '', '/dashboard');
+      checkSubscription();
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    } else if (tab === 'subscription') {
       setActiveView('subscription');
     }
   }, []);
@@ -357,6 +366,24 @@ export function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+        {showSuccessMessage && (
+          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4 animate-fade-in">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <h3 className="font-bold text-green-900 mb-1">Abonnement activé avec succès !</h3>
+                <p className="text-sm text-green-700">
+                  Bienvenue sur Hall IA ! Vous pouvez maintenant profiter de toutes les fonctionnalités pour automatiser vos emails.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeView === 'home' && (
           <div className="space-y-8">
             <div>

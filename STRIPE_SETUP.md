@@ -148,6 +148,9 @@ Quand l'utilisateur ajoute un deuxième compte email :
 
 4. **Retour sur l'application**
    → Utilisateur redirigé vers `/dashboard?success=true`
+   → Redirection automatique vers le tableau de bord (vue 'home')
+   → Message de succès affiché pendant 5 secondes
+   → Abonnement rechargé automatiquement
    → Accès débloqué
 
 ---

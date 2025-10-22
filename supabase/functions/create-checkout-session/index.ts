@@ -35,7 +35,11 @@ serve(async (req) => {
       throw new Error('Non authentifié')
     }
 
-    const { emailAccountsCount = 1, isUpgrade = false } = await req.json()
+    const { priceId, emailAccountsCount = 1, isUpgrade = false } = await req.json()
+
+    if (!priceId) {
+      throw new Error('Price ID est requis')
+    }
 
     const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') || '', {
       apiVersion: '2023-10-16',
@@ -61,17 +65,7 @@ serve(async (req) => {
 
     const lineItems: any[] = [
       {
-        price_data: {
-          currency: 'eur',
-          product_data: {
-            name: 'Hall IA',
-            description: `${emailAccountsCount} compte${emailAccountsCount > 1 ? 's' : ''} email`,
-          },
-          recurring: {
-            interval: 'month',
-          },
-          unit_amount: 2900,
-        },
+        price: priceId,
         quantity: 1,
       },
     ]

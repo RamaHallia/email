@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CreditCard, Check, X, Loader } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
@@ -9,15 +9,88 @@ interface SubscriptionModalProps {
   isUpgrade?: boolean;
 }
 
+interface StripePrice {
+  id: string;
+  unit_amount: number;
+  currency: string;
+  recurring: {
+    interval: string;
+  } | null;
+}
+
+interface StripeProduct {
+  id: string;
+  name: string;
+  description: string;
+  prices: StripePrice[];
+}
+
 export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgrade = false }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [products, setProducts] = useState<StripeProduct[]>([]);
+  const [selectedPrice, setSelectedPrice] = useState<string>('');
+  const [loadingProducts, setLoadingProducts] = useState(true);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchProducts();
+    }
+  }, [isOpen]);
+
+  const fetchProducts = async () => {
+    setLoadingProducts(true);
+    setError('');
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error('Non authentifié');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/get-stripe-products`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la récupération des produits');
+      }
+
+      const { products: fetchedProducts } = await response.json();
+      setProducts(fetchedProducts);
+
+      if (fetchedProducts.length > 0 && fetchedProducts[0].prices.length > 0) {
+        setSelectedPrice(fetchedProducts[0].prices[0].id);
+      }
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+    } finally {
+      setLoadingProducts(false);
+    }
+  };
 
   if (!isOpen) return null;
 
-  const totalPrice = 29;
+  const selectedPriceData = products
+    .flatMap(p => p.prices)
+    .find(p => p.id === selectedPrice);
+
+  const totalPrice = selectedPriceData ? (selectedPriceData.unit_amount / 100) : 29;
 
   const handleSubscribe = async () => {
+    if (!selectedPrice) {
+      setError('Veuillez sélectionner un produit');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -37,6 +110,7 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            priceId: selectedPrice,
             emailAccountsCount,
             isUpgrade,
           }),
@@ -104,49 +178,92 @@ export function SubscriptionModal({ isOpen, onClose, emailAccountsCount, isUpgra
             </div>
           )}
 
-          {/* Pricing Card */}
-          <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border-2 border-[#EF6855] mb-6">
-            <div className="flex items-center justify-between mb-5">
-              <div>
-                <h3 className="text-lg font-bold text-[#3D2817] mb-0.5">
-                  Plan Hall IA
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {emailAccountsCount} compte{emailAccountsCount > 1 ? 's' : ''} email
-                </p>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-[#EF6855]">{totalPrice}€</div>
-                <div className="text-sm text-gray-600">/mois</div>
+          {loadingProducts ? (
+            <div className="flex items-center justify-center py-12">
+              <Loader className="w-8 h-8 animate-spin text-[#EF6855]" />
+            </div>
+          ) : products.length === 0 ? (
+            <div className="mb-6 p-4 bg-red-50 rounded-lg border border-red-200">
+              <div className="text-sm text-red-800">
+                Aucun produit disponible. Veuillez contacter le support.
               </div>
             </div>
+          ) : (
+            <>
+              {/* Product Selection */}
+              <div className="mb-6">
+                <h4 className="text-sm font-semibold text-[#3D2817] mb-3">Sélectionnez votre plan :</h4>
+                <div className="space-y-3">
+                  {products.map((product) => (
+                    product.prices.map((price) => (
+                      <button
+                        key={price.id}
+                        onClick={() => setSelectedPrice(price.id)}
+                        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+                          selectedPrice === price.id
+                            ? 'border-[#EF6855] bg-gradient-to-br from-orange-50 to-white shadow-md'
+                            : 'border-gray-200 bg-white hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <h3 className="text-base font-bold text-[#3D2817]">
+                                {product.name}
+                              </h3>
+                              {selectedPrice === price.id && (
+                                <div className="w-5 h-5 rounded-full bg-[#EF6855] flex items-center justify-center">
+                                  <Check className="w-3 h-3 text-white" />
+                                </div>
+                              )}
+                            </div>
+                            {product.description && (
+                              <p className="text-sm text-gray-600">{product.description}</p>
+                            )}
+                          </div>
+                          <div className="text-right ml-4">
+                            <div className="text-2xl font-bold text-[#EF6855]">
+                              {(price.unit_amount / 100).toFixed(2)}€
+                            </div>
+                            <div className="text-xs text-gray-600">
+                              /{price.recurring?.interval || 'mois'}
+                            </div>
+                          </div>
+                        </div>
+                      </button>
+                    ))
+                  ))}
+                </div>
+              </div>
 
-            <div className="space-y-2">
-              <h4 className="text-sm font-semibold text-[#3D2817] mb-2">Inclus :</h4>
-              <div className="grid gap-2">
-                <div className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Classification intelligente</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Réponses automatiques</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Filtrage des publicités</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Statistiques détaillées</span>
-                </div>
-                <div className="flex items-start gap-2">
-                  <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
-                  <span className="text-sm text-gray-700">Support email</span>
+              {/* Features included */}
+              <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-5 border border-gray-200 mb-6">
+                <h4 className="text-sm font-semibold text-[#3D2817] mb-3">Inclus dans tous les plans :</h4>
+                <div className="grid gap-2">
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Classification intelligente</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Réponses automatiques</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Filtrage des publicités</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Statistiques détaillées</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Check className="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-gray-700">Support email</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
 
           {error && (
             <div className="mb-4 p-3 bg-red-50 rounded-lg border border-red-200">

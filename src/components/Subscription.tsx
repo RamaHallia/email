@@ -150,15 +150,15 @@ export function Subscription() {
       {selectedPlan !== 'enterprise' && (
         <div className="bg-white rounded-xl p-6 shadow-sm">
           <div className="flex items-center justify-between mb-6">
-            <h3 className="font-bold text-[#3D2817]">Utilisateurs additionnels</h3>
-            <span className="text-sm text-gray-600">19€ / utilisateur / mois</span>
+            <h3 className="font-bold text-[#3D2817]">Comptes email additionnels</h3>
+            <span className="text-sm text-gray-600">19€ / compte / mois</span>
           </div>
 
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-gray-600" />
-              <span className="font-semibold text-gray-900">Nombre d'utilisateurs</span>
+              <span className="font-semibold text-gray-900">Nombre de comptes</span>
             </div>
             <div className="flex items-center gap-3">
               <button
@@ -179,7 +179,7 @@ export function Subscription() {
             </div>
           </div>
           <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-200">
-            <span className="text-gray-600">Coût des utilisateurs additionnels</span>
+            <span className="text-gray-600">Coût des comptes additionnels</span>
             <span className="font-semibold text-gray-900">{additionalUsers * userPrice}€</span>
           </div>
         </div>
@@ -197,7 +197,7 @@ export function Subscription() {
           </div>
           {additionalUsers > 0 && selectedPlan !== 'enterprise' && (
             <div className="flex items-center justify-between text-gray-700">
-              <span>{additionalUsers} utilisateur{additionalUsers > 1 ? 's' : ''} additionnel{additionalUsers > 1 ? 's' : ''}</span>
+              <span>{additionalUsers} compte{additionalUsers > 1 ? 's' : ''} additionnel{additionalUsers > 1 ? 's' : ''}</span>
               <span className="font-medium">{additionalUsers * userPrice}€</span>
             </div>
           )}

@@ -580,7 +580,7 @@ export function Dashboard() {
                       <div className="text-xs text-orange-600 font-semibold mb-1">ÉTAPE 4</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Validez et envoyez</h3>
                       <p className="text-xs text-gray-600">
-                        Vérifiez la réponse proposée et envoyez-la depuis la boîte TRAITÉ
+                        Vérifiez la réponse proposée et envoyez-la depuis la boîte Brouillons
                       </p>
                     </div>
                   </div>

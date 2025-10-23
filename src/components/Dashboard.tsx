@@ -476,9 +476,13 @@ export function Dashboard() {
 
               <div className="relative">
                 <style>{`
-                  @keyframes slideProgress {
-                    0% { width: 0%; }
-                    100% { width: 100%; }
+                  @keyframes dashProgress {
+                    0% {
+                      stroke-dashoffset: 1000;
+                    }
+                    100% {
+                      stroke-dashoffset: 0;
+                    }
                   }
                   @keyframes fadeInUp {
                     0% { opacity: 0; transform: translateY(20px); }
@@ -488,12 +492,10 @@ export function Dashboard() {
                     0%, 100% { transform: scale(1); }
                     50% { transform: scale(1.05); }
                   }
-                  @keyframes arrowMove {
-                    0%, 100% { transform: translateX(0); }
-                    50% { transform: translateX(4px); }
-                  }
-                  .progress-line {
-                    animation: slideProgress 2s ease-out forwards;
+                  .dashed-path {
+                    stroke-dasharray: 8 8;
+                    stroke-dashoffset: 1000;
+                    animation: dashProgress 3s ease-out forwards;
                   }
                   .step-card-1 {
                     animation: fadeInUp 0.6s ease-out 0.2s backwards;
@@ -510,16 +512,27 @@ export function Dashboard() {
                   .step-badge {
                     animation: pulse 2s ease-in-out infinite;
                   }
-                  .step-arrow {
-                    animation: arrowMove 1.5s ease-in-out infinite;
-                  }
                 `}</style>
 
-                <div className="hidden lg:block absolute top-16 left-[12.5%] right-[12.5%] h-0.5 bg-gray-200">
-                  <div className="progress-line h-full bg-gradient-to-r from-blue-400 via-green-400 via-amber-400 to-orange-400"></div>
-                </div>
+                <svg className="hidden lg:block absolute top-0 left-0 w-full h-full pointer-events-none" style={{zIndex: 0}}>
+                  <path
+                    d="M 12.5% 50 L 37.5% 50 M 37.5% 50 L 62.5% 50 M 62.5% 50 L 87.5% 50"
+                    stroke="url(#gradient)"
+                    strokeWidth="2"
+                    fill="none"
+                    className="dashed-path"
+                  />
+                  <defs>
+                    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#3B82F6" />
+                      <stop offset="33%" stopColor="#22C55E" />
+                      <stop offset="66%" stopColor="#F59E0B" />
+                      <stop offset="100%" stopColor="#EF6855" />
+                    </linearGradient>
+                  </defs>
+                </svg>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative" style={{zIndex: 1}}>
                   <div className="relative step-card-1">
                     <div className="text-center bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-blue-200">
                       <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-2 shadow step-badge">
@@ -530,11 +543,6 @@ export function Dashboard() {
                       <p className="text-xs text-gray-600">
                         Un email arrive dans votre boîte de réception
                       </p>
-                    </div>
-                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center">
-                      <svg className="w-6 h-6 text-green-500 step-arrow" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
                     </div>
                   </div>
 
@@ -549,11 +557,6 @@ export function Dashboard() {
                         Notre IA analyse le contenu et le contexte
                       </p>
                     </div>
-                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center">
-                      <svg className="w-6 h-6 text-amber-500 step-arrow" style={{animationDelay: '0.3s'}} fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
                   </div>
 
                   <div className="relative step-card-3">
@@ -566,11 +569,6 @@ export function Dashboard() {
                       <p className="text-xs text-gray-600">
                         Tri automatique + brouillon de réponse
                       </p>
-                    </div>
-                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center">
-                      <svg className="w-6 h-6 text-orange-500 step-arrow" style={{animationDelay: '0.6s'}} fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                      </svg>
                     </div>
                   </div>
 

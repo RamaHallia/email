@@ -567,7 +567,7 @@ export function Dashboard() {
                       <div className="text-xs text-amber-600 font-semibold mb-1">ÉTAPE 3</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Classification & Réponse</h3>
                       <p className="text-xs text-gray-600">
-                        Tri automatique + brouillon de réponse
+                        Tri automatique dans les 3 dossiers TRAITÉ, PUB et INFO + brouillon de réponse
                       </p>
                     </div>
                   </div>

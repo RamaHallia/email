@@ -51,6 +51,11 @@ export function Dashboard() {
     }
   }, [user?.id]);
 
+  useEffect(() => {
+    if (activeView === 'home' && user?.id) {
+      loadAccounts();
+    }
+  }, [activeView, user?.id]);
 
   useEffect(() => {
     if (user?.id && activeView === 'home' && selectedEmail) {
@@ -79,7 +84,16 @@ export function Dashboard() {
     }));
 
     setAccounts(allAccounts);
-    if (allAccounts.length > 0 && !selectedAccountId) {
+
+    if (allAccounts.length === 0) {
+      setSelectedAccountId(null);
+      setSelectedEmail(null);
+      return;
+    }
+
+    const currentAccountStillExists = allAccounts.find(acc => acc.id === selectedAccountId);
+
+    if (!currentAccountStillExists) {
       setSelectedAccountId(allAccounts[0].id);
       setSelectedEmail(allAccounts[0].email);
     }
@@ -298,43 +312,64 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm">
-              <div className="mb-6">
-                <h2 className="text-sm font-semibold text-gray-700 mb-3">Compte email</h2>
-                <div className="relative">
-                  <button
-                    onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                    className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-[#EF6855] transition-colors flex items-center justify-between"
-                  >
-                    <span className="font-medium text-gray-900">
-                      {accounts.find(acc => acc.id === selectedAccountId)?.email || 'Sélectionner un compte'}
-                    </span>
-                    <ChevronDown className="w-5 h-5 text-gray-500" />
-                  </button>
-                  {showAccountDropdown && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-10">
-                      {accounts.map(account => (
-                        <button
-                          key={account.id}
-                          onClick={() => {
-                            setSelectedAccountId(account.id);
-                            setSelectedEmail(account.email);
-                            setShowAccountDropdown(false);
-                          }}
-                          className={`w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                            selectedAccountId === account.id ? 'bg-orange-50' : ''
-                          }`}
-                        >
-                          <div className="font-medium text-gray-900">{account.email}</div>
-                          <div className="text-xs text-gray-500">
-                            {account.provider === 'gmail' ? 'Gmail' : 'Outlook'}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+            {accounts.length === 0 ? (
+              <div className="bg-white rounded-xl p-8 shadow-sm text-center">
+                <div className="flex justify-center mb-4">
+                  <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                    <Mail className="w-8 h-8 text-[#EF6855]" />
+                  </div>
                 </div>
+                <h2 className="text-xl font-bold text-[#3D2817] mb-2">
+                  Aucun compte email configuré
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Ajoutez votre premier compte email pour commencer à utiliser Hall IA
+                </p>
+                <button
+                  onClick={() => setActiveView('settings')}
+                  className="px-6 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all"
+                >
+                  Ajouter un compte
+                </button>
               </div>
+            ) : (
+              <div className="bg-white rounded-xl p-6 shadow-sm">
+                <div className="mb-6">
+                  <h2 className="text-sm font-semibold text-gray-700 mb-3">Compte email</h2>
+                  <div className="relative">
+                    <button
+                      onClick={() => setShowAccountDropdown(!showAccountDropdown)}
+                      className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-[#EF6855] transition-colors flex items-center justify-between"
+                    >
+                      <span className="font-medium text-gray-900">
+                        {accounts.find(acc => acc.id === selectedAccountId)?.email || 'Sélectionner un compte'}
+                      </span>
+                      <ChevronDown className="w-5 h-5 text-gray-500" />
+                    </button>
+                    {showAccountDropdown && (
+                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-10">
+                        {accounts.map(account => (
+                          <button
+                            key={account.id}
+                            onClick={() => {
+                              setSelectedAccountId(account.id);
+                              setSelectedEmail(account.email);
+                              setShowAccountDropdown(false);
+                            }}
+                            className={`w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
+                              selectedAccountId === account.id ? 'bg-orange-50' : ''
+                            }`}
+                          >
+                            <div className="font-medium text-gray-900">{account.email}</div>
+                            <div className="text-xs text-gray-500">
+                              {account.provider === 'gmail' ? 'Gmail' : 'Outlook'}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
 
               <div className="mb-6">
                 <h2 className="text-sm font-semibold text-gray-700 mb-3">Période</h2>
@@ -442,6 +477,7 @@ export function Dashboard() {
                 </div>
               </div>
             </div>
+            )}
 
             <div className="bg-white rounded-xl p-8 shadow-sm">
               <h2 className="text-xl font-bold text-[#3D2817] mb-8">

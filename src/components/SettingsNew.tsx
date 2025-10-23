@@ -110,7 +110,17 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     ];
 
     setAccounts(allAccounts);
-    if (allAccounts.length > 0) {
+
+    if (allAccounts.length === 0) {
+      setSelectedAccount(null);
+      return;
+    }
+
+    const currentAccountStillExists = allAccounts.find(
+      acc => acc.id === selectedAccount?.id && acc.provider === selectedAccount?.provider
+    );
+
+    if (!currentAccountStillExists) {
       setSelectedAccount(allAccounts[0]);
     }
   };

@@ -138,7 +138,6 @@ export function Dashboard() {
       const { count: emailsRepondus, error: error1 } = await supabase
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
         .eq('email', selectedEmail)
         .gte('created_at', start)
         .lt('created_at', end);
@@ -148,7 +147,6 @@ export function Dashboard() {
       const { count: emailsRepondusHier, error: error2 } = await supabase
         .from('email_traite')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
         .eq('email', selectedEmail)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
@@ -158,7 +156,6 @@ export function Dashboard() {
       const { count: emailsTries, error: error3 } = await supabase
         .from('email_info')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
         .eq('email', selectedEmail)
         .gte('created_at', start)
         .lt('created_at', end);
@@ -168,7 +165,6 @@ export function Dashboard() {
       const { count: emailsTriesHier, error: error4 } = await supabase
         .from('email_info')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
         .eq('email', selectedEmail)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);
@@ -178,7 +174,6 @@ export function Dashboard() {
       const { count: publicitiesFiltrees, error: error5 } = await supabase
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
         .eq('email', selectedEmail)
         .gte('created_at', start)
         .lt('created_at', end);
@@ -188,7 +183,6 @@ export function Dashboard() {
       const { count: publicitiesHier, error: error6 } = await supabase
         .from('email_pub')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
         .eq('email', selectedEmail)
         .gte('created_at', previousStart)
         .lt('created_at', previousEnd);

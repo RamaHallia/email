@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
@@ -43,7 +43,6 @@ export function Dashboard() {
   const [accounts, setAccounts] = useState<EmailAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
-  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -325,38 +324,26 @@ export function Dashboard() {
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <div className="mb-6">
                   <h2 className="text-sm font-semibold text-gray-700 mb-3">Compte email</h2>
-                  <div className="relative">
-                    <button
-                      onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                      className="w-full px-4 py-3 bg-white border-2 border-gray-300 rounded-lg hover:border-[#EF6855] transition-colors flex items-center justify-between"
-                    >
-                      <span className="font-medium text-gray-900">
-                        {accounts.find(acc => acc.id === selectedAccountId)?.email || 'Sélectionner un compte'}
-                      </span>
-                      <ChevronDown className="w-5 h-5 text-gray-500" />
-                    </button>
-                    {showAccountDropdown && (
-                      <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-lg shadow-lg z-10">
-                        {accounts.map(account => (
-                          <button
-                            key={account.id}
-                            onClick={() => {
-                              setSelectedAccountId(account.id);
-                              setSelectedEmail(account.email);
-                              setShowAccountDropdown(false);
-                            }}
-                            className={`w-full px-4 py-3 text-left hover:bg-orange-50 transition-colors first:rounded-t-lg last:rounded-b-lg ${
-                              selectedAccountId === account.id ? 'bg-orange-50' : ''
-                            }`}
-                          >
-                            <div className="font-medium text-gray-900">{account.email}</div>
-                            <div className="text-xs text-gray-500">
-                              {account.provider === 'gmail' ? 'Gmail' : 'Outlook'}
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="flex flex-wrap gap-3">
+                    {accounts.map(account => (
+                      <button
+                        key={account.id}
+                        onClick={() => {
+                          setSelectedAccountId(account.id);
+                          setSelectedEmail(account.email);
+                        }}
+                        className={`px-4 py-3 rounded-lg font-medium transition-all border-2 ${
+                          selectedAccountId === account.id
+                            ? 'bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white border-transparent shadow-md'
+                            : 'bg-white text-gray-700 border-gray-300 hover:border-[#EF6855]'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Mail className="w-4 h-4" />
+                          <span>{account.email}</span>
+                        </div>
+                      </button>
+                    ))}
                   </div>
                 </div>
 

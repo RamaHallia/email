@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
@@ -780,17 +780,60 @@ export function Dashboard() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="text-sm text-gray-600">
-              © 2025 Hallia. Tous droits réservés.
+      <footer className="bg-[#3D2817] text-white mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            {/* Logo et Description */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-[#3D2817]" />
+                </div>
+                <span className="text-xl font-bold">Hallia</span>
+              </div>
+              <p className="text-gray-300 text-sm">
+                Simplifiez la gestion de vos emails avec l'intelligence artificielle
+              </p>
             </div>
-            <div className="flex gap-6 text-sm text-gray-600">
-              <a href="#" className="hover:text-gray-900 transition-colors">Conditions d'utilisation</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Politique de confidentialité</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
+
+            {/* Contact */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-white">Contact</h3>
+              <div className="space-y-2">
+                <a
+                  href="mailto:contact@hallia.fr"
+                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-2"
+                >
+                  <Mail className="w-4 h-4" />
+                  contact@hallia.fr
+                </a>
+                <button
+                  onClick={() => window.open('mailto:support@hallia.fr?subject=Demande de support', '_blank')}
+                  className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-2"
+                >
+                  <MessageCircle className="w-4 h-4" />
+                  Support SAV
+                </button>
+              </div>
             </div>
+
+            {/* Légal */}
+            <div className="space-y-4">
+              <h3 className="font-semibold text-white">Légal</h3>
+              <div className="space-y-2">
+                <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm block">
+                  Conditions d'utilisation
+                </a>
+                <a href="#" className="text-gray-300 hover:text-white transition-colors text-sm block">
+                  Politique de confidentialité
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Copyright */}
+          <div className="pt-8 border-t border-gray-600 text-center text-sm text-gray-300">
+            © 2025 Hallia. Tous droits réservés.
           </div>
         </div>
       </footer>

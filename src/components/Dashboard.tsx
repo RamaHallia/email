@@ -399,9 +399,9 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
+                <div className="flex flex-col lg:flex-row items-start lg:items-start justify-between gap-6 mb-6">
                   {/* Mini Cards Comptes Email */}
-                  <div className="flex-1">
+                  <div>
                     <label className="text-xs font-semibold text-gray-600 mb-3 block">Compte email</label>
                     <div className="flex flex-wrap gap-3">
                       {accounts.map(account => {
@@ -457,16 +457,16 @@ export function Dashboard() {
                             </div>
 
                             {/* Email Info */}
-                            <div className="text-left">
-                              <div className={`text-xs font-semibold mb-0.5 ${
+                            <div className="text-left min-w-0">
+                              <div className={`text-xs font-semibold mb-0.5 whitespace-nowrap ${
                                 isSelected ? 'text-[#EF6855]' : 'text-gray-500'
                               }`}>
                                 {account.provider === 'gmail' ? 'Gmail' : account.provider === 'outlook' ? 'Outlook' : 'SMTP/IMAP'}
                               </div>
-                              <div className={`text-sm font-medium ${
+                              <div className={`text-sm font-medium whitespace-nowrap ${
                                 isSelected ? 'text-gray-900' : 'text-gray-700'
                               }`}>
-                                {account.email.length > 25 ? account.email.substring(0, 25) + '...' : account.email}
+                                {account.email.length > 20 ? account.email.substring(0, 20) + '...' : account.email}
                               </div>
                             </div>
 

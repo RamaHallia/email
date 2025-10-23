@@ -399,33 +399,88 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                  {/* Dropdown Compte Email */}
-                  <div className="flex-1 w-full sm:w-auto">
-                    <label className="text-xs font-semibold text-gray-600 mb-2 block">Compte email</label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                      <select
-                        value={selectedAccountId || ''}
-                        onChange={(e) => {
-                          const account = accounts.find(acc => acc.id === e.target.value);
-                          if (account) {
-                            setSelectedAccountId(account.id);
-                            setSelectedEmail(account.email);
-                            setIsClassementActive(account.is_classement);
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-6">
+                  {/* Mini Cards Comptes Email */}
+                  <div className="flex-1">
+                    <label className="text-xs font-semibold text-gray-600 mb-3 block">Compte email</label>
+                    <div className="flex flex-wrap gap-3">
+                      {accounts.map(account => {
+                        const isSelected = selectedAccountId === account.id;
+                        const getProviderIcon = () => {
+                          if (account.provider === 'gmail') {
+                            return (
+                              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z" fill="#EA4335"/>
+                              </svg>
+                            );
+                          } else if (account.provider === 'outlook') {
+                            return (
+                              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none">
+                                <path d="M24 7.387L12 13.29 0 7.387V5.613L12 11.516 24 5.613z" fill="#0078D4"/>
+                                <path d="M24 7.387v9.226L12 22.419 0 16.613V7.387L12 13.29z" fill="#0078D4" opacity="0.8"/>
+                              </svg>
+                            );
+                          } else {
+                            return <Mail className="w-5 h-5 text-gray-600" />;
                           }
-                        }}
-                        className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-200 rounded-lg font-medium text-gray-700 appearance-none cursor-pointer hover:border-[#EF6855] focus:outline-none focus:border-[#EF6855] focus:ring-2 focus:ring-orange-100 transition-all"
-                      >
-                        {accounts.map(account => (
-                          <option key={account.id} value={account.id}>
-                            {account.email}
-                          </option>
-                        ))}
-                      </select>
-                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
+                        };
+
+                        const getProviderColor = () => {
+                          if (account.provider === 'gmail') return 'from-red-500 to-orange-500';
+                          if (account.provider === 'outlook') return 'from-blue-500 to-blue-600';
+                          return 'from-gray-500 to-gray-600';
+                        };
+
+                        return (
+                          <button
+                            key={account.id}
+                            onClick={() => {
+                              setSelectedAccountId(account.id);
+                              setSelectedEmail(account.email);
+                              setIsClassementActive(account.is_classement);
+                            }}
+                            className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
+                              isSelected
+                                ? 'bg-gradient-to-br from-orange-50 to-red-50 border-2 border-[#EF6855] shadow-md scale-105'
+                                : 'bg-gray-50 border-2 border-transparent hover:border-gray-300 hover:shadow-sm'
+                            }`}
+                          >
+                            {/* Logo Provider */}
+                            <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${
+                              isSelected
+                                ? `bg-gradient-to-br ${getProviderColor()}`
+                                : 'bg-white border border-gray-200'
+                            }`}>
+                              <div className={isSelected ? '[&_path]:fill-white [&_svg]:text-white' : ''}>
+                                {getProviderIcon()}
+                              </div>
+                            </div>
+
+                            {/* Email Info */}
+                            <div className="text-left">
+                              <div className={`text-xs font-semibold mb-0.5 ${
+                                isSelected ? 'text-[#EF6855]' : 'text-gray-500'
+                              }`}>
+                                {account.provider === 'gmail' ? 'Gmail' : account.provider === 'outlook' ? 'Outlook' : 'SMTP/IMAP'}
+                              </div>
+                              <div className={`text-sm font-medium ${
+                                isSelected ? 'text-gray-900' : 'text-gray-700'
+                              }`}>
+                                {account.email.length > 25 ? account.email.substring(0, 25) + '...' : account.email}
+                              </div>
+                            </div>
+
+                            {/* Badge sélectionné */}
+                            {isSelected && (
+                              <div className="absolute -top-1 -right-1 w-5 h-5 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center shadow-md">
+                                <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
 

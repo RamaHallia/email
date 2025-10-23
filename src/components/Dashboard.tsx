@@ -541,7 +541,7 @@ export function Dashboard() {
                       <div className="text-xs text-blue-600 font-semibold mb-1">ÉTAPE 1</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Créer un compte email</h3>
                       <p className="text-xs text-gray-600">
-                        Configurez votre compte email pour commencer à recevoir et traiter vos messages
+                        Configurez votre compte email
                       </p>
                     </div>
                   </div>

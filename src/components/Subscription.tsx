@@ -17,6 +17,7 @@ export function Subscription() {
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
+  const [isCanceling, setIsCanceling] = useState(false);
 
   const basePlanPrice = 29;
   const userPrice = 19;
@@ -141,6 +142,49 @@ export function Subscription() {
     }
   };
 
+  const handleCancelSubscription = async () => {
+    if (!confirm('Êtes-vous sûr de vouloir annuler votre abonnement ? Il restera actif jusqu\'à la fin de la période de facturation en cours.')) {
+      return;
+    }
+
+    setIsCanceling(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Vous devez être connecté');
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-cancel-subscription`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.error) {
+        alert(`Erreur: ${data.error}`);
+        return;
+      }
+
+      if (data.success) {
+        alert('Votre abonnement sera annulé à la fin de la période de facturation en cours.');
+        await fetchSubscription();
+      }
+    } catch (error) {
+      console.error('Erreur lors de l\'annulation de l\'abonnement:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsCanceling(false);
+    }
+  };
+
   const subscriptionStatus = subscription?.status || 'not_started';
   const isActive = ['active', 'trialing'].includes(subscriptionStatus);
   const nextBillingTimestamp = subscription?.current_period_end;
@@ -154,6 +198,13 @@ export function Subscription() {
   });
 
   const getStatusBadge = () => {
+    if (subscription?.cancel_at_period_end && isActive) {
+      return (
+        <span className="px-3 py-1 bg-orange-100 text-orange-800 text-xs font-semibold rounded-full">
+          Annulation programmée
+        </span>
+      );
+    }
     if (isActive) {
       return (
         <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
@@ -319,7 +370,11 @@ export function Subscription() {
         </div>
 
         <div className="text-xs text-gray-500 mb-6">
-          {isActive ? `Prochain paiement le ${actualFormattedDate}` : 'Aucun abonnement actif'}
+          {subscription?.cancel_at_period_end && isActive
+            ? `Votre abonnement sera annulé le ${actualFormattedDate}`
+            : isActive
+            ? `Prochain paiement le ${actualFormattedDate}`
+            : 'Aucun abonnement actif'}
         </div>
 
         <div className="flex gap-3">
@@ -331,8 +386,12 @@ export function Subscription() {
             {isLoading ? 'Chargement...' : (isActive ? 'Mettre à jour l\'abonnement' : 'S\'abonner')}
           </button>
           {isActive && (
-            <button className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-              Annuler l'abonnement
+            <button
+              onClick={handleCancelSubscription}
+              disabled={isCanceling}
+              className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isCanceling ? 'Annulation...' : 'Annuler l\'abonnement'}
             </button>
           )}
         </div>

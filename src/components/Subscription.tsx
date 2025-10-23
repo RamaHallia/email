@@ -88,24 +88,12 @@ export function Subscription() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { count: gmailCount } = await supabase
-        .from('gmail_tokens')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      const { count: outlookCount } = await supabase
-        .from('outlook_tokens')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id);
-
-      const { count: imapCount } = await supabase
+      const { count } = await supabase
         .from('email_configurations')
         .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('provider', 'smtp_imap');
+        .eq('user_id', user.id);
 
-      const total = (gmailCount || 0) + (outlookCount || 0) + (imapCount || 0);
-      setEmailAccountsCount(total);
+      setEmailAccountsCount(count || 0);
     } catch (error) {
       console.error('Error fetching email accounts count:', error);
     }

@@ -124,18 +124,30 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     }
   };
 
-  const handleAddAccountClick = () => {
+  const handleAddAccountClick = async () => {
     if (!hasActiveSubscription) {
       setShowAddAccountModal(true);
       return;
     }
 
-    if (accounts.length >= allowedAccounts) {
-      setShowUpgradeModal(true);
-      return;
-    }
+    try {
+      const { count } = await supabase
+        .from('email_configurations')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user?.id);
 
-    setShowAddAccountModal(true);
+      const configuredAccounts = count || 0;
+
+      if (configuredAccounts >= allowedAccounts) {
+        setShowUpgradeModal(true);
+        return;
+      }
+
+      setShowAddAccountModal(true);
+    } catch (error) {
+      console.error('Error checking account count:', error);
+      setShowAddAccountModal(true);
+    }
   };
 
   const handleUpgrade = () => {

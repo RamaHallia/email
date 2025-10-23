@@ -45,6 +45,7 @@ export function Dashboard() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [isClassementActive, setIsClassementActive] = useState(false);
+  const [showSupportModal, setShowSupportModal] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -256,10 +257,7 @@ export function Dashboard() {
         <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-[#EF6855] to-[#F9A459] rounded-lg flex items-center justify-center">
-              <Mail className="w-6 h-6 text-white" />
-            </div>
-            <span className="text-xl font-bold text-[#3D2817]">Hall IA</span>
+            <img src="/logohallia.png" alt="Hallia" className="h-12" />
           </div>
           <div className="flex items-center gap-4">
             <button
@@ -785,14 +783,9 @@ export function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* Logo et Description */}
             <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                  <Mail className="w-5 h-5 text-[#3D2817]" />
-                </div>
-                <span className="text-xl font-bold">Hallia</span>
-              </div>
+              <img src="/logohallia.png" alt="Hallia" className="h-16" />
               <p className="text-gray-300 text-sm">
-                Simplifiez la gestion de vos emails avec l'intelligence artificielle
+                Moins d'effort, plus de performance
               </p>
             </div>
 
@@ -808,11 +801,11 @@ export function Dashboard() {
                   contact@hallia.fr
                 </a>
                 <button
-                  onClick={() => window.open('mailto:support@hallia.fr?subject=Demande de support', '_blank')}
+                  onClick={() => setShowSupportModal(true)}
                   className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-2"
                 >
                   <MessageCircle className="w-4 h-4" />
-                  Support SAV
+                  Support
                 </button>
               </div>
             </div>
@@ -837,6 +830,84 @@ export function Dashboard() {
           </div>
         </div>
       </footer>
+
+      {/* Modal de Support */}
+      {showSupportModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-bold text-[#3D2817]">Contactez-nous</h2>
+              <button
+                onClick={() => setShowSupportModal(false)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                ×
+              </button>
+            </div>
+
+            <form className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type de demande
+                </label>
+                <select className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EF6855]">
+                  <option value="commercial">Commercial</option>
+                  <option value="technique">Technique</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nom
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EF6855]"
+                  placeholder="Votre nom"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  defaultValue={user?.email || ''}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EF6855]"
+                  placeholder="votre@email.com"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Message
+                </label>
+                <textarea
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EF6855] h-32 resize-none"
+                  placeholder="Décrivez votre demande..."
+                />
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowSupportModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Annuler
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg hover:opacity-90 transition-opacity"
+                >
+                  Envoyer
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

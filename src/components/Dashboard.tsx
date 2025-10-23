@@ -796,11 +796,11 @@ export function Dashboard() {
               <h3 className="font-semibold text-white">Contact</h3>
               <div className="space-y-2">
                 <a
-                  href="mailto:contact@hallia.fr"
+                  href="mailto:contact@hallia.ai"
                   className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-2"
                 >
                   <Mail className="w-4 h-4" />
-                  contact@hallia.fr
+                  contact@hallia.ai
                 </a>
                 <button
                   onClick={() => setShowSupportModal(true)}

@@ -66,10 +66,10 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   }, [selectedAccount]);
 
   useEffect(() => {
-    if (selectedAccount && !showCompanyInfoModal) {
+    if (selectedAccount && !accountMissingInfo) {
       loadCompanyData();
     }
-  }, [selectedAccount, user]);
+  }, [selectedAccount, user, accountMissingInfo, showCompanyInfoModal]);
 
   useEffect(() => {
     const handleOAuthMessage = (event: MessageEvent) => {
@@ -172,7 +172,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   };
 
   const loadCompanyData = async () => {
-    if (!user || !selectedAccount || accountMissingInfo) return;
+    if (!user || !selectedAccount) return;
 
     const { data: config } = await supabase
       .from('email_configurations')
@@ -186,6 +186,12 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         company_name: config.company_name || '',
         activity_description: config.activity_description || '',
         services_offered: config.services_offered || '',
+      });
+    } else {
+      setCompanyFormData({
+        company_name: '',
+        activity_description: '',
+        services_offered: '',
       });
     }
   };
@@ -365,10 +371,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       setShowSuccessModal(true);
       setCompanyInfoStep(1);
       setAccountMissingInfo('');
+      await loadCompanyData();
       await checkCompanyInfo();
-      if (!showCompanyInfoModal) {
-        await loadCompanyData();
-      }
     } catch (err) {
       console.error('Erreur lors de l\'enregistrement:', err);
       alert('Erreur lors de l\'enregistrement des informations');

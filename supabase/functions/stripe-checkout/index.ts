@@ -43,7 +43,7 @@ Deno.serve(async (req) => {
       return corsResponse({ error: 'Method not allowed' }, 405);
     }
 
-    const { price_id, success_url, cancel_url, mode } = await req.json();
+    const { price_id, success_url, cancel_url, mode, additional_account_price_id, additional_accounts } = await req.json();
 
     const error = validateParameters(
       { price_id, success_url, cancel_url, mode },
@@ -179,16 +179,27 @@ Deno.serve(async (req) => {
       }
     }
 
+    // create line items
+    const lineItems = [
+      {
+        price: price_id,
+        quantity: 1,
+      },
+    ];
+
+    // Add additional accounts if specified
+    if (additional_account_price_id && additional_accounts && additional_accounts > 0) {
+      lineItems.push({
+        price: additional_account_price_id,
+        quantity: additional_accounts,
+      });
+    }
+
     // create Checkout Session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       payment_method_types: ['card'],
-      line_items: [
-        {
-          price: price_id,
-          quantity: 1,
-        },
-      ],
+      line_items: lineItems,
       mode,
       success_url,
       cancel_url,

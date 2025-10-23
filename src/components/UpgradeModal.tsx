@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { X, Star, Users, Check } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 interface UpgradeModalProps {
   onClose: () => void;
@@ -6,6 +8,65 @@ interface UpgradeModalProps {
 }
 
 export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleUpgradeClick = async () => {
+    setIsLoading(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Vous devez être connecté');
+        return;
+      }
+
+      const basePlanPriceId = import.meta.env.VITE_STRIPE_BASE_PLAN_PRICE_ID;
+      const additionalAccountPriceId = import.meta.env.VITE_STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID;
+
+      if (!basePlanPriceId || !additionalAccountPriceId) {
+        alert('Configuration Stripe manquante');
+        return;
+      }
+
+      const successUrl = `${window.location.origin}?success=true`;
+      const cancelUrl = `${window.location.origin}?canceled=true`;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            price_id: basePlanPriceId,
+            additional_account_price_id: additionalAccountPriceId,
+            additional_accounts: 1,
+            success_url: successUrl,
+            cancel_url: cancelUrl,
+            mode: 'subscription',
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.error) {
+        alert(`Erreur: ${data.error}`);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Erreur lors de la création du checkout:', error);
+      alert('Une erreur est survenue');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full">
@@ -79,10 +140,11 @@ export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
               Annuler
             </button>
             <button
-              onClick={onUpgrade}
-              className="flex-1 px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all"
+              onClick={handleUpgradeClick}
+              disabled={isLoading}
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Upgrader maintenant
+              {isLoading ? 'Chargement...' : 'Upgrader maintenant'}
             </button>
           </div>
         </div>

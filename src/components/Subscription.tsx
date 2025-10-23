@@ -257,7 +257,15 @@ export function Subscription() {
           <span className="text-sm text-gray-600">19€ / compte / mois</span>
         </div>
 
-        <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+        {!isActive && (
+          <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 mb-4">
+            <p className="text-sm text-yellow-800">
+              <strong>Abonnement requis :</strong> Vous devez d'abord souscrire au Plan Premier à 29€/mois pour pouvoir ajouter des comptes additionnels.
+            </p>
+          </div>
+        )}
+
+        <div className={`p-4 bg-gray-50 rounded-lg border border-gray-200 ${!isActive ? 'opacity-50' : ''}`}>
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
               <Users className="w-5 h-5 text-gray-600" />
@@ -266,7 +274,8 @@ export function Subscription() {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => setAdditionalUsers(Math.max(0, additionalUsers - 1))}
-                className="w-8 h-8 rounded-lg border-2 border-gray-300 text-gray-600 font-bold hover:border-[#EF6855] hover:text-[#EF6855] transition-colors"
+                disabled={!isActive}
+                className="w-8 h-8 rounded-lg border-2 border-gray-300 text-gray-600 font-bold hover:border-[#EF6855] hover:text-[#EF6855] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:text-gray-600"
               >
                 -
               </button>
@@ -275,7 +284,8 @@ export function Subscription() {
               </span>
               <button
                 onClick={() => setAdditionalUsers(additionalUsers + 1)}
-                className="w-8 h-8 rounded-lg border-2 border-[#EF6855] text-[#EF6855] font-bold hover:bg-[#EF6855] hover:text-white transition-colors"
+                disabled={!isActive}
+                className="w-8 h-8 rounded-lg border-2 border-[#EF6855] text-[#EF6855] font-bold hover:bg-[#EF6855] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#EF6855]"
               >
                 +
               </button>
@@ -318,11 +328,13 @@ export function Subscription() {
             disabled={isLoading}
             className="flex-1 px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isLoading ? 'Chargement...' : 'Mettre à jour l\'abonnement'}
+            {isLoading ? 'Chargement...' : (isActive ? 'Mettre à jour l\'abonnement' : 'S\'abonner')}
           </button>
-          <button className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
-            Annuler
-          </button>
+          {isActive && (
+            <button className="px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+              Annuler l'abonnement
+            </button>
+          )}
         </div>
       </div>
 

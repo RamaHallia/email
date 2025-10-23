@@ -531,8 +531,8 @@ export function Dashboard() {
                         Un email arrive dans votre boîte de réception
                       </p>
                     </div>
-                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-green-400 step-arrow">
-                      <svg fill="currentColor" viewBox="0 0 20 20">
+                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center">
+                      <svg className="w-6 h-6 text-green-500 step-arrow" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
@@ -549,8 +549,8 @@ export function Dashboard() {
                         Notre IA analyse le contenu et le contexte
                       </p>
                     </div>
-                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-amber-400 step-arrow" style={{animationDelay: '0.3s'}}>
-                      <svg fill="currentColor" viewBox="0 0 20 20">
+                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center">
+                      <svg className="w-6 h-6 text-amber-500 step-arrow" style={{animationDelay: '0.3s'}} fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
@@ -567,8 +567,8 @@ export function Dashboard() {
                         Tri automatique + brouillon de réponse
                       </p>
                     </div>
-                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-orange-400 step-arrow" style={{animationDelay: '0.6s'}}>
-                      <svg fill="currentColor" viewBox="0 0 20 20">
+                    <div className="hidden lg:flex absolute -right-4 top-1/2 -translate-y-1/2 w-8 h-8 items-center justify-center">
+                      <svg className="w-6 h-6 text-orange-500 step-arrow" style={{animationDelay: '0.6s'}} fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>

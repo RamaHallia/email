@@ -227,7 +227,7 @@ export function Dashboard() {
     const totalMinutes =
       stats.emailsRepondus * 2 +
       stats.emailsInfo * 0.5 +
-      stats.publicitiesFiltrees * (10 / 60);
+      stats.publicitiesFiltrees * 0.17;
 
     const hours = Math.floor(totalMinutes / 60);
     const mins = Math.round(totalMinutes % 60);

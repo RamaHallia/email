@@ -1,12 +1,64 @@
 import { useState } from 'react';
-import { CreditCard, Users, Check } from 'lucide-react';
+import { CreditCard, Users, Check, Star, Zap, Crown } from 'lucide-react';
 
 export function Subscription() {
+  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'premier' | 'enterprise'>('premier');
   const [additionalUsers, setAdditionalUsers] = useState(0);
 
-  const basePlanPrice = 29;
+  const plans = [
+    {
+      id: 'starter' as const,
+      name: 'Starter',
+      price: 0,
+      icon: Zap,
+      gradient: 'from-gray-500 to-gray-600',
+      borderColor: 'border-gray-300',
+      bgGradient: 'from-gray-50 to-gray-100',
+      popular: false,
+      features: [
+        { name: 'Tri automatique', available: true, description: '100 emails/mois' },
+        { name: 'Réponses automatiques', available: false },
+        { name: '1 compte email', available: true },
+        { name: 'Support standard', available: true }
+      ]
+    },
+    {
+      id: 'premier' as const,
+      name: 'Premier',
+      price: 29,
+      icon: Star,
+      gradient: 'from-[#EF6855] to-[#F9A459]',
+      borderColor: 'border-[#EF6855]',
+      bgGradient: 'from-orange-50 to-red-50',
+      popular: true,
+      features: [
+        { name: 'Tri automatique', available: true, description: 'Illimité' },
+        { name: 'Réponses automatiques IA', available: true, description: 'Génération de brouillons' },
+        { name: 'Comptes illimités', available: true, description: 'Gmail, Outlook, SMTP/IMAP' },
+        { name: 'Support prioritaire', available: true, description: 'Assistance technique dédiée' }
+      ]
+    },
+    {
+      id: 'enterprise' as const,
+      name: 'Enterprise',
+      price: 99,
+      icon: Crown,
+      gradient: 'from-purple-500 to-purple-700',
+      borderColor: 'border-purple-500',
+      bgGradient: 'from-purple-50 to-purple-100',
+      popular: false,
+      features: [
+        { name: 'Tout du plan Premier', available: true },
+        { name: 'API accès complet', available: true, description: 'Intégration personnalisée' },
+        { name: 'Utilisateurs illimités', available: true },
+        { name: 'Support 24/7', available: true, description: 'Équipe dédiée' }
+      ]
+    }
+  ];
+
+  const currentPlan = plans.find(p => p.id === selectedPlan)!;
   const userPrice = 19;
-  const totalPrice = basePlanPrice + (additionalUsers * userPrice);
+  const totalPrice = currentPlan.price + (selectedPlan !== 'enterprise' ? additionalUsers * userPrice : 0);
 
   const nextBillingDate = new Date();
   nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
@@ -18,77 +70,105 @@ export function Subscription() {
 
   return (
     <div className="mt-6 space-y-6">
-      {/* Plan actuel */}
+      {/* Plans disponibles */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-[#3D2817]">Plan actuel</h3>
-          <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-            Actif
-          </span>
-        </div>
+        <h3 className="font-bold text-[#3D2817] mb-6">Choisissez votre plan</h3>
 
-        <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-2 border-[#EF6855]">
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-lg flex items-center justify-center">
-              <CreditCard className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <div className="font-bold text-[#3D2817] text-lg">Plan Premier</div>
-              <div className="text-sm text-gray-600">1 utilisateur inclus</div>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-[#3D2817]">29€</div>
-            <div className="text-xs text-gray-500">par mois</div>
-          </div>
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {plans.map((plan) => {
+            const Icon = plan.icon;
+            const isSelected = selectedPlan === plan.id;
+            const isCurrent = plan.id === 'premier';
 
-        <div className="mt-6 space-y-3">
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Check className="w-3 h-3 text-green-600" />
-            </div>
-            <div>
-              <div className="font-medium text-gray-900">Tri automatique des emails</div>
-              <div className="text-sm text-gray-600">Classification intelligente Info / Traités / Pub</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Check className="w-3 h-3 text-green-600" />
-            </div>
-            <div>
-              <div className="font-medium text-gray-900">Réponses automatiques IA</div>
-              <div className="text-sm text-gray-600">Génération de brouillons intelligents</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Check className="w-3 h-3 text-green-600" />
-            </div>
-            <div>
-              <div className="font-medium text-gray-900">Comptes illimités</div>
-              <div className="text-sm text-gray-600">Gmail, Outlook, SMTP/IMAP</div>
-            </div>
-          </div>
-          <div className="flex items-start gap-3">
-            <div className="w-5 h-5 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-              <Check className="w-3 h-3 text-green-600" />
-            </div>
-            <div>
-              <div className="font-medium text-gray-900">Support prioritaire</div>
-              <div className="text-sm text-gray-600">Assistance technique dédiée</div>
-            </div>
-          </div>
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-xl border-2 transition-all cursor-pointer ${
+                  isSelected
+                    ? `${plan.borderColor} shadow-lg scale-105`
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+                onClick={() => setSelectedPlan(plan.id)}
+              >
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="px-4 py-1 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white text-xs font-bold rounded-full shadow-md">
+                      POPULAIRE
+                    </span>
+                  </div>
+                )}
+
+                {isCurrent && (
+                  <div className="absolute -top-3 right-4">
+                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                      Actif
+                    </span>
+                  </div>
+                )}
+
+                <div className={`p-6 rounded-t-xl bg-gradient-to-br ${plan.bgGradient}`}>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`w-12 h-12 bg-gradient-to-br ${plan.gradient} rounded-lg flex items-center justify-center`}>
+                      <Icon className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+
+                  <h4 className="text-xl font-bold text-[#3D2817] mb-2">{plan.name}</h4>
+
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-bold text-[#3D2817]">{plan.price}€</span>
+                    <span className="text-gray-600">/mois</span>
+                  </div>
+                </div>
+
+                <div className="p-6 space-y-3">
+                  {plan.features.map((feature, idx) => (
+                    <div key={idx} className="flex items-start gap-3">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${
+                        feature.available ? 'bg-green-100' : 'bg-gray-100'
+                      }`}>
+                        {feature.available ? (
+                          <Check className="w-3 h-3 text-green-600" />
+                        ) : (
+                          <span className="text-gray-400 text-xs">✕</span>
+                        )}
+                      </div>
+                      <div className="flex-1">
+                        <div className={`text-sm font-medium ${feature.available ? 'text-gray-900' : 'text-gray-400'}`}>
+                          {feature.name}
+                        </div>
+                        {feature.description && (
+                          <div className="text-xs text-gray-500 mt-0.5">{feature.description}</div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-6 pt-0">
+                  <button
+                    className={`w-full py-3 rounded-lg font-medium transition-all ${
+                      isSelected
+                        ? `bg-gradient-to-r ${plan.gradient} text-white hover:shadow-lg`
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    {isCurrent ? 'Plan actuel' : isSelected ? 'Sélectionné' : 'Sélectionner'}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
       {/* Utilisateurs additionnels */}
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-[#3D2817]">Utilisateurs additionnels</h3>
-          <span className="text-sm text-gray-600">19€ / utilisateur / mois</span>
-        </div>
+      {selectedPlan !== 'enterprise' && (
+        <div className="bg-white rounded-xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="font-bold text-[#3D2817]">Utilisateurs additionnels</h3>
+            <span className="text-sm text-gray-600">19€ / utilisateur / mois</span>
+          </div>
 
         <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center justify-between mb-4">
@@ -119,7 +199,8 @@ export function Subscription() {
             <span className="font-semibold text-gray-900">{additionalUsers * userPrice}€</span>
           </div>
         </div>
-      </div>
+        </div>
+      )}
 
       {/* Résumé et facturation */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -127,10 +208,10 @@ export function Subscription() {
 
         <div className="space-y-3 mb-6">
           <div className="flex items-center justify-between text-gray-700">
-            <span>Plan Premier</span>
-            <span className="font-medium">{basePlanPrice}€</span>
+            <span>Plan {currentPlan.name}</span>
+            <span className="font-medium">{currentPlan.price}€</span>
           </div>
-          {additionalUsers > 0 && (
+          {additionalUsers > 0 && selectedPlan !== 'enterprise' && (
             <div className="flex items-center justify-between text-gray-700">
               <span>{additionalUsers} utilisateur{additionalUsers > 1 ? 's' : ''} additionnel{additionalUsers > 1 ? 's' : ''}</span>
               <span className="font-medium">{additionalUsers * userPrice}€</span>

@@ -52,8 +52,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     loadAccounts();
     loadDocuments();
     checkCompanyInfo();
-    loadCompanyData();
   }, [user]);
+
+  useEffect(() => {
+    if (selectedAccount) {
+      loadCompanyData();
+    }
+  }, [selectedAccount, user]);
 
 
   const handleAddAccountClick = () => {
@@ -124,13 +129,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   };
 
   const loadCompanyData = async () => {
-    if (!user) return;
+    if (!user || !selectedAccount) return;
 
     const { data: config } = await supabase
       .from('email_configurations')
       .select('company_name, activity_description, services_offered')
       .eq('user_id', user.id)
-      .eq('provider', 'gmail')
+      .eq('email', selectedAccount.email)
       .maybeSingle();
 
     if (config) {
@@ -209,14 +214,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
   const handleCompanyInfoSubmit = async () => {
     try {
-      const { data: gmailToken } = await supabase
-        .from('gmail_tokens')
-        .select('id, email')
-        .eq('user_id', user?.id)
-        .maybeSingle();
-
-      if (!gmailToken) {
-        alert('Aucun compte Gmail trouvé');
+      if (!selectedAccount) {
+        alert('Aucun compte sélectionné');
         return;
       }
 
@@ -224,7 +223,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         .from('email_configurations')
         .select('id')
         .eq('user_id', user?.id)
-        .eq('provider', 'gmail')
+        .eq('email', selectedAccount.email)
         .maybeSingle();
 
       if (existingConfig) {
@@ -234,20 +233,43 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
             company_name: companyFormData.company_name,
             activity_description: companyFormData.activity_description,
             services_offered: companyFormData.services_offered,
+            updated_at: new Date().toISOString(),
           })
           .eq('id', existingConfig.id);
 
         if (error) throw error;
       } else {
+        let gmail_token_id = null;
+        let outlook_token_id = null;
+
+        if (selectedAccount.provider === 'gmail') {
+          const { data: gmailToken } = await supabase
+            .from('gmail_tokens')
+            .select('id')
+            .eq('user_id', user?.id)
+            .eq('email', selectedAccount.email)
+            .maybeSingle();
+          gmail_token_id = gmailToken?.id;
+        } else if (selectedAccount.provider === 'outlook') {
+          const { data: outlookToken } = await supabase
+            .from('outlook_tokens')
+            .select('id')
+            .eq('user_id', user?.id)
+            .eq('email', selectedAccount.email)
+            .maybeSingle();
+          outlook_token_id = outlookToken?.id;
+        }
+
         const { error } = await supabase
           .from('email_configurations')
           .insert({
             user_id: user?.id,
-            name: gmailToken.email,
-            email: gmailToken.email,
-            provider: 'gmail',
+            name: selectedAccount.email,
+            email: selectedAccount.email,
+            provider: selectedAccount.provider,
             is_connected: true,
-            gmail_token_id: gmailToken.id,
+            gmail_token_id,
+            outlook_token_id,
             company_name: companyFormData.company_name,
             activity_description: companyFormData.activity_description,
             services_offered: companyFormData.services_offered,

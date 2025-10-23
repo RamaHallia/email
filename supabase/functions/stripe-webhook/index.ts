@@ -148,12 +148,16 @@ async function syncCustomerFromStripe(customerId: string) {
 
     const userId = customer.user_id;
 
+    console.info(`Fetching subscriptions for customer: ${customerId}`);
+
     const subscriptions = await stripe.subscriptions.list({
       customer: customerId,
       limit: 1,
       status: 'all',
       expand: ['data.default_payment_method'],
     });
+
+    console.info(`Found ${subscriptions.data.length} subscriptions for customer: ${customerId}`);
 
     if (subscriptions.data.length === 0) {
       console.info(`No active subscriptions found for customer: ${customerId}`);
@@ -176,6 +180,15 @@ async function syncCustomerFromStripe(customerId: string) {
     }
 
     const subscription = subscriptions.data[0];
+
+    console.info(`Subscription details for ${customerId}:`, {
+      id: subscription.id,
+      status: subscription.status,
+      price_id: subscription.items.data[0]?.price.id,
+      current_period_start: subscription.current_period_start,
+      current_period_end: subscription.current_period_end,
+      payment_method: subscription.default_payment_method
+    });
 
     const { error: subError } = await supabase.from('stripe_subscriptions').upsert(
       {

@@ -149,15 +149,15 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         setCompanyInfoStep(2);
         setCompanyFormData({
           company_name: accountWithoutInfo.company_name,
-          activity_description: accountWithoutInfo.activity_description || '',
-          services_offered: accountWithoutInfo.services_offered || '',
+          activity_description: '',
+          services_offered: '',
         });
       } else {
         setCompanyInfoStep(1);
         setCompanyFormData({
           company_name: accountWithoutInfo.company_name || '',
-          activity_description: accountWithoutInfo.activity_description || '',
-          services_offered: accountWithoutInfo.services_offered || '',
+          activity_description: '',
+          services_offered: '',
         });
       }
     }

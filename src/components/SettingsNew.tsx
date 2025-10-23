@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight, CreditCard, Users } from 'lucide-react';
+import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
 
 interface EmailAccount {
@@ -650,65 +650,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                 </button>
               </div>
 
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-[#3D2817]">Abonnement</h3>
-              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                Actif
-              </span>
-            </div>
-
-            <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-lg border-2 border-[#EF6855]">
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-lg flex items-center justify-center">
-                    <CreditCard className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <div className="font-bold text-[#3D2817] text-lg">Plan Premier</div>
-                    <div className="text-sm text-gray-600">1 utilisateur inclus</div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-[#3D2817]">29€</div>
-                  <div className="text-xs text-gray-500">par mois</div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2">
-                    <Users className="w-5 h-5 text-gray-600" />
-                    <span className="font-semibold text-gray-900">Utilisateurs additionnels</span>
-                  </div>
-                  <span className="text-sm text-gray-600">0 utilisateur</span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-600">19€ / utilisateur / mois</span>
-                  <span className="font-semibold text-gray-900">0€</span>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-gray-200">
-                <div className="flex items-center justify-between mb-4">
-                  <span className="text-lg font-bold text-[#3D2817]">Total mensuel</span>
-                  <span className="text-3xl font-bold text-[#EF6855]">29€</span>
-                </div>
-                <div className="text-xs text-gray-500 mb-4">
-                  Prochain paiement le 23 novembre 2025
-                </div>
-                <div className="flex gap-3">
-                  <button className="flex-1 px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all">
-                    Gérer l'abonnement
-                  </button>
-                  <button className="px-4 py-3 border-2 border-[#EF6855] text-[#EF6855] rounded-lg font-medium hover:bg-orange-50 transition-colors">
-                    Ajouter des utilisateurs
-                  </button>
-                </div>
-              </div>
             </div>
           </div>
 

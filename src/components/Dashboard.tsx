@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
+import { Subscription } from './Subscription';
 
-type ActiveView = 'home' | 'settings';
+type ActiveView = 'home' | 'settings' | 'subscription';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -281,6 +282,17 @@ export function Dashboard() {
             >
               <SettingsIcon className="w-5 h-5" />
               Paramètres
+            </button>
+            <button
+              onClick={() => setActiveView('subscription')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'subscription'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <CreditCard className="w-5 h-5" />
+              Abonnement
             </button>
             <span className="text-sm text-gray-600">{user?.email}</span>
             <button
@@ -776,6 +788,22 @@ export function Dashboard() {
           </>
         )}
 
+        {activeView === 'subscription' && (
+          <>
+            <div className="mt-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
+                  Abonnement
+                </h1>
+                <p className="text-gray-600">
+                  Gérez votre abonnement et vos utilisateurs
+                </p>
+              </div>
+            </div>
+
+            <Subscription />
+          </>
+        )}
 
       </main>
 

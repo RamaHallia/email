@@ -310,7 +310,7 @@ export function Dashboard() {
               <div className="flex items-center justify-center gap-3 max-w-3xl mx-auto">
                 {/* Email entrant */}
                 <div className="flex flex-col items-center">
-                  <div className="relative">
+                  <div className="relative h-12 flex items-center">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459] animate-pulse'}`}>
                       <Mail className={`w-6 h-6 ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-white'}`} />
                     </div>
@@ -324,7 +324,7 @@ export function Dashboard() {
                 </div>
 
                 {/* Flèche animée */}
-                <div className="flex-1 px-2 max-w-[80px] flex items-center">
+                <div className="flex-1 px-2 max-w-[80px] flex items-center" style={{ marginBottom: '28px' }}>
                   <div className={`relative h-0.5 rounded-full overflow-hidden w-full ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-200 to-orange-300'}`}>
                     {accounts.length > 0 && isClassementActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
@@ -334,16 +334,18 @@ export function Dashboard() {
 
                 {/* AI Processing */}
                 <div className="flex flex-col items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459] animate-spin-slow'}`}>
-                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <RefreshCw className={`w-5 h-5 ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-[#EF6855]'}`} />
+                  <div className="h-12 flex items-center">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459] animate-spin-slow'}`}>
+                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                        <RefreshCw className={`w-5 h-5 ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-[#EF6855]'}`} />
+                      </div>
                     </div>
                   </div>
                   <p className="mt-2 text-xs font-medium text-gray-600">IA</p>
                 </div>
 
                 {/* Flèche animée */}
-                <div className="flex-1 px-2 max-w-[80px] flex items-center">
+                <div className="flex-1 px-2 max-w-[80px] flex items-center" style={{ marginBottom: '28px' }}>
                   <div className={`relative h-0.5 rounded-full overflow-hidden w-full ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-300 to-orange-200'}`}>
                     {accounts.length > 0 && isClassementActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>

@@ -58,7 +58,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   }, [user]);
 
   useEffect(() => {
-    if (selectedAccount) {
+    if (selectedAccount && !showCompanyInfoModal) {
       loadCompanyData();
     }
   }, [selectedAccount, user]);
@@ -164,7 +164,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   };
 
   const loadCompanyData = async () => {
-    if (!user || !selectedAccount) return;
+    if (!user || !selectedAccount || accountMissingInfo) return;
 
     const { data: config } = await supabase
       .from('email_configurations')
@@ -319,7 +319,10 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       setShowSuccessModal(true);
       setCompanyInfoStep(1);
       setAccountMissingInfo('');
-      await loadCompanyData();
+      await checkCompanyInfo();
+      if (!showCompanyInfoModal) {
+        await loadCompanyData();
+      }
     } catch (err) {
       console.error('Erreur lors de l\'enregistrement:', err);
       alert('Erreur lors de l\'enregistrement des informations');
@@ -682,7 +685,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
               </button>
             )}
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-[#3D2817]">Connexion</h2>
+              <h2 className="text-2xl font-bold text-[#3D2817]">Description de votre activité</h2>
             </div>
           </div>
 
@@ -701,9 +704,9 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
           <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-800">
               <span className="font-semibold">Étape {companyInfoStep}/3</span> - {
-                companyInfoStep === 1 ? 'Authentification' :
-                companyInfoStep === 2 ? 'Description de l\'entreprise' :
-                'Signature'
+                companyInfoStep === 1 ? 'Nom de l\'entreprise' :
+                companyInfoStep === 2 ? 'Description de l\'activité' :
+                'Services proposés'
               }
             </p>
           </div>

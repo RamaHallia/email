@@ -30,7 +30,17 @@ export function Subscription() {
     if (params.get('success') === 'true') {
       setShowSuccessMessage(true);
       window.history.replaceState({}, '', '/subscription');
-      setTimeout(() => setShowSuccessMessage(false), 5000);
+
+      const pollInterval = setInterval(() => {
+        fetchSubscription();
+      }, 2000);
+
+      setTimeout(() => {
+        setShowSuccessMessage(false);
+        clearInterval(pollInterval);
+      }, 15000);
+
+      return () => clearInterval(pollInterval);
     }
     if (params.get('canceled') === 'true') {
       setShowCanceledMessage(true);

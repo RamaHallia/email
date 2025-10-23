@@ -1,10 +1,22 @@
-import { useState } from 'react';
-import { CreditCard, Users, Check, Star } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { CreditCard, Users, Check, Star, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+
+interface SubscriptionData {
+  status: string;
+  price_id: string | null;
+  current_period_end: number | null;
+  payment_method_brand: string | null;
+  payment_method_last4: string | null;
+  cancel_at_period_end: boolean;
+}
 
 export function Subscription() {
   const [additionalUsers, setAdditionalUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showCanceledMessage, setShowCanceledMessage] = useState(false);
 
   const basePlanPrice = 29;
   const userPrice = 19;
@@ -12,11 +24,50 @@ export function Subscription() {
 
   const nextBillingDate = new Date();
   nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
-  const formattedDate = nextBillingDate.toLocaleDateString('fr-FR', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('success') === 'true') {
+      setShowSuccessMessage(true);
+      window.history.replaceState({}, '', '/subscription');
+      setTimeout(() => setShowSuccessMessage(false), 5000);
+    }
+    if (params.get('canceled') === 'true') {
+      setShowCanceledMessage(true);
+      window.history.replaceState({}, '', '/subscription');
+      setTimeout(() => setShowCanceledMessage(false), 5000);
+    }
+    fetchSubscription();
+  }, []);
+
+  const fetchSubscription = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: customerData } = await supabase
+        .from('stripe_customers')
+        .select('customer_id')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .maybeSingle();
+
+      if (customerData?.customer_id) {
+        const { data: subData } = await supabase
+          .from('stripe_subscriptions')
+          .select('*')
+          .eq('customer_id', customerData.customer_id)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        if (subData) {
+          setSubscription(subData);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching subscription:', error);
+    }
+  };
 
   const features = [
     { name: 'Tri automatique', description: 'Illimité' },
@@ -80,15 +131,72 @@ export function Subscription() {
     }
   };
 
+  const subscriptionStatus = subscription?.status || 'not_started';
+  const isActive = ['active', 'trialing'].includes(subscriptionStatus);
+  const nextBillingTimestamp = subscription?.current_period_end;
+  const actualNextBillingDate = nextBillingTimestamp
+    ? new Date(nextBillingTimestamp * 1000)
+    : nextBillingDate;
+  const actualFormattedDate = actualNextBillingDate.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  });
+
+  const getStatusBadge = () => {
+    if (isActive) {
+      return (
+        <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+          Actif
+        </span>
+      );
+    }
+    if (subscriptionStatus === 'past_due') {
+      return (
+        <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
+          Paiement en retard
+        </span>
+      );
+    }
+    if (subscriptionStatus === 'canceled') {
+      return (
+        <span className="px-3 py-1 bg-red-100 text-red-800 text-xs font-semibold rounded-full">
+          Annulé
+        </span>
+      );
+    }
+    return (
+      <span className="px-3 py-1 bg-gray-100 text-gray-800 text-xs font-semibold rounded-full">
+        Inactif
+      </span>
+    );
+  };
+
   return (
     <div className="mt-6 space-y-6">
-      {/* Plan unique */}
+      {showSuccessMessage && (
+        <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded-lg flex items-center gap-3">
+          <CheckCircle className="w-5 h-5 text-green-600" />
+          <div>
+            <p className="font-medium text-green-900">Paiement réussi !</p>
+            <p className="text-sm text-green-700">Votre abonnement a été activé avec succès.</p>
+          </div>
+        </div>
+      )}
+      {showCanceledMessage && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded-lg flex items-center gap-3">
+          <AlertCircle className="w-5 h-5 text-yellow-600" />
+          <div>
+            <p className="font-medium text-yellow-900">Paiement annulé</p>
+            <p className="text-sm text-yellow-700">Vous avez annulé le processus de paiement.</p>
+          </div>
+        </div>
+      )}
+
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-[#3D2817]">Votre abonnement</h3>
-          <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-            Actif
-          </span>
+          {getStatusBadge()}
         </div>
 
         <div className="max-w-2xl mx-auto">
@@ -133,7 +241,6 @@ export function Subscription() {
         </div>
       </div>
 
-      {/* Comptes additionnels */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-[#3D2817]">Comptes email additionnels</h3>
@@ -171,7 +278,6 @@ export function Subscription() {
         </div>
       </div>
 
-      {/* Résumé et facturation */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <h3 className="font-bold text-[#3D2817] mb-6">Résumé de facturation</h3>
 
@@ -193,7 +299,7 @@ export function Subscription() {
         </div>
 
         <div className="text-xs text-gray-500 mb-6">
-          Prochain paiement le {formattedDate}
+          {isActive ? `Prochain paiement le ${actualFormattedDate}` : 'Aucun abonnement actif'}
         </div>
 
         <div className="flex gap-3">
@@ -210,7 +316,6 @@ export function Subscription() {
         </div>
       </div>
 
-      {/* Méthode de paiement */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <h3 className="font-bold text-[#3D2817] mb-6">Méthode de paiement</h3>
 
@@ -219,8 +324,19 @@ export function Subscription() {
             <CreditCard className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
-            <div className="font-medium text-gray-900">Visa •••• 4242</div>
-            <div className="text-sm text-gray-600">Expire 12/2027</div>
+            {subscription?.payment_method_brand && subscription?.payment_method_last4 ? (
+              <>
+                <div className="font-medium text-gray-900">
+                  {subscription.payment_method_brand.charAt(0).toUpperCase() + subscription.payment_method_brand.slice(1)} •••• {subscription.payment_method_last4}
+                </div>
+                <div className="text-sm text-gray-600">Méthode de paiement active</div>
+              </>
+            ) : (
+              <>
+                <div className="font-medium text-gray-900">Aucune carte enregistrée</div>
+                <div className="text-sm text-gray-600">Ajoutez une méthode de paiement</div>
+              </>
+            )}
           </div>
           <button className="px-4 py-2 text-[#EF6855] font-medium hover:bg-orange-50 rounded-lg transition-colors">
             Modifier
@@ -228,7 +344,6 @@ export function Subscription() {
         </div>
       </div>
 
-      {/* Historique de facturation */}
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-[#3D2817]">Historique de facturation</h3>

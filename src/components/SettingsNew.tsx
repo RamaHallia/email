@@ -640,7 +640,12 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-bold text-[#3D2817] mb-6">Base de connaissances</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-[#3D2817]">Base de connaissances</h3>
+              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
+                v2
+              </span>
+            </div>
             <div className="space-y-3">
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
@@ -656,7 +661,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   </button>
                 </div>
               ))}
-              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
+              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
                 <Plus className="w-4 h-4" />
                 Ajouter un document
               </button>

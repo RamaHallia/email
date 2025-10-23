@@ -591,11 +591,15 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                     if (!user || !selectedAccount) return;
                     const newValue = !autoSort;
                     setAutoSort(newValue);
-                    await supabase
+                    const { error } = await supabase
                       .from('email_configurations')
                       .update({ is_classement: newValue })
                       .eq('user_id', user.id)
                       .eq('email', selectedAccount.email);
+
+                    if (!error) {
+                      alert(newValue ? 'Tri automatique activé' : 'Tri automatique désactivé');
+                    }
                   }}
                   className={`relative w-14 h-8 rounded-full transition-colors ${
                     autoSort ? 'bg-green-500' : 'bg-gray-300'

@@ -39,6 +39,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState<string>('');
   const [accountMissingInfo, setAccountMissingInfo] = useState<string>('');
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -598,7 +600,9 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                       .eq('email', selectedAccount.email);
 
                     if (!error) {
-                      alert(newValue ? 'Tri automatique activé' : 'Tri automatique désactivé');
+                      setNotificationMessage(newValue ? 'Tri automatique activé' : 'Tri automatique désactivé');
+                      setShowNotification(true);
+                      setTimeout(() => setShowNotification(false), 3000);
                     }
                   }}
                   className={`relative w-14 h-8 rounded-full transition-colors ${
@@ -999,6 +1003,17 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
           >
             Compris
           </button>
+        </div>
+      </div>
+    )}
+
+    {showNotification && (
+      <div className="fixed top-4 right-4 z-50 animate-fade-in">
+        <div className="bg-green-500 text-white px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 border-2 border-green-400">
+          <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
+            <Check className="w-5 h-5 text-green-500 stroke-[3]" />
+          </div>
+          <span className="font-semibold text-lg">{notificationMessage}</span>
         </div>
       </div>
     )}

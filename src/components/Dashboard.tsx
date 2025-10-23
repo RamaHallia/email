@@ -784,6 +784,9 @@ export function Dashboard() {
             {/* Logo et Description */}
             <div className="space-y-4">
               <img src="/logo-hallia.svg" alt="Hallia" className="h-16" />
+              <p className="text-gray-300 text-sm">
+                Simplifiez la gestion de vos emails avec l'intelligence artificielle
+              </p>
             </div>
 
             {/* Contact */}

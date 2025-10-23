@@ -2,26 +2,10 @@ import { useState } from 'react';
 import { CreditCard, Users, Check, Star, Zap, Crown } from 'lucide-react';
 
 export function Subscription() {
-  const [selectedPlan, setSelectedPlan] = useState<'starter' | 'premier' | 'enterprise'>('premier');
+  const [selectedPlan, setSelectedPlan] = useState<'premier' | 'enterprise'>('premier');
   const [additionalUsers, setAdditionalUsers] = useState(0);
 
   const plans = [
-    {
-      id: 'starter' as const,
-      name: 'Starter',
-      price: 0,
-      icon: Zap,
-      gradient: 'from-gray-500 to-gray-600',
-      borderColor: 'border-gray-300',
-      bgGradient: 'from-gray-50 to-gray-100',
-      popular: false,
-      features: [
-        { name: 'Tri automatique', available: true, description: '100 emails/mois' },
-        { name: 'Réponses automatiques', available: false },
-        { name: '1 compte email', available: true },
-        { name: 'Support standard', available: true }
-      ]
-    },
     {
       id: 'premier' as const,
       name: 'Premier',
@@ -74,7 +58,7 @@ export function Subscription() {
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <h3 className="font-bold text-[#3D2817] mb-6">Choisissez votre plan</h3>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
           {plans.map((plan) => {
             const Icon = plan.icon;
             const isSelected = selectedPlan === plan.id;

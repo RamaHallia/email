@@ -75,9 +75,9 @@ Deno.serve(async (req) => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <style>
             body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#fff7f7; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
-            .card { background:#ffffff; border:1px solid #fecaca; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); }
+            .card { background:#ffffff; border:1px solid #fecaca; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); max-width:400px; }
             .icon { width:56px; height:56px; border-radius:9999px; background:#fef2f2; color:#dc2626; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; }
-            .title { font-weight:700; color:#991b1b; margin-bottom:4px; }
+            .title { font-weight:700; color:#991b1b; margin-bottom:4px; font-size:18px; }
             .subtitle { color:#475569; font-size:14px; }
           </style>
         </head>
@@ -85,11 +85,21 @@ Deno.serve(async (req) => {
           <div class="card">
             <div class="icon">!</div>
             <div class="title">Compte déjà existant</div>
-            <div class="subtitle">Ce compte Gmail est déjà configuré.</div>
+            <div class="subtitle">Ce compte Gmail est déjà configuré. Fermeture...</div>
           </div>
           <script>
-            window.opener && window.opener.postMessage({ type: 'gmail-duplicate', email: '${userInfo.email}' }, '*');
-            setTimeout(() => window.close(), 1500);
+            (function() {
+              if (window.opener && !window.opener.closed) {
+                window.opener.postMessage({ type: 'gmail-duplicate', email: '${userInfo.email}' }, '*');
+              }
+              setTimeout(() => {
+                try {
+                  window.close();
+                } catch (e) {
+                  console.log('Cannot close window');
+                }
+              }, 2000);
+            })();
           </script>
         </body>
       </html>`, {
@@ -138,25 +148,48 @@ Deno.serve(async (req) => {
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <style>
             body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#f6fff8; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
-            .card { background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); }
+            .card { background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); max-width:400px; }
             .icon { width:56px; height:56px; border-radius:9999px; background:#ecfdf5; color:#059669; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; }
-            .title { font-weight:700; color:#065f46; margin-bottom:4px; }
+            .title { font-weight:700; color:#065f46; margin-bottom:4px; font-size:18px; }
             .subtitle { color:#475569; font-size:14px; }
+            .spinner { border: 3px solid #ecfdf5; border-top: 3px solid #059669; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 16px auto 0; }
+            @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
           </style>
         </head>
         <body>
           <div class="card">
             <div class="icon">✓</div>
             <div class="title">Connexion Gmail réussie</div>
-            <div class="subtitle">Vous pouvez fermer cette fenêtre.</div>
+            <div class="subtitle">Fermeture automatique...</div>
+            <div class="spinner"></div>
           </div>
           <script>
-            if (window.opener) {
-              window.opener.postMessage({ type: 'gmail-connected', email: '${userInfo.email}' }, '*');
-              setTimeout(() => window.close(), 500);
-            } else {
-              window.location.href = '${redirectUrl || supabaseUrl}';
-            }
+            (function() {
+              const email = '${userInfo.email}';
+              const closeWindow = () => {
+                try {
+                  window.close();
+                } catch (e) {
+                  console.log('Cannot close window automatically');
+                }
+              };
+
+              if (window.opener && !window.opener.closed) {
+                try {
+                  window.opener.postMessage({ type: 'gmail-connected', email: email }, '*');
+                  setTimeout(closeWindow, 1000);
+                } catch (e) {
+                  console.error('Error sending message to opener:', e);
+                  setTimeout(() => {
+                    window.location.href = '${redirectUrl || supabaseUrl}';
+                  }, 2000);
+                }
+              } else {
+                setTimeout(() => {
+                  window.location.href = '${redirectUrl || supabaseUrl}';
+                }, 2000);
+              }
+            })();
           </script>
         </body>
     </html>`, {

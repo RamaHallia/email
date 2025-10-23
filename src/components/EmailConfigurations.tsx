@@ -180,12 +180,17 @@ export function EmailConfigurations() {
       const width = 600; const height = 700;
       const left = window.screen.width / 2 - width / 2;
       const top = window.screen.height / 2 - height / 2;
-      window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+
+      const popup = window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+
+      if (!popup) {
+        alert('Le popup a été bloqué. Veuillez autoriser les popups pour ce site.');
+        return;
+      }
 
       const handleMessage = async (event: MessageEvent) => {
         if (event.data.type === 'gmail-connected') {
           try {
-            // Créer/mettre à jour une ligne de configuration pour cet utilisateur
             const { data: existing } = await supabase
               .from('email_configurations')
               .select('id')
@@ -211,9 +216,19 @@ export function EmailConfigurations() {
           await loadLatestConfig();
           setMode('account');
           window.removeEventListener('message', handleMessage);
+        } else if (event.data.type === 'gmail-duplicate') {
+          alert(`Le compte ${event.data.email} est déjà configuré.`);
+          window.removeEventListener('message', handleMessage);
         }
       };
       window.addEventListener('message', handleMessage);
+
+      const checkPopupClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopupClosed);
+          window.removeEventListener('message', handleMessage);
+        }
+      }, 500);
     } catch (err) {
       console.error('Erreur connexion Gmail:', err);
       alert('Erreur lors de la connexion Gmail');

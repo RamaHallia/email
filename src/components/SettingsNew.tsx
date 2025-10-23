@@ -58,6 +58,12 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   }, [user]);
 
   useEffect(() => {
+    if (selectedAccount) {
+      loadAutoSortState();
+    }
+  }, [selectedAccount]);
+
+  useEffect(() => {
     if (selectedAccount && !showCompanyInfoModal) {
       loadCompanyData();
     }
@@ -179,6 +185,39 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         activity_description: config.activity_description || '',
         services_offered: config.services_offered || '',
       });
+    }
+  };
+
+  const loadAutoSortState = async () => {
+    if (!user || !selectedAccount) return;
+
+    const { data: config } = await supabase
+      .from('email_configurations')
+      .select('is_classement')
+      .eq('user_id', user.id)
+      .eq('email', selectedAccount.email)
+      .maybeSingle();
+
+    if (config) {
+      setAutoSort(config.is_classement ?? true);
+    }
+  };
+
+  const handleAutoSortToggle = async () => {
+    if (!user || !selectedAccount) return;
+
+    const newValue = !autoSort;
+    setAutoSort(newValue);
+
+    const { error } = await supabase
+      .from('email_configurations')
+      .update({ is_classement: newValue })
+      .eq('user_id', user.id)
+      .eq('email', selectedAccount.email);
+
+    if (error) {
+      console.error('Erreur lors de la mise à jour du tri automatique:', error);
+      setAutoSort(!newValue);
     }
   };
 
@@ -586,7 +625,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   <div className="text-sm text-gray-600">Classement dans Info, Traités, Pub</div>
                 </div>
                 <button
-                  onClick={() => setAutoSort(!autoSort)}
+                  onClick={handleAutoSortToggle}
                   className={`relative w-14 h-8 rounded-full transition-colors ${
                     autoSort ? 'bg-green-500' : 'bg-gray-300'
                   }`}

@@ -168,7 +168,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
     const { data: config } = await supabase
       .from('email_configurations')
-      .select('company_name, activity_description, services_offered')
+      .select('company_name, activity_description, services_offered, is_classement')
       .eq('user_id', user.id)
       .eq('email', selectedAccount.email)
       .maybeSingle();
@@ -179,6 +179,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         activity_description: config.activity_description || '',
         services_offered: config.services_offered || '',
       });
+      setAutoSort(config.is_classement ?? true);
     }
   };
 
@@ -586,7 +587,16 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   <div className="text-sm text-gray-600">Classement dans Info, Traités, Pub</div>
                 </div>
                 <button
-                  onClick={() => setAutoSort(!autoSort)}
+                  onClick={async () => {
+                    if (!user || !selectedAccount) return;
+                    const newValue = !autoSort;
+                    setAutoSort(newValue);
+                    await supabase
+                      .from('email_configurations')
+                      .update({ is_classement: newValue })
+                      .eq('user_id', user.id)
+                      .eq('email', selectedAccount.email);
+                  }}
                   className={`relative w-14 h-8 rounded-full transition-colors ${
                     autoSort ? 'bg-green-500' : 'bg-gray-300'
                   }`}

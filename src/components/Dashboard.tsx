@@ -1,14 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, ChevronDown, CreditCard } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, ChevronDown } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
-import { SubscriptionManagement } from './SubscriptionManagement';
-import { SubscriptionModal } from './SubscriptionModal';
-import { SubscriptionBlocker } from './SubscriptionBlocker';
 
-type ActiveView = 'home' | 'settings' | 'email-configs' | 'subscription';
+type ActiveView = 'home' | 'settings' | 'email-configs';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -47,43 +44,13 @@ export function Dashboard() {
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
-  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
-  const [subscriptionLoading, setSubscriptionLoading] = useState(true);
-  const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
-  const [shouldShowSubscriptionModal, setShouldShowSubscriptionModal] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
       loadAccounts();
-      checkSubscription();
     }
   }, [user?.id]);
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const tab = urlParams.get('tab');
-    const success = urlParams.get('success');
-
-    if (success === 'true') {
-      setActiveView('home');
-      setShowSuccessMessage(true);
-      setShowSubscriptionModal(false);
-      window.history.replaceState({}, '', '/dashboard');
-
-      const recheckSubscription = async () => {
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await checkSubscription();
-        await new Promise(resolve => setTimeout(resolve, 2000));
-        await checkSubscription();
-      };
-
-      recheckSubscription();
-      setTimeout(() => setShowSuccessMessage(false), 5000);
-    } else if (tab === 'subscription') {
-      setActiveView('subscription');
-    }
-  }, []);
 
   useEffect(() => {
     if (user?.id && activeView === 'home' && selectedEmail) {
@@ -116,44 +83,9 @@ export function Dashboard() {
       setSelectedAccountId(allAccounts[0].id);
       setSelectedEmail(allAccounts[0].email);
     }
-
-    if (allAccounts.length === 1 && !hasActiveSubscription && subscriptionLoading === false) {
-      setShouldShowSubscriptionModal(true);
-    }
   };
 
-  const checkSubscription = async () => {
-    if (!user?.id) return;
 
-    setSubscriptionLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from('subscriptions')
-        .select('status')
-        .eq('user_id', user.id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking subscription:', error);
-        setHasActiveSubscription(false);
-      } else {
-        setHasActiveSubscription(data?.status === 'active');
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      setHasActiveSubscription(false);
-    } finally {
-      setSubscriptionLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (accounts.length >= 1 && !hasActiveSubscription && !subscriptionLoading && !showSuccessMessage && !showSubscriptionModal) {
-      setShowSubscriptionModal(true);
-    } else if (hasActiveSubscription) {
-      setShowSubscriptionModal(false);
-    }
-  }, [accounts.length, hasActiveSubscription, subscriptionLoading, showSuccessMessage]);
 
   const getDateRange = () => {
     const now = new Date();
@@ -306,12 +238,7 @@ export function Dashboard() {
   };
 
   return (
-    <SubscriptionBlocker
-      hasActiveSubscription={hasActiveSubscription}
-      loading={subscriptionLoading}
-      emailAccountsCount={Math.max(accounts.length, 1)}
-    >
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-orange-50">
         <header className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -323,11 +250,8 @@ export function Dashboard() {
           <div className="flex items-center gap-4">
             <button
               onClick={() => setActiveView('home')}
-              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                !hasActiveSubscription
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : activeView === 'home'
+                activeView === 'home'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
@@ -337,11 +261,8 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveView('email-configs')}
-              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                !hasActiveSubscription
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : activeView === 'email-configs'
+                activeView === 'email-configs'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
@@ -351,28 +272,14 @@ export function Dashboard() {
             </button>
             <button
               onClick={() => setActiveView('settings')}
-              disabled={!hasActiveSubscription}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                !hasActiveSubscription
-                  ? 'text-gray-400 cursor-not-allowed'
-                  : activeView === 'settings'
+                activeView === 'settings'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
             >
               <SettingsIcon className="w-5 h-5" />
               Paramètres
-            </button>
-            <button
-              onClick={() => setActiveView('subscription')}
-              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'subscription'
-                  ? 'text-[#EF6855] font-semibold'
-                  : 'text-gray-600 hover:text-[#EF6855]'
-              }`}
-            >
-              <CreditCard className="w-5 h-5" />
-              Abonnement
             </button>
             <span className="text-sm text-gray-600">{user?.email}</span>
             <button
@@ -386,24 +293,6 @@ export function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        {showSuccessMessage && (
-          <div className="mb-6 bg-green-50 border-2 border-green-200 rounded-xl p-4 animate-fade-in">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-bold text-green-900 mb-1">Abonnement activé avec succès !</h3>
-                <p className="text-sm text-green-700">
-                  Bienvenue sur Hall IA ! Vous pouvez maintenant profiter de toutes les fonctionnalités pour automatiser vos emails.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {activeView === 'home' && (
           <div className="space-y-8">
             <div>
@@ -673,18 +562,7 @@ export function Dashboard() {
           </>
         )}
 
-        {activeView === 'subscription' && <SubscriptionManagement />}
       </main>
-
-      {!hasActiveSubscription && showSubscriptionModal && (
-        <SubscriptionModal
-          isOpen={true}
-          onClose={() => setShowSubscriptionModal(false)}
-          emailAccountsCount={Math.max(accounts.length, 1)}
-          isUpgrade={false}
-        />
-      )}
-      </div>
-    </SubscriptionBlocker>
+    </div>
   );
 }

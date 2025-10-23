@@ -548,12 +548,12 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                 </div>
               </div>
               <p className="text-sm text-gray-500">
-                {selectedAccount.provider === 'gmail' ? 'Gmail' : 'Outlook'}
+                {selectedAccount.provider === 'gmail' ? 'Gmail' : selectedAccount.provider === 'outlook' ? 'Outlook' : 'IMAP'}
               </p>
             </div>
           )}
 
-          {selectedAccount?.provider === 'gmail' && (
+          {selectedAccount && (
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-bold text-[#3D2817]">Informations de l'entreprise</h3>

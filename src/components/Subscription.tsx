@@ -318,10 +318,7 @@ export function Subscription() {
       </div>
 
       <div className="bg-white rounded-xl p-6 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-[#3D2817]">Comptes email additionnels</h3>
-          <span className="text-sm text-gray-600">19€ / compte / mois</span>
-        </div>
+        <h3 className="font-bold text-[#3D2817] mb-6">Comptes email additionnels</h3>
 
         {!isActive && (
           <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 mb-4">
@@ -331,13 +328,23 @@ export function Subscription() {
           </div>
         )}
 
-        <div className={`p-4 bg-gray-50 rounded-lg border border-gray-200 ${!isActive ? 'opacity-50' : ''}`}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Users className="w-5 h-5 text-gray-600" />
-              <span className="font-semibold text-gray-900">Nombre de comptes</span>
+        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${additionalUsers > 0 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+          <div className="flex items-center gap-4">
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${additionalUsers > 0 ? 'bg-green-200' : 'bg-gray-200'}`}>
+              <Users className={`w-6 h-6 ${additionalUsers > 0 ? 'text-green-700' : 'text-gray-500'}`} />
             </div>
-            <div className="flex items-center gap-3">
+            <div>
+              <h4 className="text-lg font-bold text-[#3D2817]">Comptes additionnels</h4>
+              <p className="text-sm text-gray-600">19€ / compte / mois</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {additionalUsers > 0 && (
+              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                {additionalUsers} compte{additionalUsers > 1 ? 's' : ''}
+              </span>
+            )}
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => setAdditionalUsers(Math.max(0, additionalUsers - 1))}
                 disabled={!isActive}
@@ -356,10 +363,6 @@ export function Subscription() {
                 +
               </button>
             </div>
-          </div>
-          <div className="flex items-center justify-between text-sm pt-3 border-t border-gray-200">
-            <span className="text-gray-600">Coût des comptes additionnels</span>
-            <span className="font-semibold text-gray-900">{additionalUsers * userPrice}€</span>
           </div>
         </div>
       </div>

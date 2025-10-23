@@ -468,82 +468,118 @@ export function Dashboard() {
 
         {activeView === 'settings' && (
           <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-[#3D2817] mb-2">
-                Paramètres
-              </h1>
-              <p className="text-gray-600">
-                Gérez vos comptes email et configuration
-              </p>
-            </div>
-            <SettingsNew onNavigateToEmailConfig={() => {}} />
-
-            <div className="mt-8 bg-gradient-to-br from-orange-50 to-white rounded-lg p-6 shadow-sm border border-orange-100">
+            <div className="mb-6 bg-gradient-to-br from-orange-50 to-white rounded-lg p-6 shadow-sm border border-orange-100">
               <h2 className="text-lg font-bold text-[#3D2817] mb-2 text-center">
                 Comment fonctionne Hall IA
               </h2>
               <p className="text-sm text-gray-600 text-center mb-8">Suivez le parcours de vos emails en 4 étapes simples</p>
 
               <div className="relative">
-                <div className="hidden lg:block absolute top-16 left-[12.5%] right-[12.5%] h-0.5 bg-gradient-to-r from-blue-300 via-green-300 via-amber-300 to-orange-300"></div>
+                <style>{`
+                  @keyframes slideProgress {
+                    0% { width: 0%; }
+                    100% { width: 100%; }
+                  }
+                  @keyframes fadeInUp {
+                    0% { opacity: 0; transform: translateY(20px); }
+                    100% { opacity: 1; transform: translateY(0); }
+                  }
+                  @keyframes pulse {
+                    0%, 100% { transform: scale(1); }
+                    50% { transform: scale(1.05); }
+                  }
+                  @keyframes arrowMove {
+                    0%, 100% { transform: translateX(0); }
+                    50% { transform: translateX(4px); }
+                  }
+                  .progress-line {
+                    animation: slideProgress 2s ease-out forwards;
+                  }
+                  .step-card-1 {
+                    animation: fadeInUp 0.6s ease-out 0.2s backwards;
+                  }
+                  .step-card-2 {
+                    animation: fadeInUp 0.6s ease-out 0.4s backwards;
+                  }
+                  .step-card-3 {
+                    animation: fadeInUp 0.6s ease-out 0.6s backwards;
+                  }
+                  .step-card-4 {
+                    animation: fadeInUp 0.6s ease-out 0.8s backwards;
+                  }
+                  .step-badge {
+                    animation: pulse 2s ease-in-out infinite;
+                  }
+                  .step-arrow {
+                    animation: arrowMove 1.5s ease-in-out infinite;
+                  }
+                `}</style>
+
+                <div className="hidden lg:block absolute top-16 left-[12.5%] right-[12.5%] h-0.5 bg-gray-200">
+                  <div className="progress-line h-full bg-gradient-to-r from-blue-400 via-green-400 via-amber-400 to-orange-400"></div>
+                </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 relative">
-                  <div className="relative">
+                  <div className="relative step-card-1">
                     <div className="text-center bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-blue-200">
-                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-3 shadow">
+                      <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-2 shadow step-badge">
                         1
                       </div>
+                      <div className="text-xs text-blue-600 font-semibold mb-1">ÉTAPE 1</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Réception du mail</h3>
                       <p className="text-xs text-gray-600">
                         Un email arrive dans votre boîte de réception
                       </p>
                     </div>
-                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-green-400">
+                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-green-400 step-arrow">
                       <svg fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative step-card-2">
                     <div className="text-center bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-green-200">
-                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-3 shadow">
+                      <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-2 shadow step-badge" style={{animationDelay: '0.2s'}}>
                         2
                       </div>
+                      <div className="text-xs text-green-600 font-semibold mb-1">ÉTAPE 2</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Analyse IA</h3>
                       <p className="text-xs text-gray-600">
                         Notre IA analyse le contenu et le contexte
                       </p>
                     </div>
-                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-amber-400">
+                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-amber-400 step-arrow" style={{animationDelay: '0.3s'}}>
                       <svg fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative step-card-3">
                     <div className="text-center bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-amber-200">
-                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-3 shadow">
+                      <div className="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-2 shadow step-badge" style={{animationDelay: '0.4s'}}>
                         3
                       </div>
+                      <div className="text-xs text-amber-600 font-semibold mb-1">ÉTAPE 3</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Classification & Réponse</h3>
                       <p className="text-xs text-gray-600">
                         Tri automatique + brouillon de réponse
                       </p>
                     </div>
-                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-orange-400">
+                    <div className="hidden lg:block absolute -right-2 top-14 w-6 h-6 text-orange-400 step-arrow" style={{animationDelay: '0.6s'}}>
                       <svg fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="relative">
+                  <div className="relative step-card-4">
                     <div className="text-center bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all border border-orange-200">
-                      <div className="w-10 h-10 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-3 shadow">
+                      <div className="w-10 h-10 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center text-white text-base font-bold mx-auto mb-2 shadow step-badge" style={{animationDelay: '0.6s'}}>
                         4
                       </div>
+                      <div className="text-xs text-orange-600 font-semibold mb-1">ÉTAPE 4</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Vous validez</h3>
                       <p className="text-xs text-gray-600">
                         Vérifiez et envoyez la réponse
@@ -588,6 +624,19 @@ export function Dashboard() {
                 </div>
               </div>
             </div>
+
+            <div className="mt-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
+                  Paramètres
+                </h1>
+                <p className="text-gray-600">
+                  Gérez vos comptes email et configuration
+                </p>
+              </div>
+            </div>
+
+            <SettingsNew onNavigateToEmailConfig={() => {}} />
           </>
         )}
 

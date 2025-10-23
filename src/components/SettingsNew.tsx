@@ -535,17 +535,12 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
             <div className="bg-white rounded-xl p-6 shadow-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-[#3D2817]">{selectedAccount.email}</h2>
-                <div className="flex gap-2">
-                  <button className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                    <Edit className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={() => handleDeleteAccountClick(selectedAccount.id, selectedAccount.email, selectedAccount.provider)}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleDeleteAccountClick(selectedAccount.id, selectedAccount.email, selectedAccount.provider)}
+                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
               </div>
               <p className="text-sm text-gray-500">
                 {selectedAccount.provider === 'gmail' ? 'Gmail' : selectedAccount.provider === 'outlook' ? 'Outlook' : 'IMAP'}

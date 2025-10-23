@@ -403,7 +403,7 @@ export function Dashboard() {
                   {/* Mini Cards Comptes Email */}
                   <div>
                     <label className="text-xs font-semibold text-gray-600 mb-3 block">Compte email</label>
-                    <div className="flex gap-3 overflow-x-auto py-2 px-1 -mx-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
+                    <div className="flex gap-3 overflow-x-auto py-2 pl-2 pr-1 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {accounts.map(account => {
                         const isSelected = selectedAccountId === account.id;
                         const getProviderIcon = () => {

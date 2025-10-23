@@ -399,11 +399,11 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="flex flex-col lg:flex-row items-start lg:items-start justify-between gap-6 mb-6">
+                <div className="flex flex-col gap-6 mb-6">
                   {/* Mini Cards Comptes Email */}
                   <div>
                     <label className="text-xs font-semibold text-gray-600 mb-3 block">Compte email</label>
-                    <div className="flex flex-wrap gap-3">
+                    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
                       {accounts.map(account => {
                         const isSelected = selectedAccountId === account.id;
                         const getProviderIcon = () => {
@@ -439,7 +439,7 @@ export function Dashboard() {
                               setSelectedEmail(account.email);
                               setIsClassementActive(account.is_classement);
                             }}
-                            className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all ${
+                            className={`group relative flex items-center gap-3 px-4 py-3 rounded-xl font-medium transition-all flex-shrink-0 ${
                               isSelected
                                 ? 'bg-gradient-to-br from-orange-50 to-red-50 border-2 border-[#EF6855] shadow-md scale-105'
                                 : 'bg-gray-50 border-2 border-transparent hover:border-gray-300 hover:shadow-sm'
@@ -485,8 +485,8 @@ export function Dashboard() {
                   </div>
 
                   {/* Buttons Période + Actualiser */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="flex items-center gap-2 bg-gray-50 p-1 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 bg-gray-50 p-1 rounded-lg flex-shrink-0">
                       <button
                         onClick={() => setTimePeriod('today')}
                         className={`px-4 py-2 rounded-md font-medium text-sm transition-all ${
@@ -521,7 +521,7 @@ export function Dashboard() {
                     <button
                       onClick={() => loadStats()}
                       disabled={loading}
-                      className="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                      className="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 flex-shrink-0"
                     >
                       <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                       Actualiser

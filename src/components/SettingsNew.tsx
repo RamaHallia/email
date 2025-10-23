@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
+import { UpgradeModal } from './UpgradeModal';
 
 interface EmailAccount {
   id: string;
@@ -41,6 +42,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [accountMissingInfo, setAccountMissingInfo] = useState<string>('');
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -57,6 +60,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     loadAccounts();
     loadDocuments();
     checkCompanyInfo();
+    checkSubscription();
   }, [user]);
 
   useEffect(() => {
@@ -84,8 +88,49 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   }, []);
 
 
+  const checkSubscription = async () => {
+    if (!user) return;
+
+    try {
+      const { data: customerData } = await supabase
+        .from('stripe_customers')
+        .select('customer_id')
+        .eq('user_id', user.id)
+        .is('deleted_at', null)
+        .maybeSingle();
+
+      if (customerData?.customer_id) {
+        const { data: subData } = await supabase
+          .from('stripe_subscriptions')
+          .select('status')
+          .eq('customer_id', customerData.customer_id)
+          .is('deleted_at', null)
+          .maybeSingle();
+
+        setHasActiveSubscription(['active', 'trialing'].includes(subData?.status || ''));
+      }
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+    }
+  };
+
   const handleAddAccountClick = () => {
+    if (!hasActiveSubscription) {
+      setShowAddAccountModal(true);
+      return;
+    }
+
+    if (accounts.length >= 1) {
+      setShowUpgradeModal(true);
+      return;
+    }
+
     setShowAddAccountModal(true);
+  };
+
+  const handleUpgrade = () => {
+    setShowUpgradeModal(false);
+    window.location.href = '/subscription';
   };
 
   const loadAccounts = async () => {
@@ -989,6 +1034,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       cancelText="Annuler"
       variant="danger"
     />
+
+    {showUpgradeModal && (
+      <UpgradeModal
+        onClose={() => setShowUpgradeModal(false)}
+        onUpgrade={handleUpgrade}
+      />
+    )}
 
     {showDuplicateEmailModal && (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">

@@ -12,16 +12,17 @@ interface SubscriptionData {
 }
 
 export function Subscription() {
-  const [additionalUsers, setAdditionalUsers] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
+  const [emailAccountsCount, setEmailAccountsCount] = useState(0);
 
   const basePlanPrice = 29;
   const userPrice = 19;
-  const totalPrice = basePlanPrice + (additionalUsers * userPrice);
+  const additionalAccounts = Math.max(0, emailAccountsCount - 1);
+  const totalPrice = basePlanPrice + (additionalAccounts * userPrice);
 
   const nextBillingDate = new Date();
   nextBillingDate.setMonth(nextBillingDate.getMonth() + 1);
@@ -49,6 +50,7 @@ export function Subscription() {
       setTimeout(() => setShowCanceledMessage(false), 5000);
     }
     fetchSubscription();
+    fetchEmailAccountsCount();
   }, []);
 
   const fetchSubscription = async () => {
@@ -77,6 +79,34 @@ export function Subscription() {
       }
     } catch (error) {
       console.error('Error fetching subscription:', error);
+    }
+  };
+
+  const fetchEmailAccountsCount = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { count: gmailCount } = await supabase
+        .from('gmail_tokens')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      const { count: outlookCount } = await supabase
+        .from('outlook_tokens')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id);
+
+      const { count: imapCount } = await supabase
+        .from('email_configurations')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.id)
+        .eq('provider', 'smtp_imap');
+
+      const total = (gmailCount || 0) + (outlookCount || 0) + (imapCount || 0);
+      setEmailAccountsCount(total);
+    } catch (error) {
+      console.error('Error fetching email accounts count:', error);
     }
   };
 
@@ -328,41 +358,23 @@ export function Subscription() {
           </div>
         )}
 
-        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${additionalUsers > 0 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
+        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${additionalAccounts > 0 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${additionalUsers > 0 ? 'bg-green-200' : 'bg-gray-200'}`}>
-              <Users className={`w-6 h-6 ${additionalUsers > 0 ? 'text-green-700' : 'text-gray-500'}`} />
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${additionalAccounts > 0 ? 'bg-green-200' : 'bg-gray-200'}`}>
+              <Users className={`w-6 h-6 ${additionalAccounts > 0 ? 'text-green-700' : 'text-gray-500'}`} />
             </div>
             <div>
               <h4 className="text-lg font-bold text-[#3D2817]">Comptes additionnels</h4>
               <p className="text-sm text-gray-600">19€ / compte / mois</p>
+              <p className="text-xs text-gray-500 mt-1">{emailAccountsCount} compte{emailAccountsCount > 1 ? 's' : ''} configuré{emailAccountsCount > 1 ? 's' : ''} ({additionalAccounts} facturable{additionalAccounts > 1 ? 's' : ''})</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {additionalUsers > 0 && (
+            {additionalAccounts > 0 && (
               <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                {additionalUsers} compte{additionalUsers > 1 ? 's' : ''}
+                +{additionalAccounts * userPrice}€/mois
               </span>
             )}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setAdditionalUsers(Math.max(0, additionalUsers - 1))}
-                disabled={!isActive}
-                className="w-8 h-8 rounded-lg border-2 border-gray-300 text-gray-600 font-bold hover:border-[#EF6855] hover:text-[#EF6855] transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:border-gray-300 disabled:hover:text-gray-600"
-              >
-                -
-              </button>
-              <span className="text-lg font-bold text-[#3D2817] min-w-[3ch] text-center">
-                {additionalUsers}
-              </span>
-              <button
-                onClick={() => setAdditionalUsers(additionalUsers + 1)}
-                disabled={!isActive}
-                className="w-8 h-8 rounded-lg border-2 border-[#EF6855] text-[#EF6855] font-bold hover:bg-[#EF6855] hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-[#EF6855]"
-              >
-                +
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -376,10 +388,10 @@ export function Subscription() {
               <span>Plan Premier</span>
               <span className="font-medium">{basePlanPrice}€</span>
             </div>
-            {additionalUsers > 0 && (
+            {additionalAccounts > 0 && (
               <div className="flex items-center justify-between text-gray-700">
-                <span>{additionalUsers} compte{additionalUsers > 1 ? 's' : ''} additionnel{additionalUsers > 1 ? 's' : ''}</span>
-                <span className="font-medium">{additionalUsers * userPrice}€</span>
+                <span>{additionalAccounts} compte{additionalAccounts > 1 ? 's' : ''} additionnel{additionalAccounts > 1 ? 's' : ''}</span>
+                <span className="font-medium">{additionalAccounts * userPrice}€</span>
               </div>
             )}
             <div className="pt-3 border-t-2 border-gray-200 flex items-center justify-between">
@@ -396,7 +408,7 @@ export function Subscription() {
               : 'Aucun abonnement actif'}
           </div>
 
-          {additionalUsers > 0 && (
+          {additionalAccounts > 0 && (
             <button
               onClick={handleUpdateSubscription}
               disabled={isLoading}

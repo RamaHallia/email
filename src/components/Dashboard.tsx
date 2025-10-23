@@ -300,65 +300,65 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-8 shadow-sm border border-blue-100">
-              <h3 className="text-lg font-bold text-[#3D2817] mb-6 text-center">Flux de traitement automatique</h3>
-              <div className="flex items-center justify-between max-w-5xl mx-auto">
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-orange-100">
+              <h3 className="text-base font-semibold text-[#3D2817] mb-4 text-center">Flux de traitement automatique</h3>
+              <div className="flex items-center justify-center gap-3 max-w-3xl mx-auto">
                 {/* Email entrant */}
                 <div className="flex flex-col items-center">
                   <div className="relative">
-                    <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg animate-pulse">
-                      <Mail className="w-10 h-10 text-white" />
+                    <div className="w-12 h-12 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center shadow-md animate-pulse">
+                      <Mail className="w-6 h-6 text-white" />
                     </div>
-                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-white flex items-center justify-center animate-bounce">
-                      <span className="text-white text-xs font-bold">!</span>
+                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center animate-bounce">
+                      <span className="text-white text-[8px] font-bold">!</span>
                     </div>
                   </div>
-                  <p className="mt-3 text-sm font-semibold text-gray-700">Email reçu</p>
+                  <p className="mt-2 text-xs font-medium text-gray-600">Email</p>
                 </div>
 
                 {/* Flèche animée */}
-                <div className="flex-1 px-4">
-                  <div className="relative h-1 bg-gradient-to-r from-blue-300 via-purple-300 to-orange-300 rounded-full overflow-hidden">
+                <div className="flex-1 px-2 max-w-[80px]">
+                  <div className="relative h-0.5 bg-gradient-to-r from-orange-200 to-orange-300 rounded-full overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
                   </div>
                 </div>
 
                 {/* AI Processing */}
-                <div className="flex flex-col items-center mx-4">
-                  <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg animate-spin-slow">
-                    <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center">
-                      <RefreshCw className="w-8 h-8 text-purple-500" />
+                <div className="flex flex-col items-center">
+                  <div className="w-12 h-12 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center shadow-md animate-spin-slow">
+                    <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
+                      <RefreshCw className="w-5 h-5 text-[#EF6855]" />
                     </div>
                   </div>
-                  <p className="mt-3 text-sm font-semibold text-gray-700">Analyse IA</p>
+                  <p className="mt-2 text-xs font-medium text-gray-600">IA</p>
                 </div>
 
                 {/* Flèche animée */}
-                <div className="flex-1 px-4">
-                  <div className="relative h-1 bg-gradient-to-r from-orange-300 via-yellow-300 to-green-300 rounded-full overflow-hidden">
+                <div className="flex-1 px-2 max-w-[80px]">
+                  <div className="relative h-0.5 bg-gradient-to-r from-orange-300 to-orange-200 rounded-full overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
                   </div>
                 </div>
 
                 {/* 3 Dossiers */}
-                <div className="flex gap-4">
+                <div className="flex gap-2">
                   <div className="flex flex-col items-center animate-slide-in-1">
-                    <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-lg">
-                      <span className="text-white text-xs font-bold">✓</span>
+                    <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-white text-sm font-bold">✓</span>
                     </div>
-                    <p className="mt-2 text-xs font-semibold text-gray-700">TRAITÉ</p>
+                    <p className="mt-1 text-[10px] font-medium text-gray-600">TRAITÉ</p>
                   </div>
                   <div className="flex flex-col items-center animate-slide-in-2">
-                    <div className="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-lg">
-                      <span className="text-white text-xs font-bold">✖</span>
+                    <div className="w-11 h-11 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-white text-sm font-bold">✖</span>
                     </div>
-                    <p className="mt-2 text-xs font-semibold text-gray-700">PUB</p>
+                    <p className="mt-1 text-[10px] font-medium text-gray-600">PUB</p>
                   </div>
                   <div className="flex flex-col items-center animate-slide-in-3">
-                    <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-                      <span className="text-white text-xs font-bold">i</span>
+                    <div className="w-11 h-11 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-lg flex items-center justify-center shadow-md">
+                      <span className="text-white text-sm font-bold">i</span>
                     </div>
-                    <p className="mt-2 text-xs font-semibold text-gray-700">INFO</p>
+                    <p className="mt-1 text-[10px] font-medium text-gray-600">INFO</p>
                   </div>
                 </div>
               </div>

@@ -554,7 +554,7 @@ export function Dashboard() {
                       <div className="text-xs text-green-600 font-semibold mb-1">ÉTAPE 2</div>
                       <h3 className="font-bold text-sm text-[#3D2817] mb-2">Description de l'activité</h3>
                       <p className="text-xs text-gray-600">
-                        Décrivez votre entreprise pour personnaliser l'analyse et les réponses automatiques
+                        Décrivez votre entreprise pour personnaliser les réponses automatiques
                       </p>
                     </div>
                   </div>

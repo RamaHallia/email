@@ -257,10 +257,10 @@ export function Subscription() {
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <h3 className="font-bold text-[#3D2817] mb-6">Votre abonnement</h3>
 
-        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${isActive ? 'bg-gray-50 border-gray-200' : 'border-[#EF6855] bg-gradient-to-br from-orange-50 to-red-50'}`}>
+        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${isActive ? 'bg-green-50 border-green-200' : 'border-[#EF6855] bg-gradient-to-br from-orange-50 to-red-50'}`}>
           <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${isActive ? 'bg-gray-200' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459]'}`}>
-              <Star className={`w-6 h-6 ${isActive ? 'text-gray-500' : 'text-white'}`} />
+            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${isActive ? 'bg-green-200' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459]'}`}>
+              <Star className={`w-6 h-6 ${isActive ? 'text-green-700' : 'text-white'}`} />
             </div>
             <div>
               <h4 className="text-lg font-bold text-[#3D2817]">Plan Premier</h4>

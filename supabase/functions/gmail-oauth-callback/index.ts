@@ -104,7 +104,7 @@ Deno.serve(async (req) => {
         </body>
       </html>`, {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+        headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' }
       });
     }
 
@@ -194,7 +194,7 @@ Deno.serve(async (req) => {
         </body>
     </html>`, {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'text/html' }
+      headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' }
     });
   } catch (error) {
     console.error('Error in Gmail OAuth callback:', error);

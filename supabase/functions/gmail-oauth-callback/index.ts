@@ -15,9 +15,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { code, state } = req.method === 'POST'
-      ? await req.json()
-      : { code: new URL(req.url).searchParams.get('code'), state: new URL(req.url).searchParams.get('state') };
+    const url = new URL(req.url);
+    const code = url.searchParams.get('code');
+    const state = url.searchParams.get('state');
 
     if (!code || !state) {
       return new Response(JSON.stringify({ error: 'Missing code or state parameter' }), {
@@ -33,7 +33,6 @@ Deno.serve(async (req) => {
     const googleClientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const frontendUrl = Deno.env.get('FRONTEND_URL') || 'http://localhost:5173';
 
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
@@ -42,7 +41,7 @@ Deno.serve(async (req) => {
         code,
         client_id: googleClientId,
         client_secret: googleClientSecret,
-        redirect_uri: `${frontendUrl}/gmail-oauth-callback.html`,
+        redirect_uri: `${supabaseUrl}/functions/v1/gmail-oauth-callback`,
         grant_type: 'authorization_code'
       })
     });
@@ -69,13 +68,10 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingConfig) {
-      return new Response(JSON.stringify({
-        error: 'Account already exists',
-        isDuplicate: true,
-        email: userInfo.email
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      const errorRedirect = `${redirectUrl}?error=duplicate&email=${encodeURIComponent(userInfo.email)}`;
+      return new Response(null, {
+        status: 302,
+        headers: { 'Location': errorRedirect }
       });
     }
 
@@ -112,18 +108,18 @@ Deno.serve(async (req) => {
       throw new Error(`Config error: ${configError.message}`);
     }
 
-    return new Response(JSON.stringify({
-      success: true,
-      email: userInfo.email
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    const successRedirect = `${redirectUrl}?success=true&email=${encodeURIComponent(userInfo.email)}`;
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': successRedirect }
     });
   } catch (error) {
     console.error('Error in Gmail OAuth callback:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    const stateData = JSON.parse(atob(new URL(req.url).searchParams.get('state') || ''));
+    const errorRedirect = `${stateData.redirectUrl}?error=${encodeURIComponent(error.message)}`;
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': errorRedirect }
     });
   }
 });

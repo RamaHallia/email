@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
@@ -379,6 +379,14 @@ export function Dashboard() {
                     }`}
                   >
                     Ce mois
+                  </button>
+                  <button
+                    onClick={() => loadStats()}
+                    disabled={loading}
+                    className="px-6 py-2 rounded-lg font-medium transition-all bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  >
+                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                    Actualiser
                   </button>
                 </div>
               </div>

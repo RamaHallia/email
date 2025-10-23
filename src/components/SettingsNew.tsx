@@ -39,6 +39,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState<string>('');
   const [accountMissingInfo, setAccountMissingInfo] = useState<string>('');
+  const [showNotification, setShowNotification] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState('');
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -218,7 +220,12 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     if (error) {
       console.error('Erreur lors de la mise à jour du tri automatique:', error);
       setAutoSort(!newValue);
+      return;
     }
+
+    setNotificationMessage(newValue ? 'Tri automatique activé' : 'Tri automatique désactivé');
+    setShowNotification(true);
+    setTimeout(() => setShowNotification(false), 3000);
   };
 
   const handleEditCompanyInfo = () => {
@@ -1025,6 +1032,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
             Compris
           </button>
         </div>
+      </div>
+    )}
+
+    {showNotification && (
+      <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 z-50 animate-slide-up">
+        <Check className="w-5 h-5" />
+        <span className="font-medium">{notificationMessage}</span>
       </div>
     )}
 

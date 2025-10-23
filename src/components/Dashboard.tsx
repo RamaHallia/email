@@ -324,8 +324,8 @@ export function Dashboard() {
                 </div>
 
                 {/* Flèche animée */}
-                <div className="flex-1 px-2 max-w-[80px]">
-                  <div className={`relative h-0.5 rounded-full overflow-hidden ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-200 to-orange-300'}`}>
+                <div className="flex-1 px-2 max-w-[80px] flex items-center">
+                  <div className={`relative h-0.5 rounded-full overflow-hidden w-full ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-200 to-orange-300'}`}>
                     {accounts.length > 0 && isClassementActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
                     )}
@@ -343,8 +343,8 @@ export function Dashboard() {
                 </div>
 
                 {/* Flèche animée */}
-                <div className="flex-1 px-2 max-w-[80px]">
-                  <div className={`relative h-0.5 rounded-full overflow-hidden ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-300 to-orange-200'}`}>
+                <div className="flex-1 px-2 max-w-[80px] flex items-center">
+                  <div className={`relative h-0.5 rounded-full overflow-hidden w-full ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-300 to-orange-200'}`}>
                     {accounts.length > 0 && isClassementActive && (
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
                     )}

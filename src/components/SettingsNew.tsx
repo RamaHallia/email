@@ -36,6 +36,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [accountToDelete, setAccountToDelete] = useState<{ id: string; email: string; provider: string } | null>(null);
   const [showDeleteDocModal, setShowDeleteDocModal] = useState(false);
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
+  const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(false);
+  const [duplicateEmail, setDuplicateEmail] = useState<string>('');
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -59,6 +61,23 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       loadCompanyData();
     }
   }, [selectedAccount, user]);
+
+  useEffect(() => {
+    const handleOAuthMessage = (event: MessageEvent) => {
+      if (event.data.type === 'gmail-duplicate' || event.data.type === 'outlook-duplicate') {
+        setDuplicateEmail(event.data.email);
+        setShowDuplicateEmailModal(true);
+      } else if (event.data.type === 'gmail-connected' || event.data.type === 'outlook-connected') {
+        loadAccounts();
+        setShowAddAccountModal(false);
+        setShowCompanyInfoModal(true);
+        setCompanyInfoStep(1);
+      }
+    };
+
+    window.addEventListener('message', handleOAuthMessage);
+    return () => window.removeEventListener('message', handleOAuthMessage);
+  }, []);
 
 
   const handleAddAccountClick = () => {
@@ -313,36 +332,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       const top = window.screen.height / 2 - height / 2;
       window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
 
-      const handleMessage = async (event: MessageEvent) => {
-        if (event.data.type === 'gmail-connected') {
-          try {
-            const { data: existing } = await supabase
-              .from('email_configurations')
-              .select('id')
-              .eq('user_id', user?.id as string)
-              .eq('email', event.data.email || '')
-              .maybeSingle();
-
-            if (!existing) {
-              await supabase.from('email_configurations').insert({
-                user_id: user?.id as string,
-                name: event.data.email || 'Gmail',
-                email: event.data.email || '',
-                provider: 'gmail',
-                is_connected: true,
-              });
-            }
-          } catch (e) {
-            console.error('Upsert config Gmail après OAuth:', e);
-          }
-          await loadAccounts();
-          setShowAddAccountModal(false);
-          setShowCompanyInfoModal(true);
-          setCompanyInfoStep(1);
-          window.removeEventListener('message', handleMessage);
-        }
-      };
-      window.addEventListener('message', handleMessage);
     } catch (err) {
       console.error('Erreur connexion Gmail:', err);
       alert('Erreur lors de la connexion Gmail');
@@ -375,7 +364,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         .maybeSingle();
 
       if (existing) {
-        alert('Ce compte email existe déjà');
+        setDuplicateEmail(imapFormData.email);
+        setShowDuplicateEmailModal(true);
         return;
       }
 
@@ -930,6 +920,42 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       cancelText="Annuler"
       variant="danger"
     />
+
+    {showDuplicateEmailModal && (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-2xl">
+          <div className="flex justify-center mb-6">
+            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-[#EF6855]" />
+            </div>
+          </div>
+
+          <h2 className="text-2xl font-bold text-[#3D2817] text-center mb-3">
+            Compte déjà existant
+          </h2>
+
+          <p className="text-gray-600 text-center mb-6">
+            Le compte <span className="font-semibold text-[#3D2817]">{duplicateEmail}</span> est déjà configuré dans votre application.
+          </p>
+
+          <div className="bg-orange-50 rounded-lg p-4 mb-6 border border-orange-200">
+            <p className="text-sm text-gray-700">
+              <span className="font-semibold text-[#3D2817]">💡 Conseil :</span> Vous ne pouvez pas ajouter deux fois le même compte email. Si vous souhaitez modifier ce compte, rendez-vous dans la liste de vos comptes.
+            </p>
+          </div>
+
+          <button
+            onClick={() => {
+              setShowDuplicateEmailModal(false);
+              setDuplicateEmail('');
+            }}
+            className="w-full bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white py-3 rounded-lg font-medium hover:shadow-lg transition-all"
+          >
+            Compris
+          </button>
+        </div>
+      </div>
+    )}
 
     </>
   );

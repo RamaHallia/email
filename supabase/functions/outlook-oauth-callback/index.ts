@@ -95,17 +95,55 @@ Deno.serve(async (req) => {
     const expiryDate = new Date();
     expiryDate.setSeconds(expiryDate.getSeconds() + (tokens.expires_in || 3600));
 
+    const userEmail = userInfo.mail || userInfo.userPrincipalName;
+
+    const { data: existingConfig } = await supabase
+      .from('email_configurations')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('email', userEmail)
+      .maybeSingle();
+
+    if (existingConfig) {
+      return new Response(`<!doctype html>
+        <html>
+          <head>
+            <meta charset="utf-8" />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+            <style>
+              body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#fff7f7; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+              .card { background:#ffffff; border:1px solid #fecaca; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); }
+              .icon { width:56px; height:56px; border-radius:9999px; background:#fef2f2; color:#dc2626; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; }
+              .title { font-weight:700; color:#991b1b; margin-bottom:4px; }
+              .subtitle { color:#475569; font-size:14px; }
+            </style>
+          </head>
+          <body>
+            <div class="card">
+              <div class="icon">!</div>
+              <div class="title">Compte déjà existant</div>
+              <div class="subtitle">Ce compte email est déjà configuré.</div>
+            </div>
+            <script>
+              window.opener && window.opener.postMessage({ type: 'outlook-duplicate', email: '${userEmail}' }, '*');
+              setTimeout(() => window.close(), 1500);
+            </script>
+          </body>
+        </html>`, {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'text/html; charset=utf-8' }
+      });
+    }
+
     const { data: tokenData, error: dbError } = await supabase
       .from('outlook_tokens')
-      .upsert({
+      .insert({
         user_id: userId,
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
         token_expiry: expiryDate.toISOString(),
-        email: userInfo.mail || userInfo.userPrincipalName,
+        email: userEmail,
         updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,email'
       })
       .select()
       .single();
@@ -114,19 +152,17 @@ Deno.serve(async (req) => {
 
     const { error: configError } = await supabase
       .from('email_configurations')
-      .upsert({
+      .insert({
         user_id: userId,
-        name: `Outlook - ${userInfo.mail || userInfo.userPrincipalName}`,
-        email: userInfo.mail || userInfo.userPrincipalName,
+        name: `Outlook - ${userEmail}`,
+        email: userEmail,
         provider: 'outlook',
         is_connected: true,
         outlook_token_id: tokenData.id,
         last_sync_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id,email'
       });
 
-    if (configError) console.error('Error creating email configuration:', configError);
+    if (configError) throw new Error(`Config error: ${configError.message}`);
 
     return new Response(`<!doctype html>
       <html>
@@ -148,7 +184,7 @@ Deno.serve(async (req) => {
             <div class="subtitle">Vous pouvez fermer cette fenêtre.</div>
           </div>
           <script>
-            window.opener && window.opener.postMessage({ type: 'outlook-connected', email: '${userInfo.mail || userInfo.userPrincipalName}' }, '*');
+            window.opener && window.opener.postMessage({ type: 'outlook-connected', email: '${userEmail}' }, '*');
             setTimeout(() => window.close(), 800);
           </script>
         </body>

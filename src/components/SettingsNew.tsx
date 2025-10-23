@@ -60,10 +60,10 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   }, [user]);
 
   useEffect(() => {
-    if (selectedAccount && !showCompanyInfoModal) {
+    if (selectedAccount) {
       loadCompanyData();
     }
-  }, [selectedAccount, user]);
+  }, [selectedAccount, user, showCompanyInfoModal]);
 
   useEffect(() => {
     const handleOAuthMessage = (event: MessageEvent) => {
@@ -117,6 +117,11 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
     if (allAccounts.length === 0) {
       setSelectedAccount(null);
+      setCompanyFormData({
+        company_name: '',
+        activity_description: '',
+        services_offered: '',
+      });
       return;
     }
 
@@ -125,6 +130,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     );
 
     if (!currentAccountStillExists) {
+      setSelectedAccount(allAccounts[0]);
+    } else if (!selectedAccount) {
       setSelectedAccount(allAccounts[0]);
     }
   };
@@ -166,7 +173,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   };
 
   const loadCompanyData = async () => {
-    if (!user || !selectedAccount || accountMissingInfo) return;
+    if (!user || !selectedAccount) return;
 
     const { data: config } = await supabase
       .from('email_configurations')
@@ -182,6 +189,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         services_offered: config.services_offered || '',
       });
       setAutoSort(config.is_classement ?? true);
+    } else {
+      setCompanyFormData({
+        company_name: '',
+        activity_description: '',
+        services_offered: '',
+      });
+      setAutoSort(true);
     }
   };
 

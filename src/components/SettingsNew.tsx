@@ -38,6 +38,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [docToDelete, setDocToDelete] = useState<string | null>(null);
   const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState<string>('');
+  const [accountMissingInfo, setAccountMissingInfo] = useState<string>('');
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -70,6 +71,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       } else if (event.data.type === 'gmail-connected' || event.data.type === 'outlook-connected') {
         loadAccounts();
         setShowAddAccountModal(false);
+        setAccountMissingInfo(event.data.email || '');
         setShowCompanyInfoModal(true);
         setCompanyInfoStep(1);
       }
@@ -128,31 +130,35 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const checkCompanyInfo = async () => {
     if (!user) return;
 
-    const { data: gmailAccounts } = await supabase
-      .from('gmail_tokens')
-      .select('id, email')
+    const { data: allConfigs } = await supabase
+      .from('email_configurations')
+      .select('email, company_name, activity_description, services_offered')
       .eq('user_id', user.id);
 
-    if (gmailAccounts && gmailAccounts.length > 0) {
-      const { data: config } = await supabase
-        .from('email_configurations')
-        .select('company_name, activity_description, services_offered')
-        .eq('user_id', user.id)
-        .eq('provider', 'gmail')
-        .maybeSingle();
+    if (!allConfigs || allConfigs.length === 0) return;
 
-      if (!config || !config.activity_description) {
-        setShowCompanyInfoModal(true);
-        if (config?.company_name) {
-          setCompanyInfoStep(2);
-          setCompanyFormData({
-            company_name: config.company_name,
-            activity_description: config.activity_description || '',
-            services_offered: config.services_offered || '',
-          });
-        } else {
-          setCompanyInfoStep(1);
-        }
+    const accountWithoutInfo = allConfigs.find(
+      config => !config.activity_description || !config.company_name
+    );
+
+    if (accountWithoutInfo) {
+      setAccountMissingInfo(accountWithoutInfo.email);
+      setShowCompanyInfoModal(true);
+
+      if (accountWithoutInfo.company_name && !accountWithoutInfo.activity_description) {
+        setCompanyInfoStep(2);
+        setCompanyFormData({
+          company_name: accountWithoutInfo.company_name,
+          activity_description: accountWithoutInfo.activity_description || '',
+          services_offered: accountWithoutInfo.services_offered || '',
+        });
+      } else {
+        setCompanyInfoStep(1);
+        setCompanyFormData({
+          company_name: accountWithoutInfo.company_name || '',
+          activity_description: accountWithoutInfo.activity_description || '',
+          services_offered: accountWithoutInfo.services_offered || '',
+        });
       }
     }
   };
@@ -243,8 +249,10 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
   const handleCompanyInfoSubmit = async () => {
     try {
-      if (!selectedAccount) {
-        alert('Aucun compte sélectionné');
+      const emailToUpdate = accountMissingInfo || selectedAccount?.email;
+
+      if (!emailToUpdate) {
+        alert('Aucun compte identifié');
         return;
       }
 
@@ -252,7 +260,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         .from('email_configurations')
         .select('id')
         .eq('user_id', user?.id)
-        .eq('email', selectedAccount.email)
+        .eq('email', emailToUpdate)
         .maybeSingle();
 
       if (existingConfig) {
@@ -310,6 +318,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       setShowCompanyInfoModal(false);
       setShowSuccessModal(true);
       setCompanyInfoStep(1);
+      setAccountMissingInfo('');
       await loadCompanyData();
     } catch (err) {
       console.error('Erreur lors de l\'enregistrement:', err);
@@ -402,7 +411,9 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         imap_port: '993',
       });
       await loadAccounts();
-      alert('Compte ajouté avec succès !');
+      setAccountMissingInfo(imapFormData.email);
+      setShowCompanyInfoModal(true);
+      setCompanyInfoStep(1);
     } catch (err) {
       console.error('Erreur ajout compte IMAP:', err);
       alert('Erreur lors de l\'ajout du compte');
@@ -675,6 +686,18 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
             </div>
           </div>
 
+          {accountMissingInfo && (
+            <div className="mb-4 p-4 bg-orange-50 rounded-lg border border-orange-200">
+              <p className="text-sm text-gray-800">
+                <span className="font-semibold text-[#EF6855]">Compte concerné :</span>{' '}
+                <span className="font-medium">{accountMissingInfo}</span>
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                Ce compte nécessite des informations supplémentaires pour fonctionner correctement.
+              </p>
+            </div>
+          )}
+
           <div className="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-800">
               <span className="font-semibold">Étape {companyInfoStep}/3</span> - {
@@ -747,6 +770,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
               onClick={() => {
                 setShowCompanyInfoModal(false);
                 setCompanyInfoStep(1);
+                setAccountMissingInfo('');
                 setCompanyFormData({
                   company_name: '',
                   activity_description: '',

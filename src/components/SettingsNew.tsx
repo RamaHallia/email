@@ -668,8 +668,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h3 className="font-bold text-[#3D2817] mb-6">Base de connaissances</h3>
-            <div className="space-y-3">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-bold text-[#3D2817]">Base de connaissances</h3>
+              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
+                v2
+              </span>
+            </div>
+            <div className="space-y-3 opacity-50">
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -678,13 +683,14 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   </div>
                   <button
                     onClick={() => handleDeleteDocumentClick(doc.id)}
-                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors cursor-not-allowed"
+                    disabled
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))}
-              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
+              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 font-medium transition-colors flex items-center justify-center gap-2 cursor-not-allowed" disabled>
                 <Plus className="w-4 h-4" />
                 Ajouter un document
               </button>

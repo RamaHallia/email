@@ -783,10 +783,7 @@ export function Dashboard() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             {/* Logo et Description */}
             <div className="space-y-4">
-              <img src="/logohallia.png" alt="Hallia" className="h-16" />
-              <p className="text-gray-300 text-sm">
-                Moins d'effort, plus de performance
-              </p>
+              <img src="/logo-hallia.svg" alt="Hallia" className="h-16" />
             </div>
 
             {/* Contact */}

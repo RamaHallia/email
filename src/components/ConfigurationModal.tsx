@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
 import { X } from 'lucide-react';
@@ -13,43 +13,6 @@ interface ConfigurationModalProps {
 export function ConfigurationModal({ isOpen, onClose, onComplete, onNavigateToOther }: ConfigurationModalProps) {
   const { user } = useAuth();
   const [connecting, setConnecting] = useState(false);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const success = params.get('success');
-    const error = params.get('error');
-    const email = params.get('email');
-
-    if (success === 'true' && email) {
-      (async () => {
-        await onComplete();
-        window.history.replaceState({}, '', window.location.pathname);
-        if (window.opener && !window.opener.closed) {
-          window.opener.postMessage({ type: 'oauth-success', email }, '*');
-          window.close();
-        }
-      })();
-    } else if (error) {
-      alert(`Erreur OAuth: ${decodeURIComponent(error)}`);
-      window.history.replaceState({}, '', window.location.pathname);
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({ type: 'oauth-error', error }, '*');
-        window.close();
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    const oauthHandler = async (event: MessageEvent) => {
-      if (event?.data?.type === 'oauth-success') {
-        setConnecting(false);
-        await onComplete();
-        onClose();
-      }
-    };
-    window.addEventListener('message', oauthHandler);
-    return () => window.removeEventListener('message', oauthHandler);
-  }, []);
 
 
   const connectGmail = async () => {
@@ -78,7 +41,48 @@ export function ConfigurationModal({ isOpen, onClose, onComplete, onNavigateToOt
       const left = window.screen.width / 2 - width / 2;
       const top = window.screen.height / 2 - height / 2;
 
-      window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+      const popup = window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+
+      if (!popup) {
+        alert('Le popup a été bloqué. Veuillez autoriser les popups pour ce site.');
+        setConnecting(false);
+        return;
+      }
+
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.data.type === 'gmail-connected') {
+          try {
+            await supabase.from('email_configurations').insert({
+              user_id: user?.id as string,
+              name: event.data.email || 'Gmail',
+              email: event.data.email || '',
+              provider: 'gmail',
+              is_connected: true,
+            });
+
+            await onComplete();
+            onClose();
+          } catch (e) {
+            console.error('Error saving Gmail config:', e);
+            alert('Erreur lors de la sauvegarde');
+          }
+          window.removeEventListener('message', handleMessage);
+          setConnecting(false);
+        } else if (event.data.type === 'gmail-duplicate') {
+          alert(`Le compte ${event.data.email} est déjà configuré.`);
+          window.removeEventListener('message', handleMessage);
+          setConnecting(false);
+        }
+      };
+      window.addEventListener('message', handleMessage);
+
+      const checkPopupClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopupClosed);
+          window.removeEventListener('message', handleMessage);
+          setConnecting(false);
+        }
+      }, 500);
     } catch (err) {
       console.error('Error connecting Gmail:', err);
       alert('Erreur lors de la connexion Gmail');

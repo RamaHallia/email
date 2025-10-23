@@ -68,10 +68,46 @@ Deno.serve(async (req) => {
       .maybeSingle();
 
     if (existingConfig) {
-      const errorRedirect = `${redirectUrl}?error=duplicate&email=${encodeURIComponent(userInfo.email)}`;
-      return new Response(null, {
-        status: 302,
-        headers: { 'Location': errorRedirect }
+      const duplicateHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Account Already Exists</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#fff7f7; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    .card { background:#ffffff; border:1px solid #fecaca; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); max-width:400px; }
+    .icon { width:56px; height:56px; border-radius:9999px; background:#fef2f2; color:#dc2626; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; }
+    .title { font-weight:700; color:#991b1b; margin-bottom:4px; font-size:18px; }
+    .subtitle { color:#475569; font-size:14px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">!</div>
+    <div class="title">Compte d\u00e9j\u00e0 existant</div>
+    <div class="subtitle">Ce compte Gmail est d\u00e9j\u00e0 configur\u00e9. Fermeture...</div>
+  </div>
+  <script>
+    (function() {
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: 'gmail-duplicate', email: '${userInfo.email}' }, '*');
+      }
+      setTimeout(function() {
+        window.close();
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>`;
+
+      return new Response(duplicateHtml, {
+        status: 400,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/html; charset=utf-8',
+          'Cache-Control': 'no-cache, no-store, must-revalidate'
+        }
       });
     }
 
@@ -108,18 +144,61 @@ Deno.serve(async (req) => {
       throw new Error(`Config error: ${configError.message}`);
     }
 
-    const successRedirect = `${redirectUrl}?success=true&email=${encodeURIComponent(userInfo.email)}`;
-    return new Response(null, {
-      status: 302,
-      headers: { 'Location': successRedirect }
+    const successHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gmail Connected</title>
+  <style>
+    body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; background:#f6fff8; margin:0; display:flex; align-items:center; justify-content:center; height:100vh; }
+    .card { background:#ffffff; border:1px solid #e2e8f0; border-radius:12px; padding:28px 32px; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.06); max-width:400px; }
+    .icon { width:56px; height:56px; border-radius:9999px; background:#ecfdf5; color:#059669; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:30px; }
+    .title { font-weight:700; color:#065f46; margin-bottom:4px; font-size:18px; }
+    .subtitle { color:#475569; font-size:14px; }
+    .spinner { border: 3px solid #ecfdf5; border-top: 3px solid #059669; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; margin: 16px auto 0; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">\u2713</div>
+    <div class="title">Connexion Gmail r\u00e9ussie</div>
+    <div class="subtitle">Fermeture automatique...</div>
+    <div class="spinner"></div>
+  </div>
+  <script>
+    (function() {
+      const email = '${userInfo.email}';
+
+      if (window.opener && !window.opener.closed) {
+        window.opener.postMessage({ type: 'gmail-connected', email: email }, '*');
+        setTimeout(function() {
+          window.close();
+        }, 1000);
+      } else {
+        setTimeout(function() {
+          window.location.href = '${redirectUrl || supabaseUrl}';
+        }, 2000);
+      }
+    })();
+  </script>
+</body>
+</html>`;
+
+    return new Response(successHtml, {
+      status: 200,
+      headers: {
+        ...corsHeaders,
+        'Content-Type': 'text/html; charset=utf-8',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
     });
   } catch (error) {
     console.error('Error in Gmail OAuth callback:', error);
-    const stateData = JSON.parse(atob(new URL(req.url).searchParams.get('state') || ''));
-    const errorRedirect = `${stateData.redirectUrl}?error=${encodeURIComponent(error.message)}`;
-    return new Response(null, {
-      status: 302,
-      headers: { 'Location': errorRedirect }
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   }
 });

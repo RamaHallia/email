@@ -39,8 +39,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [showDuplicateEmailModal, setShowDuplicateEmailModal] = useState(false);
   const [duplicateEmail, setDuplicateEmail] = useState<string>('');
   const [accountMissingInfo, setAccountMissingInfo] = useState<string>('');
-  const [showNotification, setShowNotification] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState('');
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -58,12 +56,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     loadDocuments();
     checkCompanyInfo();
   }, [user]);
-
-  useEffect(() => {
-    if (selectedAccount) {
-      loadAutoSortState();
-    }
-  }, [selectedAccount]);
 
   useEffect(() => {
     if (selectedAccount && !showCompanyInfoModal) {
@@ -188,44 +180,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         services_offered: config.services_offered || '',
       });
     }
-  };
-
-  const loadAutoSortState = async () => {
-    if (!user || !selectedAccount) return;
-
-    const { data: config } = await supabase
-      .from('email_configurations')
-      .select('is_classement')
-      .eq('user_id', user.id)
-      .eq('email', selectedAccount.email)
-      .maybeSingle();
-
-    if (config) {
-      setAutoSort(config.is_classement ?? true);
-    }
-  };
-
-  const handleAutoSortToggle = async () => {
-    if (!user || !selectedAccount) return;
-
-    const newValue = !autoSort;
-    setAutoSort(newValue);
-
-    const { error } = await supabase
-      .from('email_configurations')
-      .update({ is_classement: newValue })
-      .eq('user_id', user.id)
-      .eq('email', selectedAccount.email);
-
-    if (error) {
-      console.error('Erreur lors de la mise à jour du tri automatique:', error);
-      setAutoSort(!newValue);
-      return;
-    }
-
-    setNotificationMessage(newValue ? 'Tri automatique activé' : 'Tri automatique désactivé');
-    setShowNotification(true);
-    setTimeout(() => setShowNotification(false), 3000);
   };
 
   const handleEditCompanyInfo = () => {
@@ -632,7 +586,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   <div className="text-sm text-gray-600">Classement dans Info, Traités, Pub</div>
                 </div>
                 <button
-                  onClick={handleAutoSortToggle}
+                  onClick={() => setAutoSort(!autoSort)}
                   className={`relative w-14 h-8 rounded-full transition-colors ${
                     autoSort ? 'bg-green-500' : 'bg-gray-300'
                   }`}
@@ -668,13 +622,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
           </div>
 
           <div className="bg-white rounded-xl p-6 shadow-sm">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="font-bold text-[#3D2817]">Base de connaissances</h3>
-              <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
-                v2
-              </span>
-            </div>
-            <div className="space-y-3 opacity-50">
+            <h3 className="font-bold text-[#3D2817] mb-6">Base de connaissances</h3>
+            <div className="space-y-3">
               {documents.map((doc) => (
                 <div key={doc.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-3">
@@ -683,14 +632,13 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                   </div>
                   <button
                     onClick={() => handleDeleteDocumentClick(doc.id)}
-                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors cursor-not-allowed"
-                    disabled
+                    className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               ))}
-              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-gray-300 text-gray-400 font-medium transition-colors flex items-center justify-center gap-2 cursor-not-allowed" disabled>
+              <button className="w-full px-4 py-3 rounded-lg border-2 border-dashed border-[#EF6855] text-[#EF6855] font-medium hover:bg-orange-50 transition-colors flex items-center justify-center gap-2">
                 <Plus className="w-4 h-4" />
                 Ajouter un document
               </button>
@@ -1038,13 +986,6 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
             Compris
           </button>
         </div>
-      </div>
-    )}
-
-    {showNotification && (
-      <div className="fixed bottom-6 right-6 bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 z-50 animate-slide-up">
-        <Check className="w-5 h-5" />
-        <span className="font-medium">{notificationMessage}</span>
       </div>
     )}
 

@@ -44,11 +44,9 @@ Deno.serve(async (req: Request) => {
       'https://www.googleapis.com/auth/userinfo.email',
     ].join(' ');
 
-    const callbackUrl = `${supabaseUrl}/functions/v1/gmail-oauth-callback`;
-
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     authUrl.searchParams.set('client_id', googleClientId!);
-    authUrl.searchParams.set('redirect_uri', callbackUrl);
+    authUrl.searchParams.set('redirect_uri', `${supabaseUrl}/functions/v1/gmail-oauth-callback`);
     authUrl.searchParams.set('response_type', 'code');
     authUrl.searchParams.set('scope', scopes);
     authUrl.searchParams.set('access_type', 'offline');

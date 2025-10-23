@@ -52,43 +52,12 @@ export function EmailConfigurations() {
     })();
   }, []);
 
-  // Check URL params for OAuth callback
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const success = params.get('success');
-    const error = params.get('error');
-    const email = params.get('email');
-
-    if (success === 'true' && email) {
-      (async () => {
-        await loadLatestConfig();
-        setMode('account');
-        window.history.replaceState({}, '', window.location.pathname);
-        if (window.opener && !window.opener.closed) {
-          window.opener.postMessage({ type: 'oauth-success', email }, '*');
-          window.close();
-        }
-      })();
-    } else if (error) {
-      alert(`Erreur OAuth: ${decodeURIComponent(error)}`);
-      window.history.replaceState({}, '', window.location.pathname);
-      if (window.opener && !window.opener.closed) {
-        window.opener.postMessage({ type: 'oauth-error', error }, '*');
-        window.close();
-      }
-    }
-  }, []);
-
-  // Listener global pour capter les messages OAuth du popup
+  // Listener global pour capter les messages OAuth même si la page a rerendu
   useEffect(() => {
     const oauthHandler = async (event: MessageEvent) => {
-      if (event?.data?.type === 'oauth-success') {
-        await loadLatestConfig();
-        setMode('account');
-      } else if (event?.data?.type === 'oauth-error') {
-        console.error('OAuth error:', event.data.error);
-      } else if (event?.data?.type === 'outlook-connected') {
+      if (event?.data?.type === 'gmail-connected' || event?.data?.type === 'outlook-connected') {
         try {
+          const provider = event.data.type === 'gmail-connected' ? 'gmail' : 'outlook';
           const { data: existing } = await supabase
             .from('email_configurations')
             .select('id')
@@ -99,9 +68,9 @@ export function EmailConfigurations() {
           if (!existing) {
             await supabase.from('email_configurations').insert({
               user_id: user?.id as string,
-              name: event.data.email || 'outlook',
+              name: event.data.email || provider,
               email: event.data.email || '',
-              provider: 'outlook',
+              provider,
               is_connected: true,
             });
           }
@@ -212,7 +181,54 @@ export function EmailConfigurations() {
       const left = window.screen.width / 2 - width / 2;
       const top = window.screen.height / 2 - height / 2;
 
-      window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+      const popup = window.open(authUrl, 'Gmail OAuth', `width=${width},height=${height},left=${left},top=${top}`);
+
+      if (!popup) {
+        alert('Le popup a été bloqué. Veuillez autoriser les popups pour ce site.');
+        return;
+      }
+
+      const handleMessage = async (event: MessageEvent) => {
+        if (event.data.type === 'gmail-connected') {
+          try {
+            const { data: existing } = await supabase
+              .from('email_configurations')
+              .select('id')
+              .eq('user_id', user?.id as string)
+              .eq('email', event.data.email || '')
+              .maybeSingle();
+
+            if (!existing) {
+              await supabase.from('email_configurations').insert({
+                user_id: user?.id as string,
+                name: event.data.email || 'Gmail',
+                email: event.data.email || '',
+                provider: 'gmail',
+                is_connected: true,
+                company_name: null,
+                activity_description: null,
+                services_offered: null,
+              });
+            }
+          } catch (e) {
+            console.error('Upsert config Gmail après OAuth:', e);
+          }
+          await loadLatestConfig();
+          setMode('account');
+          window.removeEventListener('message', handleMessage);
+        } else if (event.data.type === 'gmail-duplicate') {
+          alert(`Le compte ${event.data.email} est déjà configuré.`);
+          window.removeEventListener('message', handleMessage);
+        }
+      };
+      window.addEventListener('message', handleMessage);
+
+      const checkPopupClosed = setInterval(() => {
+        if (popup.closed) {
+          clearInterval(checkPopupClosed);
+          window.removeEventListener('message', handleMessage);
+        }
+      }, 500);
     } catch (err) {
       console.error('Erreur connexion Gmail:', err);
       alert('Erreur lors de la connexion Gmail');

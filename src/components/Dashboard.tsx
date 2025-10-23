@@ -778,6 +778,22 @@ export function Dashboard() {
 
 
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 mt-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="text-sm text-gray-600">
+              © 2025 Hallia. Tous droits réservés.
+            </div>
+            <div className="flex gap-6 text-sm text-gray-600">
+              <a href="#" className="hover:text-gray-900 transition-colors">Conditions d'utilisation</a>
+              <a href="#" className="hover:text-gray-900 transition-colors">Politique de confidentialité</a>
+              <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

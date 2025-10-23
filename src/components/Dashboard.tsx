@@ -463,50 +463,78 @@ export function Dashboard() {
             </div>
             )}
 
-            <div className="bg-white rounded-xl p-8 shadow-sm">
-              <h2 className="text-xl font-bold text-[#3D2817] mb-8">
+            <div className="bg-gradient-to-br from-orange-50 to-white rounded-xl p-8 shadow-sm border border-orange-100">
+              <h2 className="text-2xl font-bold text-[#3D2817] mb-3 text-center">
                 Comment fonctionne Hall IA
               </h2>
+              <p className="text-gray-600 text-center mb-12">Suivez le parcours de vos emails en 4 étapes simples</p>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="text-center bg-blue-50 rounded-xl p-6">
-                  <div className="w-14 h-14 bg-blue-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                    1
-                  </div>
-                  <h3 className="font-bold text-[#3D2817] mb-2">Réception du mail</h3>
-                  <p className="text-sm text-gray-600">
-                    Un email arrive dans votre boîte de réception
-                  </p>
-                </div>
+              <div className="relative">
+                <div className="hidden lg:block absolute top-24 left-[12.5%] right-[12.5%] h-1 bg-gradient-to-r from-blue-300 via-green-300 via-amber-300 to-orange-300"></div>
 
-                <div className="text-center bg-green-50 rounded-xl p-6">
-                  <div className="w-14 h-14 bg-green-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                    2
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
+                  <div className="relative">
+                    <div className="text-center bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-blue-200">
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg">
+                        1
+                      </div>
+                      <h3 className="font-bold text-lg text-[#3D2817] mb-3">Réception du mail</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Un email arrive dans votre boîte de réception
+                      </p>
+                    </div>
+                    <div className="hidden lg:block absolute -right-4 top-20 w-8 h-8 text-green-400">
+                      <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-[#3D2817] mb-2">Analyse IA</h3>
-                  <p className="text-sm text-gray-600">
-                    Notre IA analyse le contenu et le contexte
-                  </p>
-                </div>
 
-                <div className="text-center bg-purple-50 rounded-xl p-6">
-                  <div className="w-14 h-14 bg-purple-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                    3
+                  <div className="relative">
+                    <div className="text-center bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-green-200">
+                      <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg">
+                        2
+                      </div>
+                      <h3 className="font-bold text-lg text-[#3D2817] mb-3">Analyse IA</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Notre IA analyse le contenu et le contexte
+                      </p>
+                    </div>
+                    <div className="hidden lg:block absolute -right-4 top-20 w-8 h-8 text-amber-400">
+                      <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-[#3D2817] mb-2">Classification & Réponse</h3>
-                  <p className="text-sm text-gray-600">
-                    Tri automatique + brouillon de réponse
-                  </p>
-                </div>
 
-                <div className="text-center bg-orange-50 rounded-xl p-6">
-                  <div className="w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-4">
-                    4
+                  <div className="relative">
+                    <div className="text-center bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-amber-200">
+                      <div className="w-16 h-16 bg-gradient-to-br from-amber-500 to-amber-600 rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg">
+                        3
+                      </div>
+                      <h3 className="font-bold text-lg text-[#3D2817] mb-3">Classification & Réponse</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Tri automatique + brouillon de réponse
+                      </p>
+                    </div>
+                    <div className="hidden lg:block absolute -right-4 top-20 w-8 h-8 text-orange-400">
+                      <svg fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </div>
                   </div>
-                  <h3 className="font-bold text-[#3D2817] mb-2">Vous validez</h3>
-                  <p className="text-sm text-gray-600">
-                    Vérifiez et envoyez la réponse
-                  </p>
+
+                  <div className="relative">
+                    <div className="text-center bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-all transform hover:-translate-y-1 border-2 border-orange-200">
+                      <div className="w-16 h-16 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center text-white text-2xl font-bold mx-auto mb-4 shadow-lg">
+                        4
+                      </div>
+                      <h3 className="font-bold text-lg text-[#3D2817] mb-3">Vous validez</h3>
+                      <p className="text-sm text-gray-600 leading-relaxed">
+                        Vérifiez et envoyez la réponse
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 

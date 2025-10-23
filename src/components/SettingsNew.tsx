@@ -890,7 +890,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
                 value={imapFormData.email}
                 onChange={(e) => setImapFormData({ ...imapFormData, email: e.target.value })}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#EF6855] focus:border-transparent"
-                placeholder="votre@email.com"
+                placeholder="contact@hallia.ai"
               />
             </div>
 

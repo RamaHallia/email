@@ -877,7 +877,7 @@ export function Dashboard() {
                   type="email"
                   defaultValue={user?.email || ''}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#EF6855]"
-                  placeholder="votre@email.com"
+                  placeholder="contact@hallia.ai"
                 />
               </div>
 

@@ -44,6 +44,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [notificationMessage, setNotificationMessage] = useState('');
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [allowedAccounts, setAllowedAccounts] = useState(1);
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -76,6 +77,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
         setShowDuplicateEmailModal(true);
       } else if (event.data.type === 'gmail-connected' || event.data.type === 'outlook-connected') {
         loadAccounts();
+        checkSubscription();
         setShowAddAccountModal(false);
         setAccountMissingInfo(event.data.email || '');
         setShowCompanyInfoModal(true);
@@ -102,12 +104,20 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       if (customerData?.customer_id) {
         const { data: subData } = await supabase
           .from('stripe_subscriptions')
-          .select('status')
+          .select('status, additional_accounts')
           .eq('customer_id', customerData.customer_id)
           .is('deleted_at', null)
           .maybeSingle();
 
-        setHasActiveSubscription(['active', 'trialing'].includes(subData?.status || ''));
+        const isActive = ['active', 'trialing'].includes(subData?.status || '');
+        setHasActiveSubscription(isActive);
+
+        if (isActive) {
+          const additionalAccounts = subData?.additional_accounts || 0;
+          setAllowedAccounts(1 + additionalAccounts);
+        } else {
+          setAllowedAccounts(1);
+        }
       }
     } catch (error) {
       console.error('Error checking subscription:', error);
@@ -120,7 +130,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       return;
     }
 
-    if (accounts.length >= 1) {
+    if (accounts.length >= allowedAccounts) {
       setShowUpgradeModal(true);
       return;
     }

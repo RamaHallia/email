@@ -181,13 +181,28 @@ async function syncCustomerFromStripe(customerId: string) {
 
     const subscription = subscriptions.data[0];
 
+    // Get the additional account price ID from environment
+    const additionalAccountPriceId = Deno.env.get('VITE_STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID');
+
+    // Calculate the number of additional accounts
+    let additionalAccounts = 0;
+    if (additionalAccountPriceId) {
+      const additionalAccountItem = subscription.items.data.find(
+        item => item.price.id === additionalAccountPriceId
+      );
+      if (additionalAccountItem) {
+        additionalAccounts = additionalAccountItem.quantity || 0;
+      }
+    }
+
     console.info(`Subscription details for ${customerId}:`, {
       id: subscription.id,
       status: subscription.status,
       price_id: subscription.items.data[0]?.price.id,
       current_period_start: subscription.current_period_start,
       current_period_end: subscription.current_period_end,
-      payment_method: subscription.default_payment_method
+      payment_method: subscription.default_payment_method,
+      additional_accounts: additionalAccounts
     });
 
     const { error: subError } = await supabase.from('stripe_subscriptions').upsert(
@@ -199,6 +214,7 @@ async function syncCustomerFromStripe(customerId: string) {
         current_period_start: subscription.current_period_start,
         current_period_end: subscription.current_period_end,
         cancel_at_period_end: subscription.cancel_at_period_end,
+        additional_accounts: additionalAccounts,
         ...(subscription.default_payment_method && typeof subscription.default_payment_method !== 'string'
           ? {
               payment_method_brand: subscription.default_payment_method.card?.brand ?? null,

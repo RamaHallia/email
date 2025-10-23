@@ -35,6 +35,7 @@ export function Subscription() {
 
       const pollInterval = setInterval(() => {
         fetchSubscription();
+        fetchEmailAccountsCount();
       }, 2000);
 
       setTimeout(() => {

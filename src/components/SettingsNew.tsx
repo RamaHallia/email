@@ -910,7 +910,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-[#3D2817] mb-2">
-                  Serveur IMAP
+                  Serveur IMAP Entrant
                 </label>
                 <input
                   type="text"

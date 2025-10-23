@@ -206,7 +206,7 @@ export function Settings() {
               <h3 className="text-xl font-bold text-[#3D2817] mb-6 mt-8">Configuration serveur IMAP</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div>
-                  <p className="text-sm text-gray-500">Serveur IMAP</p>
+                  <p className="text-sm text-gray-500">Serveur IMAP Entrant</p>
                   <p className="font-medium text-gray-900">{formData.imapHost}:{formData.imapPort}</p>
                 </div>
               </div>
@@ -371,7 +371,7 @@ export function Settings() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Serveur IMAP
+                  Serveur IMAP Entrant
                 </label>
                 <input
                   type="text"

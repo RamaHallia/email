@@ -54,6 +54,8 @@ Deno.serve(async (req) => {
 });
 
 async function handleEvent(event: Stripe.Event) {
+  console.info(`Received webhook event: ${event.type}`);
+
   const stripeData = event?.data?.object ?? {};
 
   if (!stripeData) {
@@ -64,61 +66,68 @@ async function handleEvent(event: Stripe.Event) {
     return;
   }
 
-  // for one time payments, we only listen for the checkout.session.completed event
-  if (event.type === 'payment_intent.succeeded' && event.data.object.invoice === null) {
-    return;
-  }
-
   const { customer: customerId } = stripeData;
 
   if (!customerId || typeof customerId !== 'string') {
     console.error(`No customer received on event: ${JSON.stringify(event)}`);
-  } else {
-    let isSubscription = true;
+    return;
+  }
 
-    if (event.type === 'checkout.session.completed') {
-      const { mode } = stripeData as Stripe.Checkout.Session;
+  // Handle subscription events
+  if (
+    event.type === 'customer.subscription.created' ||
+    event.type === 'customer.subscription.updated' ||
+    event.type === 'customer.subscription.deleted' ||
+    event.type === 'invoice.payment_succeeded' ||
+    event.type === 'invoice.payment_failed'
+  ) {
+    console.info(`Processing subscription event for customer: ${customerId}`);
+    await syncCustomerFromStripe(customerId);
+    return;
+  }
 
-      isSubscription = mode === 'subscription';
+  // Handle checkout session completed
+  if (event.type === 'checkout.session.completed') {
+    const { mode } = stripeData as Stripe.Checkout.Session;
+    const isSubscription = mode === 'subscription';
 
-      console.info(`Processing ${isSubscription ? 'subscription' : 'one-time payment'} checkout session`);
-    }
-
-    const { mode, payment_status } = stripeData as Stripe.Checkout.Session;
+    console.info(`Processing ${isSubscription ? 'subscription' : 'one-time payment'} checkout session`);
 
     if (isSubscription) {
       console.info(`Starting subscription sync for customer: ${customerId}`);
       await syncCustomerFromStripe(customerId);
-    } else if (mode === 'payment' && payment_status === 'paid') {
-      try {
-        // Extract the necessary information from the session
-        const {
-          id: checkout_session_id,
-          payment_intent,
-          amount_subtotal,
-          amount_total,
-          currency,
-        } = stripeData as Stripe.Checkout.Session;
+    } else {
+      const { payment_status } = stripeData as Stripe.Checkout.Session;
 
-        // Insert the order into the stripe_orders table
-        const { error: orderError } = await supabase.from('stripe_orders').insert({
-          checkout_session_id,
-          payment_intent_id: payment_intent,
-          customer_id: customerId,
-          amount_subtotal,
-          amount_total,
-          currency,
-          payment_status,
-          status: 'completed', // assuming we want to mark it as completed since payment is successful
-        });
+      if (payment_status === 'paid') {
+        try {
+          const {
+            id: checkout_session_id,
+            payment_intent,
+            amount_subtotal,
+            amount_total,
+            currency,
+          } = stripeData as Stripe.Checkout.Session;
 
-        if (orderError) {
-          console.error('Error inserting order:', orderError);
-          return;
+          const { error: orderError } = await supabase.from('stripe_orders').insert({
+            checkout_session_id,
+            payment_intent_id: payment_intent,
+            customer_id: customerId,
+            amount_subtotal,
+            amount_total,
+            currency,
+            payment_status,
+            status: 'completed',
+          });
+
+          if (orderError) {
+            console.error('Error inserting order:', orderError);
+            return;
+          }
+          console.info(`Successfully processed one-time payment for session: ${checkout_session_id}`);
+        } catch (error) {
+          console.error('Error processing one-time payment:', error);
         }
-        console.info(`Successfully processed one-time payment for session: ${checkout_session_id}`);
-      } catch (error) {
-        console.error('Error processing one-time payment:', error);
       }
     }
   }

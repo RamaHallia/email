@@ -5,7 +5,7 @@ import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, Layo
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 
-type ActiveView = 'home' | 'settings' | 'email-configs';
+type ActiveView = 'home' | 'settings';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -266,17 +266,6 @@ export function Dashboard() {
             >
               <LayoutDashboard className="w-5 h-5" />
               Tableau de bord
-            </button>
-            <button
-              onClick={() => setActiveView('email-configs')}
-              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'email-configs'
-                  ? 'text-[#EF6855] font-semibold'
-                  : 'text-gray-600 hover:text-[#EF6855]'
-              }`}
-            >
-              <Mail className="w-5 h-5" />
-              Configuration
             </button>
             <button
               onClick={() => setActiveView('settings')}
@@ -574,23 +563,10 @@ export function Dashboard() {
                 Gérez vos comptes email et configuration
               </p>
             </div>
-            <SettingsNew onNavigateToEmailConfig={() => setActiveView('email-configs')} />
+            <SettingsNew onNavigateToEmailConfig={() => {}} />
           </>
         )}
 
-        {activeView === 'email-configs' && (
-          <>
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-[#3D2817] mb-2">
-                Comptes configurés
-              </h1>
-              <p className="text-gray-600">
-                Gérez vos comptes email connectés
-              </p>
-            </div>
-            <EmailConfigurations />
-          </>
-        )}
 
       </main>
     </div>

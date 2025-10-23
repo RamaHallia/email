@@ -539,9 +539,9 @@ export function Dashboard() {
                         1
                       </div>
                       <div className="text-xs text-blue-600 font-semibold mb-1">ÉTAPE 1</div>
-                      <h3 className="font-bold text-sm text-[#3D2817] mb-2">Réception du mail</h3>
+                      <h3 className="font-bold text-sm text-[#3D2817] mb-2">Créer un compte email</h3>
                       <p className="text-xs text-gray-600">
-                        Un email arrive dans votre boîte de réception
+                        Configurez votre compte email pour commencer à recevoir et traiter vos messages
                       </p>
                     </div>
                   </div>
@@ -552,9 +552,9 @@ export function Dashboard() {
                         2
                       </div>
                       <div className="text-xs text-green-600 font-semibold mb-1">ÉTAPE 2</div>
-                      <h3 className="font-bold text-sm text-[#3D2817] mb-2">Analyse IA</h3>
+                      <h3 className="font-bold text-sm text-[#3D2817] mb-2">Description de l'activité</h3>
                       <p className="text-xs text-gray-600">
-                        Notre IA analyse le contenu et le contexte
+                        Décrivez votre entreprise pour personnaliser l'analyse et les réponses automatiques
                       </p>
                     </div>
                   </div>
@@ -578,9 +578,9 @@ export function Dashboard() {
                         4
                       </div>
                       <div className="text-xs text-orange-600 font-semibold mb-1">ÉTAPE 4</div>
-                      <h3 className="font-bold text-sm text-[#3D2817] mb-2">Vous validez</h3>
+                      <h3 className="font-bold text-sm text-[#3D2817] mb-2">Validez et envoyez</h3>
                       <p className="text-xs text-gray-600">
-                        Vérifiez et envoyez la réponse
+                        Vérifiez la réponse proposée et envoyez-la depuis la boîte TRAITÉ
                       </p>
                     </div>
                   </div>

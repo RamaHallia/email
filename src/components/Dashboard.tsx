@@ -23,6 +23,7 @@ interface EmailAccount {
   id: string;
   email: string;
   provider: 'gmail' | 'outlook' | 'smtp_imap';
+  is_classement: boolean;
 }
 
 export function Dashboard() {
@@ -43,6 +44,7 @@ export function Dashboard() {
   const [accounts, setAccounts] = useState<EmailAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
+  const [isClassementActive, setIsClassementActive] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -67,7 +69,7 @@ export function Dashboard() {
 
     const { data, error } = await supabase
       .from('email_configurations')
-      .select('id, email, provider')
+      .select('id, email, provider, is_classement')
       .eq('user_id', user.id)
       .eq('is_connected', true);
 
@@ -79,7 +81,8 @@ export function Dashboard() {
     const allAccounts: EmailAccount[] = (data || []).map(acc => ({
       id: acc.id,
       email: acc.email,
-      provider: acc.provider as 'gmail' | 'outlook' | 'smtp_imap'
+      provider: acc.provider as 'gmail' | 'outlook' | 'smtp_imap',
+      is_classement: acc.is_classement ?? true
     }));
 
     setAccounts(allAccounts);
@@ -87,6 +90,7 @@ export function Dashboard() {
     if (allAccounts.length === 0) {
       setSelectedAccountId(null);
       setSelectedEmail(null);
+      setIsClassementActive(false);
       return;
     }
 
@@ -95,6 +99,9 @@ export function Dashboard() {
     if (!currentAccountStillExists) {
       setSelectedAccountId(allAccounts[0].id);
       setSelectedEmail(allAccounts[0].email);
+      setIsClassementActive(allAccounts[0].is_classement);
+    } else {
+      setIsClassementActive(currentAccountStillExists.is_classement);
     }
   };
 
@@ -300,34 +307,38 @@ export function Dashboard() {
               </p>
             </div>
 
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-orange-100">
+            <div className={`bg-white rounded-xl p-6 shadow-sm border ${accounts.length === 0 || !isClassementActive ? 'border-gray-200' : 'border-orange-100'}`}>
               <h3 className="text-base font-semibold text-[#3D2817] mb-4 text-center">Flux de traitement automatique</h3>
               <div className="flex items-center justify-center gap-3 max-w-3xl mx-auto">
                 {/* Email entrant */}
                 <div className="flex flex-col items-center">
                   <div className="relative">
-                    <div className="w-12 h-12 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center shadow-md animate-pulse">
-                      <Mail className="w-6 h-6 text-white" />
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459] animate-pulse'}`}>
+                      <Mail className={`w-6 h-6 ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-white'}`} />
                     </div>
-                    <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center animate-bounce">
-                      <span className="text-white text-[8px] font-bold">!</span>
-                    </div>
+                    {accounts.length > 0 && isClassementActive && (
+                      <div className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white flex items-center justify-center animate-bounce">
+                        <span className="text-white text-[8px] font-bold">!</span>
+                      </div>
+                    )}
                   </div>
                   <p className="mt-2 text-xs font-medium text-gray-600">Email</p>
                 </div>
 
                 {/* Flèche animée */}
                 <div className="flex-1 px-2 max-w-[80px]">
-                  <div className="relative h-0.5 bg-gradient-to-r from-orange-200 to-orange-300 rounded-full overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+                  <div className={`relative h-0.5 rounded-full overflow-hidden ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-200 to-orange-300'}`}>
+                    {accounts.length > 0 && isClassementActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+                    )}
                   </div>
                 </div>
 
                 {/* AI Processing */}
                 <div className="flex flex-col items-center">
-                  <div className="w-12 h-12 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-full flex items-center justify-center shadow-md animate-spin-slow">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459] animate-spin-slow'}`}>
                     <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                      <RefreshCw className="w-5 h-5 text-[#EF6855]" />
+                      <RefreshCw className={`w-5 h-5 ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-[#EF6855]'}`} />
                     </div>
                   </div>
                   <p className="mt-2 text-xs font-medium text-gray-600">IA</p>
@@ -335,28 +346,30 @@ export function Dashboard() {
 
                 {/* Flèche animée */}
                 <div className="flex-1 px-2 max-w-[80px]">
-                  <div className="relative h-0.5 bg-gradient-to-r from-orange-300 to-orange-200 rounded-full overflow-hidden">
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+                  <div className={`relative h-0.5 rounded-full overflow-hidden ${accounts.length === 0 || !isClassementActive ? 'bg-gray-200' : 'bg-gradient-to-r from-orange-300 to-orange-200'}`}>
+                    {accounts.length > 0 && isClassementActive && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent animate-shimmer"></div>
+                    )}
                   </div>
                 </div>
 
                 {/* 3 Dossiers */}
                 <div className="flex gap-2">
-                  <div className="flex flex-col items-center animate-slide-in-1">
-                    <div className="w-11 h-11 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center shadow-md">
-                      <span className="text-white text-sm font-bold">✓</span>
+                  <div className={`flex flex-col items-center ${accounts.length > 0 && isClassementActive ? 'animate-slide-in-1' : ''}`}>
+                    <div className={`w-11 h-11 rounded-lg flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-green-500 to-green-600'}`}>
+                      <span className={`text-sm font-bold ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-white'}`}>✓</span>
                     </div>
                     <p className="mt-1 text-[10px] font-medium text-gray-600">TRAITÉ</p>
                   </div>
-                  <div className="flex flex-col items-center animate-slide-in-2">
-                    <div className="w-11 h-11 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center shadow-md">
-                      <span className="text-white text-sm font-bold">✖</span>
+                  <div className={`flex flex-col items-center ${accounts.length > 0 && isClassementActive ? 'animate-slide-in-2' : ''}`}>
+                    <div className={`w-11 h-11 rounded-lg flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-red-500 to-red-600'}`}>
+                      <span className={`text-sm font-bold ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-white'}`}>✖</span>
                     </div>
                     <p className="mt-1 text-[10px] font-medium text-gray-600">PUB</p>
                   </div>
-                  <div className="flex flex-col items-center animate-slide-in-3">
-                    <div className="w-11 h-11 bg-gradient-to-br from-[#EF6855] to-[#F9A459] rounded-lg flex items-center justify-center shadow-md">
-                      <span className="text-white text-sm font-bold">i</span>
+                  <div className={`flex flex-col items-center ${accounts.length > 0 && isClassementActive ? 'animate-slide-in-3' : ''}`}>
+                    <div className={`w-11 h-11 rounded-lg flex items-center justify-center shadow-md ${accounts.length === 0 || !isClassementActive ? 'bg-gray-300' : 'bg-gradient-to-br from-[#EF6855] to-[#F9A459]'}`}>
+                      <span className={`text-sm font-bold ${accounts.length === 0 || !isClassementActive ? 'text-gray-500' : 'text-white'}`}>i</span>
                     </div>
                     <p className="mt-1 text-[10px] font-medium text-gray-600">INFO</p>
                   </div>
@@ -395,6 +408,7 @@ export function Dashboard() {
                         onClick={() => {
                           setSelectedAccountId(account.id);
                           setSelectedEmail(account.email);
+                          setIsClassementActive(account.is_classement);
                         }}
                         className={`px-4 py-3 rounded-lg font-medium transition-all border-2 ${
                           selectedAccountId === account.id

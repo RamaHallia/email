@@ -399,75 +399,80 @@ export function Dashboard() {
               </div>
             ) : (
               <div className="bg-white rounded-xl p-6 shadow-sm">
-                <div className="mb-6">
-                  <h2 className="text-sm font-semibold text-gray-700 mb-3">Compte email</h2>
-                  <div className="flex flex-wrap gap-3">
-                    {accounts.map(account => (
-                      <button
-                        key={account.id}
-                        onClick={() => {
-                          setSelectedAccountId(account.id);
-                          setSelectedEmail(account.email);
-                          setIsClassementActive(account.is_classement);
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+                  {/* Dropdown Compte Email */}
+                  <div className="flex-1 w-full sm:w-auto">
+                    <label className="text-xs font-semibold text-gray-600 mb-2 block">Compte email</label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                      <select
+                        value={selectedAccountId || ''}
+                        onChange={(e) => {
+                          const account = accounts.find(acc => acc.id === e.target.value);
+                          if (account) {
+                            setSelectedAccountId(account.id);
+                            setSelectedEmail(account.email);
+                            setIsClassementActive(account.is_classement);
+                          }
                         }}
-                        className={`px-4 py-3 rounded-lg font-medium transition-all border-2 ${
-                          selectedAccountId === account.id
-                            ? 'bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white border-transparent shadow-md'
-                            : 'bg-white text-gray-700 border-gray-300 hover:border-[#EF6855]'
+                        className="w-full pl-10 pr-4 py-3 bg-white border-2 border-gray-200 rounded-lg font-medium text-gray-700 appearance-none cursor-pointer hover:border-[#EF6855] focus:outline-none focus:border-[#EF6855] focus:ring-2 focus:ring-orange-100 transition-all"
+                      >
+                        {accounts.map(account => (
+                          <option key={account.id} value={account.id}>
+                            {account.email}
+                          </option>
+                        ))}
+                      </select>
+                      <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </div>
+                  </div>
+
+                  {/* Buttons Période + Actualiser */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-center gap-2 bg-gray-50 p-1 rounded-lg">
+                      <button
+                        onClick={() => setTimePeriod('today')}
+                        className={`px-4 py-2 rounded-md font-medium text-sm transition-all ${
+                          timePeriod === 'today'
+                            ? 'bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
                         }`}
                       >
-                        <div className="flex items-center gap-2">
-                          <Mail className="w-4 h-4" />
-                          <span>{account.email}</span>
-                        </div>
+                        Aujourd'hui
                       </button>
-                    ))}
+                      <button
+                        onClick={() => setTimePeriod('week')}
+                        className={`px-4 py-2 rounded-md font-medium text-sm transition-all ${
+                          timePeriod === 'week'
+                            ? 'bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        Cette semaine
+                      </button>
+                      <button
+                        onClick={() => setTimePeriod('month')}
+                        className={`px-4 py-2 rounded-md font-medium text-sm transition-all ${
+                          timePeriod === 'month'
+                            ? 'bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white shadow-sm'
+                            : 'text-gray-600 hover:text-gray-900'
+                        }`}
+                      >
+                        Ce mois
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => loadStats()}
+                      disabled={loading}
+                      className="px-4 py-2 rounded-lg font-medium text-sm transition-all bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                      Actualiser
+                    </button>
                   </div>
                 </div>
-
-              <div className="mb-6">
-                <h2 className="text-sm font-semibold text-gray-700 mb-3">Période</h2>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setTimePeriod('today')}
-                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                      timePeriod === 'today'
-                        ? 'bg-[#EF6855] text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Aujourd'hui
-                  </button>
-                  <button
-                    onClick={() => setTimePeriod('week')}
-                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                      timePeriod === 'week'
-                        ? 'bg-[#EF6855] text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Cette semaine
-                  </button>
-                  <button
-                    onClick={() => setTimePeriod('month')}
-                    className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                      timePeriod === 'month'
-                        ? 'bg-[#EF6855] text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    Ce mois
-                  </button>
-                  <button
-                    onClick={() => loadStats()}
-                    disabled={loading}
-                    className="px-6 py-2 rounded-lg font-medium transition-all bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                    Actualiser
-                  </button>
-                </div>
-              </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="bg-white border-2 border-blue-200 rounded-xl p-6">

@@ -156,8 +156,51 @@ export function Subscription() {
       }
 
       setInvoices(data || []);
+
+      // If no invoices and user has active subscription, sync from Stripe
+      if ((!data || data.length === 0) && subscription?.status === 'active') {
+        await syncInvoicesFromStripe();
+      }
     } catch (error) {
       console.error('Error fetching invoices:', error);
+    }
+  };
+
+  const syncInvoicesFromStripe = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-sync-invoices`,
+        {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Invoices synced:', result);
+        // Refetch invoices after sync
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data } = await supabase
+          .from('stripe_invoices')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('status', 'paid')
+          .order('paid_at', { ascending: false })
+          .limit(10);
+
+        setInvoices(data || []);
+      }
+    } catch (error) {
+      console.error('Error syncing invoices:', error);
     }
   };
 

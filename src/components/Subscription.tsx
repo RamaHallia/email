@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Users, Check, Star, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, Check, Star, AlertCircle, CheckCircle, Download } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface SubscriptionData {
@@ -19,6 +19,17 @@ interface EmailAccount {
   provider: string;
 }
 
+interface Invoice {
+  id: number;
+  invoice_id: string;
+  invoice_number: string | null;
+  amount_paid: number;
+  currency: string;
+  status: string;
+  paid_at: number | null;
+  invoice_pdf: string | null;
+}
+
 export function Subscription() {
   const [isLoading, setIsLoading] = useState(false);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
@@ -27,6 +38,8 @@ export function Subscription() {
   const [isCanceling, setIsCanceling] = useState(false);
   const [emailAccountsCount, setEmailAccountsCount] = useState(0);
   const [emailAccounts, setEmailAccounts] = useState<EmailAccount[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [downloadingInvoice, setDownloadingInvoice] = useState<string | null>(null);
 
   const basePlanPrice = 29;
   const userPrice = 19;
@@ -61,6 +74,7 @@ export function Subscription() {
     }
     fetchSubscription();
     fetchEmailAccountsCount();
+    fetchInvoices();
   }, []);
 
   const fetchSubscription = async () => {
@@ -131,6 +145,70 @@ export function Subscription() {
       setEmailAccountsCount(accounts.length);
     } catch (error) {
       console.error('Error fetching email accounts count:', error);
+    }
+  };
+
+  const fetchInvoices = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('stripe_invoices')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('status', 'paid')
+        .order('paid_at', { ascending: false })
+        .limit(10);
+
+      if (error) {
+        console.error('Error fetching invoices:', error);
+        return;
+      }
+
+      setInvoices(data || []);
+    } catch (error) {
+      console.error('Error fetching invoices:', error);
+    }
+  };
+
+  const handleDownloadInvoice = async (invoiceId: string, invoiceNumber: string | null) => {
+    setDownloadingInvoice(invoiceId);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Vous devez être connecté');
+        return;
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-download-invoice?invoice_id=${invoiceId}`,
+        {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to download invoice');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `facture-${invoiceNumber || invoiceId}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Error downloading invoice:', error);
+      alert('Erreur lors du téléchargement de la facture');
+    } finally {
+      setDownloadingInvoice(null);
     }
   };
 
@@ -499,43 +577,52 @@ export function Subscription() {
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-[#3D2817]">Historique de facturation</h3>
-          <button className="text-sm text-[#EF6855] font-medium hover:underline">
-            Voir tout
-          </button>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div>
-              <div className="font-medium text-gray-900">23 octobre 2025</div>
-              <div className="text-sm text-gray-600">Plan Premier</div>
-            </div>
-            <div className="text-right">
-              <div className="font-bold text-gray-900">29€</div>
-              <span className="text-xs text-green-600 font-medium">Payé</span>
-            </div>
+        {invoices.length === 0 ? (
+          <div className="p-6 bg-gray-50 rounded-lg border border-gray-200 text-center">
+            <p className="text-sm text-gray-600">Aucune facture disponible</p>
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div>
-              <div className="font-medium text-gray-900">23 septembre 2025</div>
-              <div className="text-sm text-gray-600">Plan Premier</div>
-            </div>
-            <div className="text-right">
-              <div className="font-bold text-gray-900">29€</div>
-              <span className="text-xs text-green-600 font-medium">Payé</span>
-            </div>
+        ) : (
+          <div className="space-y-3">
+            {invoices.map((invoice) => {
+              const paidDate = invoice.paid_at
+                ? new Date(invoice.paid_at * 1000).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })
+                : 'Date inconnue';
+
+              const amount = (invoice.amount_paid / 100).toFixed(2);
+
+              return (
+                <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div>
+                    <div className="font-medium text-gray-900">{paidDate}</div>
+                    <div className="text-sm text-gray-600">
+                      {invoice.invoice_number || invoice.invoice_id}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <div className="font-bold text-gray-900">{amount}€</div>
+                      <span className="text-xs text-green-600 font-medium">Payé</span>
+                    </div>
+                    <button
+                      onClick={() => handleDownloadInvoice(invoice.invoice_id, invoice.invoice_number)}
+                      disabled={downloadingInvoice === invoice.invoice_id || !invoice.invoice_pdf}
+                      className="px-3 py-2 bg-[#EF6855] text-white rounded-lg text-sm font-medium hover:bg-[#E05744] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      {downloadingInvoice === invoice.invoice_id ? 'Téléchargement...' : 'Télécharger'}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-          <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-            <div>
-              <div className="font-medium text-gray-900">23 août 2025</div>
-              <div className="text-sm text-gray-600">Plan Premier</div>
-            </div>
-            <div className="text-right">
-              <div className="font-bold text-gray-900">29€</div>
-              <span className="text-xs text-green-600 font-medium">Payé</span>
-            </div>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );

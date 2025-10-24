@@ -73,12 +73,19 @@ async function handleEvent(event: Stripe.Event) {
     return;
   }
 
+  // Handle invoice payment succeeded - save invoice data
+  if (event.type === 'invoice.payment_succeeded') {
+    console.info(`Processing invoice payment for customer: ${customerId}`);
+    await saveInvoice(event.data.object as Stripe.Invoice);
+    await syncCustomerFromStripe(customerId);
+    return;
+  }
+
   // Handle subscription events
   if (
     event.type === 'customer.subscription.created' ||
     event.type === 'customer.subscription.updated' ||
     event.type === 'customer.subscription.deleted' ||
-    event.type === 'invoice.payment_succeeded' ||
     event.type === 'invoice.payment_failed'
   ) {
     console.info(`Processing subscription event for customer: ${customerId}`);
@@ -130,6 +137,59 @@ async function handleEvent(event: Stripe.Event) {
         }
       }
     }
+  }
+}
+
+async function saveInvoice(invoice: Stripe.Invoice) {
+  try {
+    const customerId = typeof invoice.customer === 'string' ? invoice.customer : invoice.customer?.id;
+
+    if (!customerId) {
+      console.error('No customer ID found in invoice');
+      return;
+    }
+
+    const { data: customer, error: customerError } = await supabase
+      .from('stripe_customers')
+      .select('user_id')
+      .eq('customer_id', customerId)
+      .maybeSingle();
+
+    if (customerError || !customer) {
+      console.error('Failed to fetch customer from database:', customerError);
+      return;
+    }
+
+    const userId = customer.user_id;
+
+    const { error: invoiceError } = await supabase.from('stripe_invoices').upsert(
+      {
+        customer_id: customerId,
+        invoice_id: invoice.id,
+        subscription_id: typeof invoice.subscription === 'string' ? invoice.subscription : invoice.subscription?.id,
+        amount_paid: invoice.amount_paid,
+        currency: invoice.currency,
+        invoice_pdf: invoice.invoice_pdf,
+        invoice_number: invoice.number,
+        status: invoice.status,
+        period_start: invoice.period_start,
+        period_end: invoice.period_end,
+        paid_at: invoice.status_transitions?.paid_at,
+        user_id: userId,
+      },
+      {
+        onConflict: 'invoice_id',
+      }
+    );
+
+    if (invoiceError) {
+      console.error('Error saving invoice:', invoiceError);
+      return;
+    }
+
+    console.info(`Successfully saved invoice ${invoice.id} for customer: ${customerId}`);
+  } catch (error) {
+    console.error('Error in saveInvoice:', error);
   }
 }
 

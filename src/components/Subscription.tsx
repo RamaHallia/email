@@ -17,6 +17,7 @@ interface EmailAccount {
   id: string;
   email: string;
   provider: string;
+  is_primary?: boolean;
 }
 
 interface Invoice {
@@ -111,34 +112,22 @@ export function Subscription() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const accounts: EmailAccount[] = [];
+      let accounts: EmailAccount[] = [];
 
-      const { data: gmailTokens } = await supabase
-        .from('gmail_tokens')
-        .select('id, email')
-        .eq('user_id', user.id);
-
-      if (gmailTokens) {
-        accounts.push(...gmailTokens.map(t => ({ id: t.id, email: t.email, provider: 'gmail' })));
-      }
-
-      const { data: outlookTokens } = await supabase
-        .from('outlook_tokens')
-        .select('id, email')
-        .eq('user_id', user.id);
-
-      if (outlookTokens) {
-        accounts.push(...outlookTokens.map(t => ({ id: t.id, email: t.email, provider: 'outlook' })));
-      }
-
-      const { data: imapConfigs } = await supabase
+      const { data: allConfigs } = await supabase
         .from('email_configurations')
-        .select('id, email')
+        .select('id, email, provider, is_primary')
         .eq('user_id', user.id)
-        .eq('provider', 'imap');
+        .order('is_primary', { ascending: false })
+        .order('created_at', { ascending: true });
 
-      if (imapConfigs) {
-        accounts.push(...imapConfigs.map(c => ({ id: c.id, email: c.email, provider: 'imap' })));
+      if (allConfigs) {
+        accounts = allConfigs.map(c => ({
+          id: c.id,
+          email: c.email,
+          provider: c.provider,
+          is_primary: c.is_primary
+        }));
       }
 
       setEmailAccounts(accounts);
@@ -462,12 +451,12 @@ export function Subscription() {
 
         <div className="space-y-3">
           {emailAccounts.length > 0 ? (
-            emailAccounts.map((account, index) => {
-              const isBase = index === 0;
-              const accountType = isBase ? 'Compte de base (inclus)' : 'Compte additionnel (+19€/mois)';
-              const bgColor = isBase ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200';
-              const iconBgColor = isBase ? 'bg-blue-200' : 'bg-green-200';
-              const iconColor = isBase ? 'text-blue-700' : 'text-green-700';
+            emailAccounts.map((account) => {
+              const isPrimary = account.is_primary === true;
+              const accountType = isPrimary ? 'Compte de base (inclus)' : 'Compte additionnel (+19€/mois)';
+              const bgColor = isPrimary ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200';
+              const iconBgColor = isPrimary ? 'bg-blue-200' : 'bg-green-200';
+              const iconColor = isPrimary ? 'text-blue-700' : 'text-green-700';
 
               return (
                 <div key={account.id} className={`flex items-center justify-between p-4 rounded-lg border-2 ${bgColor}`}>
@@ -481,12 +470,12 @@ export function Subscription() {
                       <p className="text-xs text-gray-500 capitalize">{account.provider}</p>
                     </div>
                   </div>
-                  {!isBase && (
+                  {!isPrimary && (
                     <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                       +19€/mois
                     </span>
                   )}
-                  {isBase && (
+                  {isPrimary && (
                     <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
                       Inclus
                     </span>

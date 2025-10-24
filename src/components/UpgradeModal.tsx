@@ -5,10 +5,14 @@ import { supabase } from '../lib/supabase';
 interface UpgradeModalProps {
   onClose: () => void;
   onUpgrade: () => void;
+  currentAdditionalAccounts?: number;
 }
 
-export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
+export function UpgradeModal({ onClose, onUpgrade, currentAdditionalAccounts = 0 }: UpgradeModalProps) {
   const [isLoading, setIsLoading] = useState(false);
+
+  const newAdditionalAccounts = currentAdditionalAccounts + 1;
+  const newTotal = 29 + (newAdditionalAccounts * 19);
 
   const handleUpgradeClick = async () => {
     setIsLoading(true);
@@ -19,19 +23,21 @@ export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
         return;
       }
 
-      const basePlanPriceId = import.meta.env.VITE_STRIPE_BASE_PLAN_PRICE_ID;
-      const additionalAccountPriceId = import.meta.env.VITE_STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID;
+      const { data: customerData } = await supabase
+        .from('stripe_customers')
+        .select('customer_id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
 
-      if (!basePlanPriceId || !additionalAccountPriceId) {
-        alert('Configuration Stripe manquante');
+      if (!customerData) {
+        alert('Aucun client Stripe trouvé');
         return;
       }
 
-      const successUrl = `${window.location.origin}?success=true`;
-      const cancelUrl = `${window.location.origin}?canceled=true`;
+      const newAccounts = newAdditionalAccounts;
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-checkout`,
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-update-subscription`,
         {
           method: 'POST',
           headers: {
@@ -39,12 +45,7 @@ export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            price_id: basePlanPriceId,
-            additional_account_price_id: additionalAccountPriceId,
-            additional_accounts: 1,
-            success_url: successUrl,
-            cancel_url: cancelUrl,
-            mode: 'subscription',
+            additional_accounts: newAccounts,
           }),
         }
       );
@@ -56,11 +57,13 @@ export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
         return;
       }
 
-      if (data.url) {
-        window.location.href = data.url;
+      if (data.success) {
+        alert('Votre abonnement a été mis à jour avec succès ! Vous pouvez maintenant ajouter un compte supplémentaire.');
+        onUpgrade();
+        onClose();
       }
     } catch (error) {
-      console.error('Erreur lors de la création du checkout:', error);
+      console.error('Erreur lors de la mise à jour de l\'abonnement:', error);
       alert('Une erreur est survenue');
     } finally {
       setIsLoading(false);
@@ -122,10 +125,12 @@ export function UpgradeModal({ onClose, onUpgrade }: UpgradeModalProps) {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-700">Nouveau total mensuel</p>
-                  <p className="text-xs text-gray-600">Plan Premier (29€) + 1 compte additionnel (19€)</p>
+                  <p className="text-xs text-gray-600">
+                    Plan Premier (29€) + {newAdditionalAccounts} compte{newAdditionalAccounts > 1 ? 's' : ''} additionnel{newAdditionalAccounts > 1 ? 's' : ''} ({newAdditionalAccounts * 19}€)
+                  </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-2xl font-bold text-[#EF6855]">48€</p>
+                  <p className="text-2xl font-bold text-[#EF6855]">{newTotal}€</p>
                   <p className="text-xs text-gray-600">/mois</p>
                 </div>
               </div>

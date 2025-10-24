@@ -9,6 +9,7 @@ interface SubscriptionData {
   payment_method_brand: string | null;
   payment_method_last4: string | null;
   cancel_at_period_end: boolean;
+  additional_accounts: number;
 }
 
 export function Subscription() {
@@ -21,7 +22,7 @@ export function Subscription() {
 
   const basePlanPrice = 29;
   const userPrice = 19;
-  const additionalAccounts = Math.max(0, emailAccountsCount - 1);
+  const additionalAccounts = subscription?.additional_accounts || 0;
   const totalPrice = basePlanPrice + (additionalAccounts * userPrice);
 
   const nextBillingDate = new Date();

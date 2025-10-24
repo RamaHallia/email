@@ -45,6 +45,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const [allowedAccounts, setAllowedAccounts] = useState(1);
+  const [currentAdditionalAccounts, setCurrentAdditionalAccounts] = useState(0);
   const [companyFormData, setCompanyFormData] = useState({
     company_name: '',
     activity_description: '',
@@ -114,8 +115,10 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
         if (isActive) {
           const additionalAccounts = subData?.additional_accounts || 0;
+          setCurrentAdditionalAccounts(additionalAccounts);
           setAllowedAccounts(1 + additionalAccounts);
         } else {
+          setCurrentAdditionalAccounts(0);
           setAllowedAccounts(1);
         }
       }
@@ -150,9 +153,9 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
     }
   };
 
-  const handleUpgrade = () => {
+  const handleUpgrade = async () => {
     setShowUpgradeModal(false);
-    window.location.href = '/subscription';
+    await checkSubscription();
   };
 
   const loadAccounts = async () => {
@@ -1061,6 +1064,7 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       <UpgradeModal
         onClose={() => setShowUpgradeModal(false)}
         onUpgrade={handleUpgrade}
+        currentAdditionalAccounts={currentAdditionalAccounts}
       />
     )}
 

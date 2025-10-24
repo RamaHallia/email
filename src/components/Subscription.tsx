@@ -473,15 +473,26 @@ export function Subscription() {
             </div>
           </div>
 
-          {additionalAccounts > 0 && (
-            <button
-              onClick={handleUpdateSubscription}
-              disabled={isLoading}
-              className="w-full px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Chargement...' : 'Mettre à jour l\'abonnement'}
-            </button>
-          )}
+          <div className="flex gap-3">
+            {additionalAccounts > 0 && (
+              <button
+                onClick={handleUpdateSubscription}
+                disabled={isLoading}
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? 'Chargement...' : 'Mettre à jour l\'abonnement'}
+              </button>
+            )}
+            {!subscription?.cancel_at_period_end && (
+              <button
+                onClick={handleCancelSubscription}
+                disabled={isCanceling}
+                className={`${additionalAccounts > 0 ? 'flex-1' : 'w-full'} px-4 py-3 border-2 border-red-300 text-red-700 rounded-lg font-medium hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed`}
+              >
+                {isCanceling ? 'Annulation...' : 'Annuler l\'abonnement'}
+              </button>
+            )}
+          </div>
         </div>
       )}
 

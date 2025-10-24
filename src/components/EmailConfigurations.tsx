@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Mail, CheckCircle, Plus } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
 import { ConfigurationModal } from './ConfigurationModal';
+import { DeleteAccountModal } from './DeleteAccountModal';
 
 type SimpleConfigRow = {
   id: string;
@@ -34,6 +35,7 @@ export function EmailConfigurations() {
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
 
   // Formulaire simplifié selon votre JSON
   const [formData, setFormData] = useState({
@@ -49,8 +51,37 @@ export function EmailConfigurations() {
   useEffect(() => {
     (async () => {
       await loadLatestConfig();
+      await checkSubscription();
     })();
   }, []);
+
+  const checkSubscription = async () => {
+    if (!user) return;
+
+    try {
+      const { data: customerData } = await supabase
+        .from('stripe_customers')
+        .select('customer_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!customerData) {
+        setHasActiveSubscription(false);
+        return;
+      }
+
+      const { data: subData } = await supabase
+        .from('stripe_subscriptions')
+        .select('status')
+        .eq('customer_id', customerData.customer_id)
+        .maybeSingle();
+
+      setHasActiveSubscription(subData?.status === 'active' || subData?.status === 'trialing');
+    } catch (error) {
+      console.error('Error checking subscription:', error);
+      setHasActiveSubscription(false);
+    }
+  };
 
   // Listener global pour capter les messages OAuth même si la page a rerendu
   useEffect(() => {
@@ -812,14 +843,13 @@ export function EmailConfigurations() {
         cancelText="Annuler"
       />
 
-      <ConfirmationModal
+      <DeleteAccountModal
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={handleDelete}
-        title="Supprimer la configuration"
-        message={`Êtes-vous sûr de vouloir supprimer définitivement la configuration de ${items[0]?.email} ? Cette action est irréversible.`}
-        confirmText="Supprimer"
-        cancelText="Annuler"
+        email={items[0]?.email || ''}
+        currentTotalAccounts={items.length}
+        hasActiveSubscription={hasActiveSubscription}
       />
     </div>
   );

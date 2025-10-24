@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Plus, Edit, Trash2, FileText, Globe, Share2, X, Check, Lock, ChevronRight } from 'lucide-react';
 import { ConfirmationModal } from './ConfirmationModal';
 import { UpgradeModal } from './UpgradeModal';
+import { DeleteAccountModal } from './DeleteAccountModal';
 
 interface EmailAccount {
   id: string;
@@ -1076,18 +1077,16 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
       </div>
     )}
 
-    <ConfirmationModal
+    <DeleteAccountModal
       isOpen={showDeleteModal}
       onClose={() => {
         setShowDeleteModal(false);
         setAccountToDelete(null);
       }}
       onConfirm={handleDeleteAccount}
-      title="Supprimer le compte"
-      message={`Êtes-vous sûr de vouloir supprimer définitivement le compte ${accountToDelete?.email} ? Cette action est irréversible.`}
-      confirmText="Supprimer"
-      cancelText="Annuler"
-      variant="danger"
+      email={accountToDelete?.email || ''}
+      currentTotalAccounts={accounts.length}
+      hasActiveSubscription={hasActiveSubscription}
     />
 
     <ConfirmationModal

@@ -128,7 +128,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const additionalAccountPriceId = Deno.env.get('VITE_STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID');
+    const additionalAccountPriceId = Deno.env.get('STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID');
 
     if (!additionalAccountPriceId) {
       return new Response(

@@ -182,7 +182,7 @@ async function syncCustomerFromStripe(customerId: string) {
     const subscription = subscriptions.data[0];
 
     // Get the additional account price ID from environment
-    const additionalAccountPriceId = Deno.env.get('VITE_STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID');
+    const additionalAccountPriceId = Deno.env.get('STRIPE_ADDITIONAL_ACCOUNT_PRICE_ID');
 
     // Calculate the number of additional accounts
     let additionalAccounts = 0;

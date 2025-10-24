@@ -6,10 +6,17 @@ interface SubscriptionData {
   status: string;
   price_id: string | null;
   current_period_end: number | null;
+  current_period_start: number | null;
   payment_method_brand: string | null;
   payment_method_last4: string | null;
   cancel_at_period_end: boolean;
   additional_accounts: number;
+}
+
+interface EmailAccount {
+  id: string;
+  email: string;
+  provider: string;
 }
 
 export function Subscription() {
@@ -19,6 +26,7 @@ export function Subscription() {
   const [showCanceledMessage, setShowCanceledMessage] = useState(false);
   const [isCanceling, setIsCanceling] = useState(false);
   const [emailAccountsCount, setEmailAccountsCount] = useState(0);
+  const [emailAccounts, setEmailAccounts] = useState<EmailAccount[]>([]);
 
   const basePlanPrice = 29;
   const userPrice = 19;
@@ -89,12 +97,38 @@ export function Subscription() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { count } = await supabase
-        .from('email_configurations')
-        .select('*', { count: 'exact', head: true })
+      const accounts: EmailAccount[] = [];
+
+      const { data: gmailTokens } = await supabase
+        .from('gmail_tokens')
+        .select('id, email')
         .eq('user_id', user.id);
 
-      setEmailAccountsCount(count || 0);
+      if (gmailTokens) {
+        accounts.push(...gmailTokens.map(t => ({ id: t.id, email: t.email, provider: 'gmail' })));
+      }
+
+      const { data: outlookTokens } = await supabase
+        .from('outlook_tokens')
+        .select('id, email')
+        .eq('user_id', user.id);
+
+      if (outlookTokens) {
+        accounts.push(...outlookTokens.map(t => ({ id: t.id, email: t.email, provider: 'outlook' })));
+      }
+
+      const { data: imapConfigs } = await supabase
+        .from('email_configurations')
+        .select('id, email')
+        .eq('user_id', user.id)
+        .eq('provider', 'imap');
+
+      if (imapConfigs) {
+        accounts.push(...imapConfigs.map(c => ({ id: c.id, email: c.email, provider: 'imap' })));
+      }
+
+      setEmailAccounts(accounts);
+      setEmailAccountsCount(accounts.length);
     } catch (error) {
       console.error('Error fetching email accounts count:', error);
     }
@@ -338,7 +372,7 @@ export function Subscription() {
       </div>
 
       <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h3 className="font-bold text-[#3D2817] mb-6">Comptes email additionnels</h3>
+        <h3 className="font-bold text-[#3D2817] mb-6">Vos comptes email</h3>
 
         {!isActive && (
           <div className="p-4 bg-yellow-50 rounded-lg border border-yellow-200 mb-4">
@@ -348,23 +382,51 @@ export function Subscription() {
           </div>
         )}
 
-        <div className={`flex items-center justify-between p-4 rounded-lg border-2 ${additionalAccounts > 0 ? 'bg-green-50 border-green-200' : 'bg-gray-50 border-gray-200'}`}>
-          <div className="flex items-center gap-4">
-            <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${additionalAccounts > 0 ? 'bg-green-200' : 'bg-gray-200'}`}>
-              <Users className={`w-6 h-6 ${additionalAccounts > 0 ? 'text-green-700' : 'text-gray-500'}`} />
+        <div className="space-y-3">
+          {emailAccounts.length > 0 ? (
+            emailAccounts.map((account, index) => {
+              const isBase = index === 0;
+              const accountType = isBase ? 'Compte de base (inclus)' : 'Compte additionnel (+19€/mois)';
+              const bgColor = isBase ? 'bg-blue-50 border-blue-200' : 'bg-green-50 border-green-200';
+              const iconBgColor = isBase ? 'bg-blue-200' : 'bg-green-200';
+              const iconColor = isBase ? 'text-blue-700' : 'text-green-700';
+
+              return (
+                <div key={account.id} className={`flex items-center justify-between p-4 rounded-lg border-2 ${bgColor}`}>
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${iconBgColor}`}>
+                      <Users className={`w-6 h-6 ${iconColor}`} />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-[#3D2817]">{account.email}</h4>
+                      <p className="text-xs text-gray-600">{accountType}</p>
+                      <p className="text-xs text-gray-500 capitalize">{account.provider}</p>
+                    </div>
+                  </div>
+                  {!isBase && (
+                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
+                      +19€/mois
+                    </span>
+                  )}
+                  {isBase && (
+                    <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">
+                      Inclus
+                    </span>
+                  )}
+                </div>
+              );
+            })
+          ) : (
+            <div className="p-4 bg-gray-50 rounded-lg border border-gray-200 text-center">
+              <p className="text-sm text-gray-600">Aucun compte email configuré</p>
             </div>
-            <div>
-              <h4 className="text-lg font-bold text-[#3D2817]">Comptes additionnels</h4>
-              <p className="text-sm text-gray-600">19€ / compte / mois</p>
-              <p className="text-xs text-gray-500 mt-1">{emailAccountsCount} compte{emailAccountsCount > 1 ? 's' : ''} configuré{emailAccountsCount > 1 ? 's' : ''} ({additionalAccounts} facturable{additionalAccounts > 1 ? 's' : ''})</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {additionalAccounts > 0 && (
-              <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                +{additionalAccounts * userPrice}€/mois
-              </span>
-            )}
+          )}
+        </div>
+
+        <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-gray-700">Total:</span>
+            <span className="font-bold text-[#3D2817]">{emailAccountsCount} compte{emailAccountsCount > 1 ? 's' : ''} ({additionalAccounts} facturable{additionalAccounts > 1 ? 's' : ''})</span>
           </div>
         </div>
       </div>
@@ -390,12 +452,25 @@ export function Subscription() {
             </div>
           </div>
 
-          <div className="text-xs text-gray-500 mb-6">
-            {subscription?.cancel_at_period_end && isActive
-              ? `Votre abonnement sera annulé le ${actualFormattedDate}`
-              : isActive
-              ? `Prochain paiement le ${actualFormattedDate}`
-              : 'Aucun abonnement actif'}
+          <div className="space-y-2 mb-6 p-4 bg-gray-50 rounded-lg">
+            {subscription?.current_period_start && (
+              <div className="flex items-center justify-between text-sm">
+                <span className="text-gray-600">Date de souscription:</span>
+                <span className="font-medium text-gray-900">
+                  {new Date(subscription.current_period_start * 1000).toLocaleDateString('fr-FR', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                  })}
+                </span>
+              </div>
+            )}
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">
+                {subscription?.cancel_at_period_end && isActive ? 'Fin de l\'abonnement:' : 'Prochain paiement:'}
+              </span>
+              <span className="font-medium text-gray-900">{actualFormattedDate}</span>
+            </div>
           </div>
 
           {additionalAccounts > 0 && (

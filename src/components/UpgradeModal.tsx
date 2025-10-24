@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { X, Star, Users, Check, CreditCard, AlertCircle } from 'lucide-react';
+import { X, Star, Users, Check, CreditCard, AlertCircle, CheckCircle, Mail } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface UpgradeModalProps {
@@ -11,6 +11,7 @@ interface UpgradeModalProps {
 export function UpgradeModal({ onClose, onUpgrade, currentAdditionalAccounts = 0 }: UpgradeModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const newAdditionalAccounts = currentAdditionalAccounts + 1;
   const newTotal = 29 + (newAdditionalAccounts * 19);
@@ -64,9 +65,9 @@ export function UpgradeModal({ onClose, onUpgrade, currentAdditionalAccounts = 0
       }
 
       if (data.success) {
-        alert('✅ Abonnement mis à jour avec succès !\n\n💳 Votre carte a été débitée du prorata.\n📧 Vous pouvez maintenant ajouter un compte supplémentaire.');
+        setShowConfirmation(false);
+        setShowSuccess(true);
         onUpgrade();
-        onClose();
       }
     } catch (error) {
       console.error('Erreur lors de la mise à jour de l\'abonnement:', error);
@@ -75,6 +76,70 @@ export function UpgradeModal({ onClose, onUpgrade, currentAdditionalAccounts = 0
       setIsLoading(false);
     }
   };
+
+  if (showSuccess) {
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
+          <div className="bg-gradient-to-br from-green-500 to-emerald-600 p-6 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+            <div className="absolute bottom-0 left-0 w-24 h-24 bg-white opacity-10 rounded-full -ml-12 -mb-12"></div>
+            <div className="relative z-10">
+              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <CheckCircle className="w-10 h-10 text-green-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-center mb-2">Upgrade réussi !</h2>
+              <p className="text-center text-green-50 text-sm">Votre abonnement a été mis à jour</p>
+            </div>
+          </div>
+
+          <div className="p-6">
+            <div className="space-y-4 mb-6">
+              <div className="flex items-start gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                <CreditCard className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-green-900">Paiement effectué</p>
+                  <p className="text-xs text-green-700 mt-1">
+                    Votre carte a été débitée du prorata (~{prorataAmount}€)
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                <Mail className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-blue-900">Compte additionnel activé</p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Vous pouvez maintenant ajouter un compte email supplémentaire
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                <Star className="w-5 h-5 text-orange-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-orange-900">Nouveau montant</p>
+                  <p className="text-xs text-orange-700 mt-1">
+                    À partir du prochain cycle : {newTotal}€/mois
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowSuccess(false);
+                onClose();
+              }}
+              className="w-full px-4 py-3 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg font-medium hover:shadow-lg transition-all"
+            >
+              Continuer
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (showConfirmation) {
     return (

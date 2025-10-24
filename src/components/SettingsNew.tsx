@@ -307,7 +307,8 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
 
       if (totalAccountsBeforeDeletion > 1) {
         try {
-          const newAdditionalAccounts = Math.max(0, totalAccountsBeforeDeletion - 2);
+          const totalAccountsAfterDeletion = totalAccountsBeforeDeletion - 1;
+          const newAdditionalAccounts = Math.max(0, totalAccountsAfterDeletion - 1);
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-update-subscription`,

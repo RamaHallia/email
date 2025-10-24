@@ -364,7 +364,7 @@ export function EmailConfigurations() {
         .select('id')
         .eq('user_id', user.id);
 
-      const totalAccounts = allConfigs?.length || 0;
+      const totalAccountsBeforeDeletion = allConfigs?.length || 0;
 
       if (cfg?.provider === 'gmail' && cfg?.gmail_token_id) {
         const { error: tokenError } = await supabase
@@ -388,9 +388,10 @@ export function EmailConfigurations() {
         .eq('user_id', user.id);
       if (error) throw error;
 
-      if (totalAccounts > 1) {
+      if (totalAccountsBeforeDeletion > 1) {
         try {
-          const newAdditionalAccounts = Math.max(0, totalAccounts - 2);
+          const totalAccountsAfterDeletion = totalAccountsBeforeDeletion - 1;
+          const newAdditionalAccounts = Math.max(0, totalAccountsAfterDeletion - 1);
 
           const response = await fetch(
             `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-update-subscription`,

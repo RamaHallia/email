@@ -63,20 +63,6 @@ export function DeleteAccountModal({
 
         <div className="p-6">
           <div className="space-y-4 mb-6">
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-red-900 mb-1">
-                    Action irréversible
-                  </p>
-                  <p className="text-xs text-red-700">
-                    Tous les emails classés, les paramètres et l'historique de ce compte seront définitivement supprimés.
-                  </p>
-                </div>
-              </div>
-            </div>
-
             {hasActiveSubscription && accountsAfterDeletion > 0 && (
               <>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -89,16 +75,7 @@ export function DeleteAccountModal({
                       <div className="flex items-baseline gap-2">
                         <span className="text-2xl font-bold text-blue-900">{newTotal}€</span>
                         <span className="text-sm text-blue-700">/mois</span>
-                        {savings > 0 && (
-                          <span className="ml-2 text-xs bg-green-100 text-green-800 px-2 py-1 rounded-full font-medium">
-                            -{savings}€/mois
-                          </span>
-                        )}
                       </div>
-                      <p className="text-xs text-blue-700 mt-1">
-                        {accountsAfterDeletion} compte{accountsAfterDeletion > 1 ? 's' : ''} au total
-                        {newAdditionalAccounts > 0 && ` (1 de base + ${newAdditionalAccounts} additionnel${newAdditionalAccounts > 1 ? 's' : ''})`}
-                      </p>
                     </div>
                   </div>
                 </div>
@@ -111,7 +88,7 @@ export function DeleteAccountModal({
                         <p className="text-sm font-medium text-green-900 mb-1">
                           Crédit prorata
                         </p>
-                        <p className="text-xs text-green-700 mb-2">
+                        <p className="text-xs text-green-700">
                           Un crédit d'environ <span className="font-semibold">{prorataCredit}€</span> sera appliqué sur votre prochaine facture pour les {daysLeftInMonth} jours restants de ce mois.
                         </p>
                       </div>
@@ -133,22 +110,6 @@ export function DeleteAccountModal({
                   </div>
                 </div>
               </>
-            )}
-
-            {hasActiveSubscription && accountsAfterDeletion === 0 && (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-yellow-900 mb-1">
-                      Dernier compte
-                    </p>
-                    <p className="text-xs text-yellow-700">
-                      C'est votre dernier compte configuré. Après suppression, vous devrez ajouter un nouveau compte pour utiliser le service.
-                    </p>
-                  </div>
-                </div>
-              </div>
             )}
           </div>
 

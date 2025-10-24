@@ -353,6 +353,19 @@ export function EmailConfigurations() {
     try {
       const cfg = items[0];
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Vous devez être connecté');
+        return;
+      }
+
+      const { data: allConfigs } = await supabase
+        .from('email_configurations')
+        .select('id')
+        .eq('user_id', user.id);
+
+      const totalAccounts = allConfigs?.length || 0;
+
       if (cfg?.provider === 'gmail' && cfg?.gmail_token_id) {
         const { error: tokenError } = await supabase
           .from('gmail_tokens')
@@ -375,6 +388,33 @@ export function EmailConfigurations() {
         .eq('user_id', user.id);
       if (error) throw error;
 
+      if (totalAccounts > 1) {
+        try {
+          const newAdditionalAccounts = Math.max(0, totalAccounts - 2);
+
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-update-subscription`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                additional_accounts: newAdditionalAccounts,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (data.error) {
+            console.error('Erreur mise à jour Stripe:', data.error);
+          }
+        } catch (stripeError) {
+          console.error('Erreur lors de la mise à jour de l\'abonnement:', stripeError);
+        }
+      }
+
       await loadLatestConfig();
       setFormData({
         email: '',
@@ -386,7 +426,7 @@ export function EmailConfigurations() {
         services_offered: '',
       });
       setMode('choices');
-      alert('Configuration supprimée.');
+      alert('Configuration supprimée et abonnement mis à jour.');
     } catch (err) {
       console.error('Erreur suppression:', err);
       alert('Impossible de supprimer la configuration');

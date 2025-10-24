@@ -287,18 +287,61 @@ export function SettingsNew({ onNavigateToEmailConfig }: SettingsNewProps = {}) 
   };
 
   const handleDeleteAccount = async () => {
-    if (!accountToDelete) return;
+    if (!accountToDelete || !user) return;
 
-    if (accountToDelete.provider === 'imap') {
-      await supabase.from('email_configurations').delete().eq('id', accountToDelete.id);
-    } else {
-      const tableName = accountToDelete.provider === 'gmail' ? 'gmail_tokens' : 'outlook_tokens';
-      await supabase.from(tableName).delete().eq('id', accountToDelete.id);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        alert('Vous devez être connecté');
+        return;
+      }
+
+      const totalAccountsBeforeDeletion = accounts.length;
+
+      if (accountToDelete.provider === 'imap') {
+        await supabase.from('email_configurations').delete().eq('id', accountToDelete.id);
+      } else {
+        const tableName = accountToDelete.provider === 'gmail' ? 'gmail_tokens' : 'outlook_tokens';
+        await supabase.from(tableName).delete().eq('id', accountToDelete.id);
+      }
+
+      if (totalAccountsBeforeDeletion > 1) {
+        try {
+          const newAdditionalAccounts = Math.max(0, totalAccountsBeforeDeletion - 2);
+
+          const response = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/stripe-update-subscription`,
+            {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${session.access_token}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                additional_accounts: newAdditionalAccounts,
+              }),
+            }
+          );
+
+          const data = await response.json();
+          if (data.error) {
+            console.error('Erreur mise à jour Stripe:', data.error);
+          } else {
+            console.log('Abonnement Stripe mis à jour:', data);
+          }
+        } catch (stripeError) {
+          console.error('Erreur lors de la mise à jour de l\'abonnement:', stripeError);
+        }
+      }
+
+      setShowDeleteModal(false);
+      setAccountToDelete(null);
+      loadAccounts();
+      checkSubscription();
+    } catch (error) {
+      console.error('Erreur lors de la suppression du compte:', error);
+      alert('Une erreur est survenue lors de la suppression');
     }
-
-    setShowDeleteModal(false);
-    setAccountToDelete(null);
-    loadAccounts();
   };
 
   const handleDeleteDocumentClick = (docId: string) => {

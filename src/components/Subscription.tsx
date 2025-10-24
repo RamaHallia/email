@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CreditCard, Users, Check, Star, AlertCircle, CheckCircle } from 'lucide-react';
+import { Users, Check, Star, AlertCircle, CheckCircle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 interface SubscriptionData {
@@ -484,34 +484,6 @@ export function Subscription() {
           )}
         </div>
       )}
-
-      <div className="bg-white rounded-xl p-6 shadow-sm">
-        <h3 className="font-bold text-[#3D2817] mb-6">Méthode de paiement</h3>
-
-        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-          <div className="w-12 h-8 bg-gradient-to-br from-blue-500 to-blue-600 rounded flex items-center justify-center">
-            <CreditCard className="w-6 h-6 text-white" />
-          </div>
-          <div className="flex-1">
-            {subscription?.payment_method_brand && subscription?.payment_method_last4 ? (
-              <>
-                <div className="font-medium text-gray-900">
-                  {subscription.payment_method_brand.charAt(0).toUpperCase() + subscription.payment_method_brand.slice(1)} •••• {subscription.payment_method_last4}
-                </div>
-                <div className="text-sm text-gray-600">Méthode de paiement active</div>
-              </>
-            ) : (
-              <>
-                <div className="font-medium text-gray-900">Aucune carte enregistrée</div>
-                <div className="text-sm text-gray-600">Ajoutez une méthode de paiement</div>
-              </>
-            )}
-          </div>
-          <button className="px-4 py-2 text-[#EF6855] font-medium hover:bg-orange-50 rounded-lg transition-colors">
-            Modifier
-          </button>
-        </div>
-      </div>
 
       <div className="bg-white rounded-xl p-6 shadow-sm">
         <div className="flex items-center justify-between mb-6">

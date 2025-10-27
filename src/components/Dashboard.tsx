@@ -281,7 +281,7 @@ export function Dashboard() {
               }`}
             >
               <SettingsIcon className="w-5 h-5" />
-              Paramètres
+              Configuration
             </button>
             <button
               onClick={() => setActiveView('subscription')}
@@ -776,7 +776,7 @@ export function Dashboard() {
             <div className="mt-6">
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
-                  Paramètres
+                  Configuration
                 </h1>
                 <p className="text-gray-600">
                   Gérez vos comptes email et configuration

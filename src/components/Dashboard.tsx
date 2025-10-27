@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard, ChevronDown, User } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 import { Subscription } from './Subscription';
 
-type ActiveView = 'home' | 'configuration' | 'settings';
+type ActiveView = 'home' | 'settings' | 'subscription';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -47,8 +47,6 @@ export function Dashboard() {
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [isClassementActive, setIsClassementActive] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
-  const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [settingsTab, setSettingsTab] = useState<'account' | 'subscription'>('account');
 
   useEffect(() => {
     if (user?.id) {
@@ -275,53 +273,34 @@ export function Dashboard() {
               Tableau de bord
             </button>
             <button
-              onClick={() => setActiveView('configuration')}
+              onClick={() => setActiveView('settings')}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'configuration'
+                activeView === 'settings'
                   ? 'text-[#EF6855] font-semibold'
                   : 'text-gray-600 hover:text-[#EF6855]'
               }`}
             >
-              <Mail className="w-5 h-5" />
+              <SettingsIcon className="w-5 h-5" />
               Configuration
             </button>
-
-            <div className="relative">
-              <button
-                onClick={() => setShowUserDropdown(!showUserDropdown)}
-                className="flex items-center gap-2 px-3 py-2 text-gray-600 hover:text-[#EF6855] transition-colors"
-              >
-                <User className="w-5 h-5" />
-                <span className="text-sm">{user?.email}</span>
-                <ChevronDown className="w-4 h-4" />
-              </button>
-
-              {showUserDropdown && (
-                <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                  <button
-                    onClick={() => {
-                      setActiveView('settings');
-                      setShowUserDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    <SettingsIcon className="w-5 h-5" />
-                    <span className="font-medium">Paramètres</span>
-                  </button>
-                  <div className="border-t border-gray-200 my-1"></div>
-                  <button
-                    onClick={() => {
-                      signOut();
-                      setShowUserDropdown(false);
-                    }}
-                    className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 transition-colors"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    <span className="font-medium">Déconnexion</span>
-                  </button>
-                </div>
-              )}
-            </div>
+            <button
+              onClick={() => setActiveView('subscription')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'subscription'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <CreditCard className="w-5 h-5" />
+              Abonnement
+            </button>
+            <span className="text-sm text-gray-600">{user?.email}</span>
+            <button
+              onClick={() => signOut()}
+              className="flex items-center gap-2 text-gray-600 hover:text-[#EF6855] transition-colors"
+            >
+              <LogOut className="w-5 h-5" />
+            </button>
           </div>
         </div>
       </header>
@@ -809,52 +788,20 @@ export function Dashboard() {
           </>
         )}
 
-        {activeView === 'settings' && (
+        {activeView === 'subscription' && (
           <>
             <div className="mt-6">
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
-                  Paramètres
+                  Abonnement
                 </h1>
                 <p className="text-gray-600">
-                  Gérez votre compte utilisateur et abonnement
+                  Gérez votre abonnement et vos utilisateurs
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 space-y-6">
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-xl font-bold text-[#3D2817] flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    Gestion du compte
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                      <User className="w-5 h-5 text-gray-600 mt-0.5" />
-                      <div>
-                        <p className="font-medium text-gray-900">Email du compte</p>
-                        <p className="text-sm text-gray-600 mt-1">{user?.email}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-                <div className="border-b border-gray-200 px-6 py-4">
-                  <h2 className="text-xl font-bold text-[#3D2817] flex items-center gap-2">
-                    <CreditCard className="w-5 h-5" />
-                    Abonnement
-                  </h2>
-                </div>
-                <div className="p-6">
-                  <Subscription />
-                </div>
-              </div>
-            </div>
+            <Subscription />
           </>
         )}
 

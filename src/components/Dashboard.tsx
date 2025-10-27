@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard, User } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 import { Subscription } from './Subscription';
 
-type ActiveView = 'home' | 'settings' | 'subscription';
+type ActiveView = 'home' | 'settings' | 'subscription' | 'user-settings';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -294,7 +294,17 @@ export function Dashboard() {
               <CreditCard className="w-5 h-5" />
               Abonnement
             </button>
-            <span className="text-sm text-gray-600">{user?.email}</span>
+            <button
+              onClick={() => setActiveView('user-settings')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'user-settings'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <User className="w-5 h-5" />
+              Paramètres
+            </button>
             <button
               onClick={() => signOut()}
               className="flex items-center gap-2 text-gray-600 hover:text-[#EF6855] transition-colors"
@@ -802,6 +812,35 @@ export function Dashboard() {
             </div>
 
             <Subscription />
+          </>
+        )}
+
+        {activeView === 'user-settings' && (
+          <>
+            <div className="mt-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
+                  Paramètres
+                </h1>
+                <p className="text-gray-600">
+                  Gérez vos informations personnelles
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Adresse email
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <Mail className="w-5 h-5 text-gray-400" />
+                    <span className="text-lg font-medium text-gray-900">{user?.email}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </>
         )}
 

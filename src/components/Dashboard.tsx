@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, User } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, User, Edit } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 import { Subscription } from './Subscription';
+import { UserProfileModal } from './UserProfileModal';
 
 type ActiveView = 'home' | 'settings' | 'user-settings';
 type TimePeriod = 'today' | 'week' | 'month';
@@ -47,6 +48,7 @@ export function Dashboard() {
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [isClassementActive, setIsClassementActive] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showUserProfileModal, setShowUserProfileModal] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -801,6 +803,16 @@ export function Dashboard() {
             </div>
 
             <div className="mt-6 bg-white rounded-xl p-8 shadow-sm border border-gray-200">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-[#3D2817]">Informations personnelles</h3>
+                <button
+                  onClick={() => setShowUserProfileModal(true)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#EF6855] to-[#F9A459] text-white rounded-lg hover:shadow-lg transition-all font-medium"
+                >
+                  <Edit className="w-4 h-4" />
+                  Modifier
+                </button>
+              </div>
               <div className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -950,6 +962,16 @@ export function Dashboard() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* User Profile Modal */}
+      {user && (
+        <UserProfileModal
+          isOpen={showUserProfileModal}
+          onClose={() => setShowUserProfileModal(false)}
+          userEmail={user.email || ''}
+          userId={user.id}
+        />
       )}
     </div>
   );

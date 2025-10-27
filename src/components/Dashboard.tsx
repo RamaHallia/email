@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard, User } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, User } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 import { Subscription } from './Subscription';
 
-type ActiveView = 'home' | 'settings' | 'subscription' | 'user-settings';
+type ActiveView = 'home' | 'settings' | 'user-settings';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -282,17 +282,6 @@ export function Dashboard() {
             >
               <SettingsIcon className="w-5 h-5" />
               Configuration
-            </button>
-            <button
-              onClick={() => setActiveView('subscription')}
-              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                activeView === 'subscription'
-                  ? 'text-[#EF6855] font-semibold'
-                  : 'text-gray-600 hover:text-[#EF6855]'
-              }`}
-            >
-              <CreditCard className="w-5 h-5" />
-              Abonnement
             </button>
             <button
               onClick={() => setActiveView('user-settings')}
@@ -798,23 +787,6 @@ export function Dashboard() {
           </>
         )}
 
-        {activeView === 'subscription' && (
-          <>
-            <div className="mt-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
-                  Abonnement
-                </h1>
-                <p className="text-gray-600">
-                  Gérez votre abonnement et vos utilisateurs
-                </p>
-              </div>
-            </div>
-
-            <Subscription />
-          </>
-        )}
-
         {activeView === 'user-settings' && (
           <>
             <div className="mt-6">
@@ -823,7 +795,7 @@ export function Dashboard() {
                   Paramètres
                 </h1>
                 <p className="text-gray-600">
-                  Gérez vos informations personnelles
+                  Gérez vos informations personnelles et votre abonnement
                 </p>
               </div>
             </div>
@@ -841,6 +813,8 @@ export function Dashboard() {
                 </div>
               </div>
             </div>
+
+            <Subscription />
           </>
         )}
 

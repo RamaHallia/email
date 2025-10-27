@@ -6,7 +6,7 @@ import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 import { Subscription } from './Subscription';
 
-type ActiveView = 'home' | 'settings';
+type ActiveView = 'home' | 'configuration' | 'settings';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -48,6 +48,7 @@ export function Dashboard() {
   const [isClassementActive, setIsClassementActive] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showUserDropdown, setShowUserDropdown] = useState(false);
+  const [settingsTab, setSettingsTab] = useState<'account' | 'subscription'>('account');
 
   useEffect(() => {
     if (user?.id) {
@@ -272,6 +273,17 @@ export function Dashboard() {
             >
               <LayoutDashboard className="w-5 h-5" />
               Tableau de bord
+            </button>
+            <button
+              onClick={() => setActiveView('configuration')}
+              className={`flex items-center gap-2 px-3 py-2 transition-colors ${
+                activeView === 'configuration'
+                  ? 'text-[#EF6855] font-semibold'
+                  : 'text-gray-600 hover:text-[#EF6855]'
+              }`}
+            >
+              <Mail className="w-5 h-5" />
+              Configuration
             </button>
 
             <div className="relative">
@@ -785,6 +797,23 @@ export function Dashboard() {
             <div className="mt-6">
               <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
                 <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
+                  Configuration
+                </h1>
+                <p className="text-gray-600">
+                  Gérez vos comptes email et configuration
+                </p>
+              </div>
+            </div>
+
+            <SettingsNew onNavigateToEmailConfig={() => {}} />
+          </>
+        )}
+
+        {activeView === 'settings' && (
+          <>
+            <div className="mt-6">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+                <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
                   Paramètres
                 </h1>
                 <p className="text-gray-600">
@@ -802,7 +831,15 @@ export function Dashboard() {
                   </h2>
                 </div>
                 <div className="p-6">
-                  <SettingsNew onNavigateToEmailConfig={() => {}} />
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                      <User className="w-5 h-5 text-gray-600 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-gray-900">Email du compte</p>
+                        <p className="text-sm text-gray-600 mt-1">{user?.email}</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

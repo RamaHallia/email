@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard, ChevronDown, Inbox } from 'lucide-react';
+import { Settings as SettingsIcon, Mail, TrendingUp, Filter, Clock, LogOut, LayoutDashboard, RefreshCw, MessageCircle, CreditCard } from 'lucide-react';
 import { SettingsNew } from './SettingsNew';
 import { EmailConfigurations } from './EmailConfigurations';
 import { Subscription } from './Subscription';
-import { EmailList } from './EmailList';
 
-type ActiveView = 'home' | 'settings' | 'subscription' | 'emails';
+type ActiveView = 'home' | 'settings' | 'subscription';
 type TimePeriod = 'today' | 'week' | 'month';
 
 interface EmailStats {
@@ -48,7 +47,6 @@ export function Dashboard() {
   const [selectedEmail, setSelectedEmail] = useState<string | null>(null);
   const [isClassementActive, setIsClassementActive] = useState(false);
   const [showSupportModal, setShowSupportModal] = useState(false);
-  const [showEmailSubmenu, setShowEmailSubmenu] = useState(false);
 
   useEffect(() => {
     if (user?.id) {
@@ -274,39 +272,6 @@ export function Dashboard() {
               <LayoutDashboard className="w-5 h-5" />
               Tableau de bord
             </button>
-
-            <div className="relative">
-              <button
-                onClick={() => setShowEmailSubmenu(!showEmailSubmenu)}
-                className={`flex items-center gap-2 px-3 py-2 transition-colors ${
-                  activeView === 'emails'
-                    ? 'text-[#EF6855] font-semibold'
-                    : 'text-gray-600 hover:text-[#EF6855]'
-                }`}
-              >
-                <Mail className="w-5 h-5" />
-                Emails
-                <ChevronDown className={`w-4 h-4 transition-transform ${
-                  showEmailSubmenu ? 'rotate-180' : ''
-                }`} />
-              </button>
-
-              {showEmailSubmenu && (
-                <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg py-2 min-w-[200px] z-50">
-                  <button
-                    onClick={() => {
-                      setActiveView('emails');
-                      setShowEmailSubmenu(false);
-                    }}
-                    className="w-full flex items-center gap-2 px-4 py-2 text-left text-gray-600 hover:bg-orange-50 hover:text-[#EF6855] transition-colors"
-                  >
-                    <Inbox className="w-4 h-4" />
-                    Liste des emails
-                  </button>
-                </div>
-              )}
-            </div>
-
             <button
               onClick={() => setActiveView('settings')}
               className={`flex items-center gap-2 px-3 py-2 transition-colors ${
@@ -820,23 +785,6 @@ export function Dashboard() {
             </div>
 
             <SettingsNew onNavigateToEmailConfig={() => {}} />
-          </>
-        )}
-
-        {activeView === 'emails' && (
-          <>
-            <div className="mb-6">
-              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-                <h1 className="text-2xl font-bold text-[#3D2817] mb-2">
-                  Liste des emails
-                </h1>
-                <p className="text-gray-600">
-                  Consultez tous vos emails traités par l'IA
-                </p>
-              </div>
-            </div>
-
-            <EmailList />
           </>
         )}
 

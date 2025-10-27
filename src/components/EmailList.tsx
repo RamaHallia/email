@@ -15,22 +15,18 @@ interface Email {
   email_account_id: string | null;
 }
 
-interface EmailAccount {
-  id: string;
-  email: string;
-  provider: 'gmail' | 'outlook' | 'smtp_imap';
-}
-
 type EmailCategory = 'info' | 'pub' | 'traite';
 
-export function EmailList() {
+interface EmailListProps {
+  selectedAccountId: string | null;
+  category: EmailCategory;
+}
+
+export function EmailList({ selectedAccountId, category }: EmailListProps) {
   const { user } = useAuth();
   const [emails, setEmails] = useState<Email[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEmail, setSelectedEmail] = useState<Email | null>(null);
-  const [accounts, setAccounts] = useState<EmailAccount[]>([]);
-  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
-  const [category, setCategory] = useState<EmailCategory>('traite');
 
   const tableName = category === 'info' ? 'email_info'
                   : category === 'pub' ? 'email_pub'
@@ -67,43 +63,10 @@ export function EmailList() {
   const Icon = config.icon;
 
   useEffect(() => {
-    if (user?.id) {
-      loadAccounts();
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
     if (user?.id && selectedAccountId) {
       loadEmails();
     }
   }, [user?.id, selectedAccountId, category]);
-
-  const loadAccounts = async () => {
-    if (!user?.id) return;
-
-    const { data, error } = await supabase
-      .from('email_configurations')
-      .select('id, email, provider')
-      .eq('user_id', user.id)
-      .eq('is_connected', true);
-
-    if (error) {
-      console.error('Error loading accounts:', error);
-      return;
-    }
-
-    const allAccounts: EmailAccount[] = (data || []).map(acc => ({
-      id: acc.id,
-      email: acc.email,
-      provider: acc.provider as 'gmail' | 'outlook' | 'smtp_imap'
-    }));
-
-    setAccounts(allAccounts);
-
-    if (allAccounts.length > 0 && !selectedAccountId) {
-      setSelectedAccountId(allAccounts[0].id);
-    }
-  };
 
   const loadEmails = async () => {
     if (!user?.id || !selectedAccountId) return;
@@ -150,90 +113,35 @@ export function EmailList() {
     }
   };
 
-  if (accounts.length === 0) {
+  if (!selectedAccountId) {
     return (
       <div className="bg-white rounded-xl p-8 text-center shadow-sm">
         <Mail className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <p className="text-gray-600">Aucun compte email configuré</p>
+        <p className="text-gray-600">Sélectionnez un compte email pour voir les emails</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Icon className={`w-6 h-6 ${config.textColor}`} />
-            <h2 className="text-xl font-bold text-gray-900">{config.title}</h2>
-            <span className={`px-3 py-1 ${config.bgColor} ${config.textColor} rounded-full text-sm font-medium`}>
-              {emails.length}
-            </span>
-          </div>
-          <button
-            onClick={loadEmails}
-            disabled={loading}
-            className={`flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg hover:border-[#EF6855] transition-colors ${
-              loading ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Actualiser
-          </button>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Icon className={`w-6 h-6 ${config.textColor}`} />
+          <h2 className="text-xl font-bold text-gray-900">{config.title}</h2>
+          <span className={`px-3 py-1 ${config.bgColor} ${config.textColor} rounded-full text-sm font-medium`}>
+            {emails.length}
+          </span>
         </div>
-
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="text-sm font-semibold text-gray-600 mb-2 block">Compte email</label>
-            <select
-              value={selectedAccountId || ''}
-              onChange={(e) => setSelectedAccountId(e.target.value)}
-              className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:border-[#EF6855] transition-colors"
-            >
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.email}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex-1">
-            <label className="text-sm font-semibold text-gray-600 mb-2 block">Catégorie</label>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCategory('traite')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                  category === 'traite'
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Traités
-              </button>
-              <button
-                onClick={() => setCategory('info')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                  category === 'info'
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Info
-              </button>
-              <button
-                onClick={() => setCategory('pub')}
-                className={`flex-1 px-4 py-2 rounded-lg font-medium text-sm transition-all ${
-                  category === 'pub'
-                    ? 'bg-purple-500 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                Pub
-              </button>
-            </div>
-          </div>
-        </div>
+        <button
+          onClick={loadEmails}
+          disabled={loading}
+          className={`flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-300 rounded-lg hover:border-[#EF6855] transition-colors ${
+            loading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+          Actualiser
+        </button>
       </div>
 
       {loading && emails.length === 0 ? (
